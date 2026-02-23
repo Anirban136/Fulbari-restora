@@ -25,7 +25,9 @@ import {
     ArrowLeft,
     Upload,
     ImagePlus,
-    Loader2
+    Loader2,
+    CheckCircle2,
+    AlertCircle
 } from "lucide-react";
 
 interface MenuItem {
@@ -47,6 +49,12 @@ export default function AdminDashboard() {
     const [isEditing, setIsEditing] = useState(false);
     const [editingId, setEditingId] = useState<string | null>(null);
     const [isUploading, setIsUploading] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
+    const [showToast, setShowToast] = useState<{ show: boolean, message: string, type: 'success' | 'error' }>({
+        show: false,
+        message: "",
+        type: 'success'
+    });
     const router = useRouter();
 
     const [newItem, setNewItem] = useState({
@@ -156,7 +164,7 @@ export default function AdminDashboard() {
             }
         } catch (error) {
             console.error("Upload Error:", error);
-            alert("Upload failed. Please try again.");
+            alert("Upload failed! If you are on the live site, this is likely because the server is read-only. Please use Image URLs instead.");
         } finally {
             setIsUploading(false);
         }
@@ -179,6 +187,7 @@ export default function AdminDashboard() {
 
     const handleAddItem = async (e: React.FormEvent) => {
         e.preventDefault();
+        setIsSaving(true);
         const categoryToSave = isCustomCategory ? customCategory : newItem.category;
         const fixedImageUrl = fixUnsplashUrl(newItem.image);
 
@@ -209,9 +218,23 @@ export default function AdminDashboard() {
                 setCustomCategory("");
                 setIsCustomCategory(false);
                 fetchMenu();
+
+                // Show success toast
+                setShowToast({
+                    show: true,
+                    message: isEditing ? "Update Complete!" : "Item Added Successfully!",
+                    type: 'success'
+                });
+                setTimeout(() => setShowToast({ ...showToast, show: false }), 3000);
+            } else {
+                const data = await res.json();
+                alert(`Error: ${data.error || "Failed to save item"}. Note: Live site is read-only.`);
             }
         } catch (error) {
             console.error(isEditing ? "Update failed" : "Add failed");
+            alert("Connection error. Please check your internet or try again.");
+        } finally {
+            setIsSaving(false);
         }
     };
 
@@ -234,7 +257,25 @@ export default function AdminDashboard() {
     );
 
     return (
-        <div className="min-h-screen flex flex-col bg-background">
+        <div className="min-h-screen flex flex-col bg-background relative">
+            {/* Success/Error Toast */}
+            <AnimatePresence>
+                {showToast.show && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -50, x: "-50%" }}
+                        animate={{ opacity: 1, y: 20, x: "-50%" }}
+                        exit={{ opacity: 0, y: -50, x: "-50%" }}
+                        className={cn(
+                            "fixed top-20 left-1/2 -translate-x-1/2 z-[100] px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 min-w-[300px]",
+                            showToast.type === 'success' ? "bg-green-500 text-white" : "bg-red-500 text-white"
+                        )}
+                    >
+                        {showToast.type === 'success' ? <CheckCircle2 size={24} /> : <AlertCircle size={24} />}
+                        <span className="font-bold text-sm tracking-wide">{showToast.message}</span>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
             <Navbar />
             <main className="flex-grow pt-24 pb-12 px-4 container mx-auto">
                 <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
@@ -481,7 +522,12 @@ export default function AdminDashboard() {
                                         />
                                         <span className="text-sm font-medium group-hover:text-yellow-500 transition-colors">Bestseller</span>
                                     </label>
-                                    <Button type="submit" className="ml-auto px-8 py-6 rounded-2xl font-bold shadow-lg shadow-primary/20">
+                                    <Button
+                                        type="submit"
+                                        disabled={isSaving}
+                                        className="ml-auto px-8 py-6 rounded-2xl font-bold shadow-lg shadow-primary/20 flex items-center gap-2"
+                                    >
+                                        {isSaving && <Loader2 className="w-4 h-4 animate-spin" />}
                                         {isEditing ? "Update Menu Item" : "Save Item to Menu"}
                                     </Button>
                                 </div>
