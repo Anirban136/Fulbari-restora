@@ -226,6 +226,7 @@ export default function AdminDashboard() {
                     type: 'success'
                 });
                 setTimeout(() => setShowToast({ ...showToast, show: false }), 3000);
+            } else {
                 // Show specific error from Supabase
                 const data = await res.json();
                 alert(`Error: ${data.error || "Failed to save item"}. Check your Supabase table and keys.`);
