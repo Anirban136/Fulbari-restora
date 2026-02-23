@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { writeFile, mkdir } from "fs/promises";
-import { join } from "path";
+import { supabase } from "@/lib/supabase";
 
 export async function POST(request: Request) {
     try {
@@ -11,33 +10,30 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
         }
 
-        const bytes = await file.arrayBuffer();
-        const buffer = Buffer.from(bytes);
-
-        // Define upload directory
-        const uploadDir = join(process.cwd(), "public", "images", "menu");
-
-        // Ensure directory exists
-        try {
-            await mkdir(uploadDir, { recursive: true });
-        } catch (err) {
-            // Already exists or other error
-        }
-
         // Generate unique filename
         const fileExtension = file.name.split(".").pop();
-        const fileName = `${crypto.randomUUID()}.${fileExtension}`;
-        const path = join(uploadDir, fileName);
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExtension}`;
 
-        // Write file to filesystem
-        await writeFile(path, buffer);
+        // Upload to Supabase Storage
+        const { data, error } = await supabase.storage
+            .from('menu-images')
+            .upload(fileName, file, {
+                cacheControl: '3600',
+                upsert: false
+            });
 
-        // Return the public URL
-        const publicUrl = `/images/menu/${fileName}`;
+        if (error) throw error;
+
+        // Get Public URL
+        const { data: { publicUrl } } = supabase.storage
+            .from('menu-images')
+            .getPublicUrl(fileName);
 
         return NextResponse.json({ success: true, url: publicUrl });
-    } catch (error) {
+    } catch (error: any) {
         console.error("Upload Error:", error);
-        return NextResponse.json({ error: "Upload failed" }, { status: 500 });
+        return NextResponse.json({
+            error: error.message || "Upload failed. Please ensure 'menu-images' bucket exists in Supabase and is public."
+        }, { status: 500 });
     }
 }

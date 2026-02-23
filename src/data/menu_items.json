@@ -130,9 +130,10 @@
     "description": "Fried cottage cheese fritters with special spices.",
     "price": 209,
     "category": "Appetizers",
-    "image": "https://images.unsplash.com/photo-1666060519824-796d5638d809?q=80&w=2070",
+    "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRfdnQnkZCuReE7RTjpEEosfWF_Tc-eGP2uQg&s",
     "isVeg": true,
-    "available": true
+    "available": false,
+    "isBestseller": false
   },
   {
     "id": "a4",
@@ -201,9 +202,10 @@
     "description": "Juicy prawns tossed in a spicy chilli sauce.",
     "price": 249,
     "category": "Appetizers",
-    "image": "https://images.unsplash.com/photo-1628102422003-887630790182?q=80&w=2070",
+    "image": "https://deliciouslyindian.net/wp-content/uploads/2025/09/IMG_8488-scaled.jpg",
     "isVeg": false,
-    "available": true
+    "available": true,
+    "isBestseller": false
   },
   {
     "id": "a20",
