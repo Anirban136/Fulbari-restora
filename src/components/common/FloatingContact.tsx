@@ -20,12 +20,7 @@ export default function FloatingContact() {
 
     return (
         <>
-            {/* Diagnostic Dot - If you see this red dot in the top left, the component is working */}
-            <div
-                className="fixed top-2 left-2 w-3 h-3 bg-red-600 rounded-full opacity-70 pointer-events-none"
-                style={{ zIndex: 999999, position: 'fixed', top: '10px', left: '10px' }}
-                title="Diagnostic Dot"
-            />
+
 
             <div
                 id="floating-contact-widget"
