@@ -55,7 +55,7 @@ export default function FloatingContact() {
                     "w-14 h-14 rounded-full flex items-center justify-center shadow-2xl transition-all duration-500 hover:scale-110 active:scale-95",
                     isOpen
                         ? "bg-muted-foreground text-background rotate-90"
-                        : "bg-primary text-primary-foreground animate-bounce-slow"
+                        : "bg-primary text-primary-foreground animate-bounce"
                 )}
             >
                 {isOpen ? (
