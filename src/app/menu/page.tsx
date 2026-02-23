@@ -1,26 +1,42 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
-import { menuItems, Category } from "@/data/menu";
+import { Category } from "@/data/menu";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, Leaf, Utensils } from "lucide-react";
+import { Search, Leaf, Utensils, Loader2 } from "lucide-react";
 
 export default function MenuPage() {
+    const [menuItems, setMenuItems] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
     const [activeCategory, setActiveCategory] = useState<Category>("All");
     const [searchQuery, setSearchQuery] = useState("");
 
     const categories: Category[] = ["All", "Bengali", "Indian", "Chinese", "Starters", "Drinks", "Desserts"];
 
-    // Filter logic
+    useEffect(() => {
+        fetch("/api/menu")
+            .then(res => res.json())
+            .then(data => {
+                setMenuItems(data);
+                setLoading(false);
+            })
+            .catch(err => {
+                console.error("Failed to load menu", err);
+                setLoading(false);
+            });
+    }, []);
+
+    // Filter logic - Only show available items
     const filteredItems = menuItems.filter((item) => {
+        const isAvailable = item.available !== false; // Default to true if not specified
         const matchesCategory = activeCategory === "All" || item.category === activeCategory;
         const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
             item.description.toLowerCase().includes(searchQuery.toLowerCase());
-        return matchesCategory && matchesSearch;
+        return isAvailable && matchesCategory && matchesSearch;
     });
 
     return (
@@ -111,7 +127,12 @@ export default function MenuPage() {
 
             {/* Menu Grid */}
             <section className="flex-grow py-12 px-4 container mx-auto">
-                {filteredItems.length === 0 ? (
+                {loading ? (
+                    <div className="flex flex-col items-center justify-center py-20">
+                        <Loader2 className="w-12 h-12 text-primary animate-spin mb-4" />
+                        <p className="text-muted-foreground animate-pulse">Loading our delicious menu...</p>
+                    </div>
+                ) : filteredItems.length === 0 ? (
                     <div className="text-center py-20">
                         <p className="text-muted-foreground text-xl">No dishes found matching your search.</p>
                         <Button variant="link" onClick={() => { setActiveCategory("All"); setSearchQuery(""); }}>

@@ -13,6 +13,7 @@ const navLinks = [
     { name: "Menu", href: "/menu" },
     { name: "Gallery", href: "/gallery" },
     { name: "Contact", href: "/contact" },
+    { name: "Admin", href: "/admin/login" },
 ];
 
 export function Navbar() {
