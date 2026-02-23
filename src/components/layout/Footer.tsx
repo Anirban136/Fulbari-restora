@@ -67,10 +67,10 @@ export function Footer() {
                             <li className="flex flex-col gap-3 text-muted-foreground">
                                 <div className="flex items-center gap-3">
                                     <Phone className="shrink-0 text-primary" size={18} />
-                                    <span className="text-sm">+91 98765 43210</span>
+                                    <span className="text-sm">+91 84206 80650</span>
                                 </div>
                                 <div className="ml-7 p-2.5 rounded-lg bg-primary/5 border border-primary/10">
-                                    <span className="text-primary/90 font-bengali font-bold italic text-[11px] tracking-wide">টেবিল বুকিংয়ের জন্য কল করুন: +91 98765 43210</span>
+                                    <span className="text-primary/90 font-bengali font-bold italic text-[11px] tracking-wide">টেবিল বুকিংয়ের জন্য কল করুন: +91 84206 80650</span>
                                 </div>
                             </li>
                             <li className="flex items-center gap-3 text-muted-foreground">

@@ -40,7 +40,7 @@ export default function ContactPage() {
                     {/* Contact Info Cards */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {[
-                            { icon: Phone, title: "Phone", content: "+91 98765 43210", sub: "Mon-Sun from 11am" },
+                            { icon: Phone, title: "Phone", content: "+91 84206 80650", sub: "Mon-Sun from 11am" },
                             { icon: Mail, title: "Email", content: "info@fulbarirestaurant.com", sub: "Online support" },
                             { icon: MapPin, title: "Location", content: "123 Station Road, Serampore", sub: "Hooghly, West Bengal 712201" },
                             { icon: Clock, title: "Opening Hours", content: "11:00 AM - 10:00 PM", sub: "Every Day" },
