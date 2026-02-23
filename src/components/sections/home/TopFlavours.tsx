@@ -66,9 +66,9 @@ export function TopFlavours() {
 
     return (
         <>
-            <section className="py-10 md:py-14 bg-card/50">
-                <div className="container mx-auto px-4">
-                    {/* Compact Header */}
+            <section className="py-10 md:py-14 lg:py-16 bg-card/50">
+                <div className="max-w-7xl mx-auto px-4 md:px-8 lg:px-12">
+                    {/* Header */}
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
@@ -78,7 +78,7 @@ export function TopFlavours() {
                     >
                         <div>
                             <span className="text-primary font-heading italic text-sm md:text-base mb-1 block">Special Menu</span>
-                            <h2 className="text-xl md:text-2xl font-bold font-heading">Today&apos;s Special</h2>
+                            <h2 className="text-xl md:text-2xl xl:text-3xl font-bold font-heading">Today&apos;s Special</h2>
                         </div>
                         <button
                             onClick={() => setShowPopup(true)}
@@ -88,8 +88,8 @@ export function TopFlavours() {
                         </button>
                     </motion.div>
 
-                    {/* Horizontal Scrolling on Mobile, Grid on Desktop */}
-                    <div className="flex gap-4 overflow-x-auto pb-2 no-scrollbar md:grid md:grid-cols-6 md:overflow-visible">
+                    {/* Horizontal scroll on mobile, 3-col on md, 6-col on lg+ */}
+                    <div className="flex gap-4 overflow-x-auto pb-2 no-scrollbar sm:grid sm:grid-cols-3 sm:overflow-visible lg:grid-cols-6">
                         {specialItems.map((item, index) => (
                             <motion.div
                                 key={item.id}
@@ -98,9 +98,9 @@ export function TopFlavours() {
                                 viewport={{ once: true }}
                                 transition={{ delay: index * 0.08 }}
                                 whileHover={{ y: -5 }}
-                                className="min-w-[140px] md:min-w-0 group bg-card rounded-xl overflow-hidden border border-transparent hover:border-primary/20 hover:shadow-lg hover:shadow-primary/5 transition-all cursor-pointer"
+                                className="min-w-[140px] sm:min-w-0 group bg-card rounded-xl overflow-hidden border border-transparent hover:border-primary/20 hover:shadow-lg hover:shadow-primary/5 transition-all cursor-pointer"
                             >
-                                <div className="relative h-28 md:h-32 overflow-hidden">
+                                <div className="relative h-28 md:h-36 lg:h-40 overflow-hidden">
                                     <img
                                         src={item.image}
                                         alt={item.name}
@@ -139,10 +139,7 @@ export function TopFlavours() {
                         className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8"
                         onClick={() => setShowPopup(false)}
                     >
-                        {/* Backdrop */}
                         <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
-
-                        {/* Modal */}
                         <motion.div
                             initial={{ opacity: 0, scale: 0.9, y: 30 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -151,7 +148,6 @@ export function TopFlavours() {
                             onClick={(e) => e.stopPropagation()}
                             className="relative bg-card border border-border rounded-2xl w-full max-w-2xl max-h-[85vh] overflow-hidden shadow-2xl"
                         >
-                            {/* Modal Header */}
                             <div className="flex items-center justify-between p-5 border-b border-border">
                                 <div>
                                     <span className="text-primary font-heading italic text-sm">Special Menu</span>
@@ -165,7 +161,6 @@ export function TopFlavours() {
                                 </button>
                             </div>
 
-                            {/* Items Grid */}
                             <div className="p-5 overflow-y-auto max-h-[calc(85vh-5rem)] custom-scrollbar">
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     {specialItems.map((item, index) => (

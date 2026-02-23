@@ -112,7 +112,7 @@ function VenueImageSlider({ images, label }: { images: string[], label: string }
 
     return (
         <div
-            className="relative group overflow-hidden rounded-2xl shadow-2xl h-[300px] md:h-[500px] touch-pan-y"
+            className="relative group overflow-hidden rounded-2xl shadow-2xl h-[280px] md:h-[460px] lg:h-[540px] xl:h-[620px] touch-pan-y"
             onMouseEnter={handleMouseEnter}
             onMouseLeave={() => setIsPaused(false)}
         >
@@ -181,12 +181,12 @@ export function About() {
     const IconComponent = current.icon;
 
     return (
-        <section className="py-16 md:py-24 bg-background relative overflow-hidden">
+        <section className="py-12 md:py-20 lg:py-24 xl:py-32 bg-background relative overflow-hidden">
             {/* Decorative glows */}
             <div className="absolute top-20 left-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
             <div className="absolute bottom-20 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
 
-            <div className="container mx-auto px-4 md:px-6 relative z-10">
+            <div className="max-w-7xl mx-auto px-4 md:px-8 lg:px-12 relative z-10">
                 {/* Section Header */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
@@ -197,7 +197,7 @@ export function About() {
                     <span className="text-primary font-heading italic text-base md:text-lg mb-2 block">
                         About Us
                     </span>
-                    <h2 className="text-2xl md:text-4xl font-bold font-heading mb-3 leading-tight">
+                    <h2 className="text-2xl md:text-3xl xl:text-4xl font-bold font-heading mb-3 leading-tight">
                         A <span className="text-primary">Proshantir Neer</span> in Serampore
                     </h2>
                     <p className="text-muted-foreground text-sm md:text-base max-w-2xl mx-auto mb-8">
@@ -262,7 +262,7 @@ export function About() {
                                     </span>
                                 </div>
 
-                                <h3 className="text-2xl md:text-4xl font-bold font-heading mb-4 leading-tight">
+                                <h3 className="text-xl md:text-3xl xl:text-4xl font-bold font-heading mb-4 leading-tight">
                                     {current.label}
                                 </h3>
                                 <p className={`text-sm md:text-base mb-8 leading-relaxed ${current.descriptionClassName || 'text-muted-foreground'}`}>

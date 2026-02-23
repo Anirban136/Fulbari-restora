@@ -30,20 +30,20 @@ const testimonials = [
 
 export function Testimonials() {
     return (
-        <section className="py-20 bg-background">
-            <div className="container mx-auto px-4">
+        <section className="py-12 md:py-20 lg:py-24 bg-background">
+            <div className="max-w-7xl mx-auto px-4 md:px-8 lg:px-12">
                 <motion.div
                     initial={{ opacity: 0, y: 30 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.5 }}
-                    className="text-center mb-16"
+                    className="text-center mb-8 md:mb-16"
                 >
-                    <span className="text-primary font-heading italic text-lg mb-2 block">Testimonials</span>
-                    <h2 className="text-2xl md:text-4xl font-bold font-heading mb-4">What Our Customers Say</h2>
+                    <span className="text-primary font-heading italic text-base md:text-lg mb-2 block">Testimonials</span>
+                    <h2 className="text-2xl md:text-3xl xl:text-4xl font-bold font-heading mb-4">What Our Customers Say</h2>
                 </motion.div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-8">
                     {testimonials.map((item, index) => (
                         <motion.div
                             key={item.id}
@@ -52,19 +52,19 @@ export function Testimonials() {
                             viewport={{ once: true }}
                             transition={{ delay: index * 0.15 }}
                             whileHover={{ y: -6 }}
-                            className="bg-card p-8 rounded-2xl border border-border/50 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 transition-colors relative"
+                            className="bg-card p-5 md:p-8 rounded-2xl border border-border/50 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 transition-colors relative"
                         >
-                            <Quote className="absolute top-8 right-8 text-primary/20" size={36} />
+                            <Quote className="absolute top-5 right-5 md:top-8 md:right-8 text-primary/20" size={32} />
 
-                            <p className="text-muted-foreground mb-8 relative z-10 italic text-base">"{item.content}"</p>
+                            <p className="text-muted-foreground mb-6 md:mb-8 relative z-10 italic text-sm md:text-base">&quot;{item.content}&quot;</p>
 
                             <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 rounded-full overflow-hidden relative border-2 border-primary/50">
+                                <div className="w-12 h-12 rounded-full overflow-hidden relative border-2 border-primary/50 shrink-0">
                                     <Image src={item.image} alt={item.name} fill className="object-cover" />
                                 </div>
                                 <div>
-                                    <h4 className="font-bold text-foreground">{item.name}</h4>
-                                    <span className="text-sm text-primary">{item.role}</span>
+                                    <h4 className="font-bold text-foreground text-sm md:text-base">{item.name}</h4>
+                                    <span className="text-xs md:text-sm text-primary">{item.role}</span>
                                 </div>
                             </div>
                         </motion.div>

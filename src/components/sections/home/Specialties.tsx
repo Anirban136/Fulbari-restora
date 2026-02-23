@@ -50,16 +50,16 @@ export function Specialties() {
 
     return (
         <>
-            <section className="py-20 bg-card">
-                <div className="container mx-auto px-4">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            <section className="py-14 md:py-20 lg:py-28 bg-card">
+                <div className="max-w-7xl mx-auto px-4 md:px-8 lg:px-12">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 md:gap-16 items-center">
                         <motion.div
                             initial={{ opacity: 0, x: -50 }}
                             whileInView={{ opacity: 1, x: 0 }}
                             viewport={{ once: true }}
                         >
-                            <span className="text-primary font-heading italic text-lg mb-2 block">Our Categories</span>
-                            <h2 className="text-3xl md:text-4xl font-bold font-heading mb-6">Explore Our Cuisine</h2>
+                            <span className="text-primary font-heading italic text-base md:text-lg mb-2 block">Our Categories</span>
+                            <h2 className="text-2xl md:text-3xl xl:text-4xl font-bold font-heading mb-6">Explore Our Cuisine</h2>
 
                             <div className="space-y-6 mb-8">
                                 <div className="p-5 rounded-2xl bg-primary/5 border-l-4 border-primary/40 backdrop-blur-sm">
@@ -83,7 +83,7 @@ export function Specialties() {
                             </div>
 
                             {/* Category Image */}
-                            <div className="relative h-[220px] md:h-[260px] rounded-2xl overflow-hidden mb-8 group">
+                            <div className="relative h-[200px] md:h-[260px] lg:h-[300px] rounded-2xl overflow-hidden mb-8 group">
                                 <img
                                     src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1?q=80&w=2074&auto=format&fit=crop"
                                     alt="Varieties of food served at Fulbari"

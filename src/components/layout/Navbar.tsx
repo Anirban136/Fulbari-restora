@@ -35,7 +35,7 @@ export function Navbar() {
                 scrolled ? "bg-background/80 backdrop-blur-md border-b border-border py-2" : "bg-transparent py-4"
             )}
         >
-            <div className="container mx-auto px-4 md:px-6 flex items-center justify-center md:justify-between relative">
+            <div className="max-w-7xl mx-auto px-4 md:px-8 w-full flex items-center justify-center md:justify-between relative">
                 {/* Logo - Centered on mobile, left on desktop */}
                 <Link href="/" className="flex items-center gap-2">
                     <div className="relative h-12 w-32 md:h-16 md:w-48">
