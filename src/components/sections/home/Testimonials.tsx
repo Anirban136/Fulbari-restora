@@ -54,14 +54,9 @@ export function Testimonials() {
 
                             <p className="text-muted-foreground mb-6 md:mb-8 relative z-10 italic text-sm md:text-base">&quot;{item.content}&quot;</p>
 
-                            <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 rounded-full bg-primary/15 border-2 border-primary/40 flex items-center justify-center shrink-0">
-                                    <span className="text-primary font-bold text-base">{item.name.charAt(0)}</span>
-                                </div>
-                                <div>
-                                    <h4 className="font-bold text-foreground text-sm md:text-base">{item.name}</h4>
-                                    <span className="text-xs md:text-sm text-primary">{item.role}</span>
-                                </div>
+                            <div>
+                                <h4 className="font-bold text-foreground text-sm md:text-base">{item.name}</h4>
+                                <span className="text-xs md:text-sm text-primary">{item.role}</span>
                             </div>
                         </motion.div>
                     ))}
