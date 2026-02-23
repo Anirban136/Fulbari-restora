@@ -263,16 +263,16 @@ export default function AdminDashboard() {
             <AnimatePresence>
                 {showToast.show && (
                     <motion.div
-                        initial={{ opacity: 0, y: -50, x: "-50%" }}
-                        animate={{ opacity: 1, y: 20, x: "-50%" }}
-                        exit={{ opacity: 0, y: -50, x: "-50%" }}
+                        initial={{ opacity: 0, y: 50, x: "-50%" }}
+                        animate={{ opacity: 1, y: -20, x: "-50%" }}
+                        exit={{ opacity: 0, y: 50, x: "-50%" }}
                         className={cn(
-                            "fixed top-20 left-1/2 -translate-x-1/2 z-[100] px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 min-w-[300px]",
+                            "fixed bottom-10 left-1/2 -translate-x-1/2 z-[100] px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 w-[90%] md:min-w-[300px] md:w-auto",
                             showToast.type === 'success' ? "bg-green-500 text-white" : "bg-red-500 text-white"
                         )}
                     >
                         {showToast.type === 'success' ? <CheckCircle2 size={24} /> : <AlertCircle size={24} />}
-                        <span className="font-bold text-sm tracking-wide">{showToast.message}</span>
+                        <span className="font-bold text-sm tracking-wide text-center flex-grow">{showToast.message}</span>
                     </motion.div>
                 )}
             </AnimatePresence>
@@ -504,29 +504,31 @@ export default function AdminDashboard() {
                                         required
                                     />
                                 </div>
-                                <div className="flex gap-6 items-center lg:col-span-3 pt-2">
-                                    <label className="flex items-center gap-2 cursor-pointer group">
-                                        <input
-                                            type="checkbox"
-                                            className="w-5 h-5 accent-primary rounded cursor-pointer"
-                                            checked={newItem.isVeg}
-                                            onChange={(e) => setNewItem({ ...newItem, isVeg: e.target.checked })}
-                                        />
-                                        <span className="text-sm font-medium group-hover:text-primary transition-colors">Vegetarian</span>
-                                    </label>
-                                    <label className="flex items-center gap-2 cursor-pointer group">
-                                        <input
-                                            type="checkbox"
-                                            className="w-5 h-5 accent-yellow-500 rounded cursor-pointer"
-                                            checked={newItem.isBestseller}
-                                            onChange={(e) => setNewItem({ ...newItem, isBestseller: e.target.checked })}
-                                        />
-                                        <span className="text-sm font-medium group-hover:text-yellow-500 transition-colors">Bestseller</span>
-                                    </label>
+                                <div className="flex flex-col md:flex-row gap-4 md:gap-8 items-start md:items-center lg:col-span-3 pt-2">
+                                    <div className="flex gap-6 items-center">
+                                        <label className="flex items-center gap-2 cursor-pointer group">
+                                            <input
+                                                type="checkbox"
+                                                className="w-5 h-5 accent-primary rounded cursor-pointer"
+                                                checked={newItem.isVeg}
+                                                onChange={(e) => setNewItem({ ...newItem, isVeg: e.target.checked })}
+                                            />
+                                            <span className="text-sm font-medium group-hover:text-primary transition-colors">Vegetarian</span>
+                                        </label>
+                                        <label className="flex items-center gap-2 cursor-pointer group">
+                                            <input
+                                                type="checkbox"
+                                                className="w-5 h-5 accent-yellow-500 rounded cursor-pointer"
+                                                checked={newItem.isBestseller}
+                                                onChange={(e) => setNewItem({ ...newItem, isBestseller: e.target.checked })}
+                                            />
+                                            <span className="text-sm font-medium group-hover:text-yellow-500 transition-colors">Bestseller</span>
+                                        </label>
+                                    </div>
                                     <Button
                                         type="submit"
                                         disabled={isSaving}
-                                        className="ml-auto px-8 py-6 rounded-2xl font-bold shadow-lg shadow-primary/20 flex items-center gap-2"
+                                        className="w-full md:w-auto md:ml-auto px-8 py-6 rounded-2xl font-bold shadow-lg shadow-primary/20 flex items-center justify-center gap-2"
                                     >
                                         {isSaving && <Loader2 className="w-4 h-4 animate-spin" />}
                                         {isEditing ? "Update Menu Item" : "Save Item to Menu"}
