@@ -24,7 +24,8 @@ import {
     Pencil,
     ArrowLeft,
     Upload,
-    ImagePlus
+    ImagePlus,
+    Loader2
 } from "lucide-react";
 
 interface MenuItem {
@@ -363,28 +364,93 @@ export default function AdminDashboard() {
                                         </select>
                                     )}
                                 </div>
-                                <div className="space-y-2 md:col-span-2 lg:col-span-1">
-                                    <label className="text-sm font-medium text-muted-foreground">Image URL</label>
-                                    <input
-                                        type="text"
-                                        placeholder="https://images.unsplash.com/..."
-                                        className="w-full bg-accent border-transparent rounded-xl p-3 outline-none focus:ring-1 focus:ring-primary transition-all"
-                                        value={newItem.image}
-                                        onChange={(e) => setNewItem({ ...newItem, image: e.target.value })}
-                                        required
-                                    />
-                                    {newItem.image && (
-                                        <div className="mt-2 relative h-32 w-full rounded-xl overflow-hidden border border-border bg-accent/30 group/preview">
-                                            <img
-                                                src={fixUnsplashUrl(newItem.image)}
-                                                alt="Preview"
-                                                className="w-full h-full object-cover transition-transform duration-500 group-hover/preview:scale-110"
+                                <div className="space-y-3 md:col-span-2 lg:col-span-1">
+                                    <label className="text-sm font-medium text-muted-foreground flex items-center justify-between">
+                                        <span>Item Image</span>
+                                        {newItem.image && (
+                                            <button
+                                                type="button"
+                                                onClick={() => setNewItem({ ...newItem, image: "" })}
+                                                className="text-[10px] text-red-500 hover:underline"
+                                            >
+                                                Clear Image
+                                            </button>
+                                        )}
+                                    </label>
+
+                                    {/* Premium Dual UI: Upload or Paste */}
+                                    <div className="space-y-3">
+                                        {/* 1. Upload Area */}
+                                        <div className="relative group/upload">
+                                            <input
+                                                type="file"
+                                                accept="image/*"
+                                                onChange={handleImageUpload}
+                                                className="hidden"
+                                                id="image-upload"
                                             />
-                                            <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover/preview:opacity-100 transition-opacity">
-                                                <span className="text-white text-[10px] font-bold uppercase tracking-wider">Live Preview</span>
+                                            <label
+                                                htmlFor="image-upload"
+                                                className={cn(
+                                                    "flex flex-col items-center justify-center w-full min-h-[140px] rounded-2xl border-2 border-dashed transition-all cursor-pointer relative overflow-hidden",
+                                                    newItem.image
+                                                        ? "border-primary/50 bg-primary/5"
+                                                        : "border-border hover:border-primary/50 bg-accent/30"
+                                                )}
+                                            >
+                                                {isUploading ? (
+                                                    <div className="flex flex-col items-center gap-2">
+                                                        <Loader2 className="w-8 h-8 text-primary animate-spin" />
+                                                        <span className="text-xs font-bold text-primary animate-pulse uppercase tracking-widest">Uploading...</span>
+                                                    </div>
+                                                ) : newItem.image ? (
+                                                    <div className="absolute inset-0 w-full h-full">
+                                                        <img
+                                                            src={fixUnsplashUrl(newItem.image)}
+                                                            alt="Preview"
+                                                            className="w-full h-full object-cover transition-transform duration-500 group-hover/upload:scale-105"
+                                                        />
+                                                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover/upload:opacity-100 transition-opacity">
+                                                            <div className="flex flex-col items-center gap-1">
+                                                                <Upload size={20} className="text-white" />
+                                                                <span className="text-[10px] text-white font-bold uppercase tracking-widest">Change Image</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                ) : (
+                                                    <div className="flex flex-col items-center gap-2 text-muted-foreground group-hover/upload:text-primary transition-colors py-6">
+                                                        <div className="w-12 h-12 rounded-full bg-background flex items-center justify-center shadow-inner">
+                                                            <ImagePlus size={24} strokeWidth={1.5} />
+                                                        </div>
+                                                        <span className="text-[10px] font-bold uppercase tracking-widest">Upload local photo</span>
+                                                    </div>
+                                                )}
+                                            </label>
+                                        </div>
+
+                                        {/* 2. URL Fallback */}
+                                        <div className="relative">
+                                            <div className="flex items-center gap-2 mb-1.5 px-1">
+                                                <div className="h-[1px] flex-1 bg-border/50" />
+                                                <span className="text-[9px] text-muted-foreground uppercase font-bold tracking-tighter">or paste image link</span>
+                                                <div className="h-[1px] flex-1 bg-border/50" />
+                                            </div>
+                                            <div className="relative">
+                                                <input
+                                                    type="text"
+                                                    placeholder="https://images.unsplash.com/..."
+                                                    className="w-full bg-accent/50 border border-border/50 rounded-xl p-3 text-xs outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all pr-10"
+                                                    value={newItem.image}
+                                                    onChange={(e) => setNewItem({ ...newItem, image: e.target.value })}
+                                                />
+                                                <ImageIcon size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                                             </div>
                                         </div>
-                                    )}
+                                    </div>
+
+                                    <p className="text-[10px] text-muted-foreground italic px-1 pt-1">
+                                        Tip: Photos from Pexels, Pixabay, or Times of India now work perfectly!
+                                    </p>
                                 </div>
                                 <div className="space-y-2 md:col-span-2">
                                     <label className="text-sm font-medium text-muted-foreground">Description</label>
