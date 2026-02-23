@@ -11,77 +11,62 @@ export function Hero() {
 
             {/* ===== DESKTOP HERO (md and up) ===== */}
             <div className="hidden md:block">
-                {/* Full-screen image container — no height cap so the full photo is visible */}
-                <div className="relative w-full" style={{ minHeight: '90vh' }}>
-
-                    {/* Hero Image — covers full area, object-center so nothing is cropped */}
+                {/* Image + overlay container */}
+                <div className="relative w-full pt-16">
+                    {/* Hero Image */}
                     <Image
                         src="/hero-bg.jpg"
                         alt="Fulbari Restaurant Exterior Night View"
-                        fill
-                        className="object-cover object-center"
+                        width={1920}
+                        height={1080}
+                        className="w-full max-h-[82vh] object-cover object-center"
                         priority
                     />
 
-                    {/* Subtle dark vignette around edges for focus */}
-                    <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-black/70" />
-                    <div className="absolute inset-0 bg-gradient-to-r from-black/50 via-transparent to-black/30" />
+                    {/* Dark gradient overlay for text readability */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent" />
+                    <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background to-transparent" />
 
-                    {/* Bottom fade into background */}
-                    <div className="absolute bottom-0 left-0 right-0 h-28 bg-gradient-to-t from-background to-transparent" />
-
-                    {/* Text — centered in the lower-middle area, below the sign */}
-                    <div className="absolute inset-0 flex items-center justify-center pt-16">
-                        <motion.div
-                            initial={{ opacity: 0, y: 40 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.9, delay: 0.3 }}
-                            className="text-center px-6 max-w-3xl"
-                        >
-                            {/* Tagline */}
-                            <motion.p
-                                initial={{ opacity: 0, y: 20 }}
+                    {/* Text - bottom of image, left-aligned, clear of the neon sign */}
+                    <div className="absolute inset-0 flex items-end pb-10 md:pb-14">
+                        <div className="max-w-7xl mx-auto w-full px-8 md:px-12 lg:px-16">
+                            <motion.div
+                                initial={{ opacity: 0, y: 30 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.7, delay: 0.5 }}
-                                className="text-primary font-bengali-logo font-bold italic text-lg xl:text-2xl mb-5 drop-shadow-lg tracking-wide"
+                                transition={{ duration: 0.8, delay: 0.2 }}
+                                className="max-w-xl"
                             >
-                                ফুলবাড়ি রেস্তোরাঁ: প্রকৃতির সান্নিধ্যে এক অনন্য স্বাদের ঠিকানা
-                            </motion.p>
-
-                            <h1 className="font-heading text-4xl lg:text-5xl xl:text-6xl 2xl:text-7xl font-bold text-white mb-5 leading-tight drop-shadow-2xl">
-                                Experience{" "}
-                                <span className="text-primary drop-shadow-lg">Authentic</span>
-                                <br />
-                                Flavors &amp; Ambiance
-                            </h1>
-
-                            <p className="text-white/80 text-base lg:text-lg xl:text-xl mb-8 font-light max-w-xl mx-auto drop-shadow-md leading-relaxed">
-                                A perfect blend of traditional Bengali cuisine and modern dining in the heart of Serampore.
-                            </p>
-
-                            <div className="flex gap-4 justify-center">
-                                <Link href="/menu">
-                                    <Button size="lg" className="text-sm px-8 shadow-2xl shadow-primary/40">
-                                        View Menu
-                                    </Button>
-                                </Link>
-                                <Link href="/contact">
-                                    <Button
-                                        size="lg"
-                                        variant="outline"
-                                        className="text-sm px-8 border-white/50 text-white hover:bg-white/15 backdrop-blur-sm shadow-xl"
-                                    >
-                                        Book a Table
-                                    </Button>
-                                </Link>
-                            </div>
-                        </motion.div>
+                                <h1 className="font-heading text-3xl lg:text-4xl xl:text-5xl 2xl:text-6xl font-bold text-white mb-4 leading-tight drop-shadow-lg">
+                                    Experience <span className="text-primary">Authentic</span> <br />
+                                    Flavors &amp; Ambiance
+                                </h1>
+                                <p className="text-primary font-bengali-logo font-bold italic text-base lg:text-lg xl:text-xl mb-5 tracking-wide drop-shadow-sm">
+                                    ফুলবাড়ি রেস্তোরাঁ: প্রকৃতির সান্নিধ্যে এক অনন্য স্বাদের ঠিকানা
+                                </p>
+                                <p className="text-white/80 text-sm lg:text-base xl:text-lg mb-8 font-light max-w-md drop-shadow-sm">
+                                    A perfect blend of traditional Bengali cuisine and modern dining in the heart of Serampore.
+                                </p>
+                                <div className="flex gap-4">
+                                    <Link href="/menu">
+                                        <Button size="lg" className="text-sm px-8 shadow-lg">
+                                            View Menu
+                                        </Button>
+                                    </Link>
+                                    <Link href="/contact">
+                                        <Button size="lg" variant="outline" className="text-sm px-8 border-white/40 text-white hover:bg-white/10 backdrop-blur-sm shadow-lg">
+                                            Book a Table
+                                        </Button>
+                                    </Link>
+                                </div>
+                            </motion.div>
+                        </div>
                     </div>
                 </div>
             </div>
 
             {/* ===== MOBILE HERO (below md) ===== */}
             <div className="md:hidden">
+                {/* Full image at natural aspect ratio */}
                 <div className="relative w-full pt-14">
                     <Image
                         src="/hero-bg.jpg"
@@ -94,6 +79,7 @@ export function Hero() {
                     <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-background to-transparent" />
                 </div>
 
+                {/* Mobile Text below image */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
