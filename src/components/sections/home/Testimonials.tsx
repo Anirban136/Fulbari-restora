@@ -2,7 +2,6 @@
 
 import { Quote } from "lucide-react";
 import { motion } from "framer-motion";
-import Image from "next/image";
 
 const testimonials = [
     {
@@ -10,21 +9,18 @@ const testimonials = [
         name: "Rohan Das",
         role: "Food Blogger",
         content: "The best Bengali cuisine I've had in a long time. The Hilsa curry was absolutely divine!",
-        image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=300&auto=format&fit=crop"
     },
     {
         id: 2,
         name: "Priya Sharma",
         role: "Local Guide",
         content: "Beautiful ambiance and excellent service. The balcony view in the evening is magical.",
-        image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=300&auto=format&fit=crop"
     },
     {
         id: 3,
         name: "Amit Ghosh",
         role: "Regular Customer",
         content: "A perfect place for family dinner. The staff is courteous and the food is always fresh.",
-        image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=300&auto=format&fit=crop"
     }
 ];
 
@@ -59,8 +55,8 @@ export function Testimonials() {
                             <p className="text-muted-foreground mb-6 md:mb-8 relative z-10 italic text-sm md:text-base">&quot;{item.content}&quot;</p>
 
                             <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 rounded-full overflow-hidden relative border-2 border-primary/50 shrink-0">
-                                    <Image src={item.image} alt={item.name} fill className="object-cover" />
+                                <div className="w-12 h-12 rounded-full bg-primary/15 border-2 border-primary/40 flex items-center justify-center shrink-0">
+                                    <span className="text-primary font-bold text-base">{item.name.charAt(0)}</span>
                                 </div>
                                 <div>
                                     <h4 className="font-bold text-foreground text-sm md:text-base">{item.name}</h4>
