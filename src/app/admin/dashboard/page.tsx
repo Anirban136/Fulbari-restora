@@ -274,9 +274,18 @@ export default function AdminDashboard() {
         try {
             const res = await fetch('/api/upload', { method: 'POST', body: fd });
             const data = await res.json();
-            if (data.url) setGalleryForm(prev => ({ ...prev, url: data.url }));
-        } catch { }
+            if (data.url) {
+                setGalleryForm(prev => ({ ...prev, url: data.url }));
+                setShowToast({ show: true, message: "Image Uploaded Successfully!", type: 'success' });
+            } else {
+                throw new Error(data.error || "Upload failed");
+            }
+        } catch (err: any) {
+            console.error("Gallery upload error:", err);
+            setShowToast({ show: true, message: `Upload Failed: ${err.message}. Ensure 'gallery' bucket exists.`, type: 'error' });
+        }
         finally { setGalleryUploading(false); }
+        setTimeout(() => setShowToast(p => ({ ...p, show: false })), 4000);
     };
 
     const handleSaveGalleryItem = async (e: React.FormEvent) => {
@@ -292,14 +301,20 @@ export default function AdminDashboard() {
                     item: galleryForm
                 }),
             });
+            const data = await res.json();
             if (res.ok) {
                 setGalleryForm({ url: '', category: 'Food' });
                 fetchGallery();
                 setShowToast({ show: true, message: "Image Added to Gallery!", type: 'success' });
-                setTimeout(() => setShowToast(p => ({ ...p, show: false })), 3000);
+            } else {
+                throw new Error(data.error || "Failed to save item");
             }
-        } catch { }
+        } catch (err: any) {
+            console.error("Gallery save error:", err);
+            setShowToast({ show: true, message: `Save Failed: ${err.message}. Ensure 'gallery_items' table exists.`, type: 'error' });
+        }
         finally { setGallerySaving(false); }
+        setTimeout(() => setShowToast(p => ({ ...p, show: false })), 4000);
     };
 
     const handleDeleteGalleryItem = async (id: string) => {
