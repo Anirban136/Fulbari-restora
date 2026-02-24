@@ -40,6 +40,7 @@ interface EventItem {
     description: string;
     event_date: string;
     poster_url: string | null;
+    image_urls: string[];
     is_active: boolean;
 }
 
@@ -53,6 +54,9 @@ interface MenuItem {
     isVeg: boolean;
     isBestseller?: boolean;
     available: boolean;
+    menu_type: "RESTAURANT" | "CAFE";
+    variant_prices?: Record<string, number>;
+    price_options?: number[];
 }
 
 export default function AdminDashboard() {
@@ -83,6 +87,8 @@ export default function AdminDashboard() {
     const [eventImages, setEventImages] = useState<string[]>([]);
     const [eventUploading, setEventUploading] = useState(false);
     const [eventSaving, setEventSaving] = useState(false);
+    const [isEditingEvent, setIsEditingEvent] = useState(false);
+    const [editingEventId, setEditingEventId] = useState<string | null>(null);
 
     const [newItem, setNewItem] = useState({
         name: "",
@@ -91,8 +97,14 @@ export default function AdminDashboard() {
         category: "Bengali",
         image: "",
         isVeg: false,
-        isBestseller: false
+        isBestseller: false,
+        menu_type: "RESTAURANT" as "RESTAURANT" | "CAFE",
+        variant_prices: {} as Record<string, number>,
+        price_options: [] as number[]
     });
+
+    const [variantInput, setVariantInput] = useState("");
+    const [priceOptionsInput, setPriceOptionsInput] = useState("");
 
     const [customCategory, setCustomCategory] = useState("");
     const [isCustomCategory, setIsCustomCategory] = useState(false);
@@ -140,6 +152,12 @@ export default function AdminDashboard() {
     const handleEventPosterUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
+
+        if (eventImages.length >= 10) {
+            alert("Maximum 10 images allowed per event.");
+            return;
+        }
+
         setEventUploading(true);
         const fd = new FormData();
         fd.append('file', file);
@@ -156,27 +174,48 @@ export default function AdminDashboard() {
         setEventImages(prev => prev.filter((_, i) => i !== idx));
     };
 
-    const handleAddEvent = async (e: React.FormEvent) => {
+    const handleSaveEvent = async (e: React.FormEvent) => {
         e.preventDefault();
         setEventSaving(true);
         try {
-            await fetch('/api/events', {
+            const res = await fetch('/api/events', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    action: 'ADD',
+                    action: isEditingEvent ? 'UPDATE' : 'ADD',
                     event: {
                         ...eventForm,
+                        id: editingEventId,
                         poster_url: eventImages[0] ?? null,
                         image_urls: eventImages,
                     }
                 }),
             });
-            setEventForm({ title: '', description: '', event_date: '' });
-            setEventImages([]);
-            fetchEvents();
+            if (res.ok) {
+                setEventForm({ title: '', description: '', event_date: '' });
+                setEventImages([]);
+                setIsEditingEvent(false);
+                setEditingEventId(null);
+                fetchEvents();
+                setShowToast({ show: true, message: isEditingEvent ? "Event Updated!" : "Event Added!", type: 'success' });
+                setTimeout(() => setShowToast(p => ({ ...p, show: false })), 3000);
+            }
         } catch { }
         finally { setEventSaving(false); }
+    };
+
+    const handleEditEvent = (ev: EventItem) => {
+        setEventForm({
+            title: ev.title,
+            description: ev.description,
+            event_date: new Date(ev.event_date).toISOString().split('T')[0]
+        });
+        setEventImages(ev.image_urls || []);
+        setIsEditingEvent(true);
+        setEditingEventId(ev.id);
+        // Scroll to form
+        const form = document.querySelector('#event-form');
+        form?.scrollIntoView({ behavior: 'smooth' });
     };
 
     const handleDeleteEvent = async (id: string) => {
@@ -253,8 +292,13 @@ export default function AdminDashboard() {
             category: item.category,
             image: item.image,
             isVeg: item.isVeg,
-            isBestseller: item.isBestseller || false
+            isBestseller: item.isBestseller || false,
+            menu_type: item.menu_type || "RESTAURANT",
+            variant_prices: item.variant_prices || {},
+            price_options: item.price_options || []
         });
+        setVariantInput(item.variant_prices ? JSON.stringify(item.variant_prices) : "");
+        setPriceOptionsInput(item.price_options ? item.price_options.join(", ") : "");
         setIsEditing(true);
         setEditingId(item.id);
         setShowAddForm(true);
@@ -331,8 +375,13 @@ export default function AdminDashboard() {
                     category: "Bengali",
                     image: "",
                     isVeg: false,
-                    isBestseller: false
+                    isBestseller: false,
+                    menu_type: "RESTAURANT",
+                    variant_prices: {},
+                    price_options: []
                 });
+                setVariantInput("");
+                setPriceOptionsInput("");
                 setCustomCategory("");
                 setIsCustomCategory(false);
                 fetchMenu();
@@ -419,8 +468,13 @@ export default function AdminDashboard() {
                                         category: "Bengali",
                                         image: "",
                                         isVeg: false,
-                                        isBestseller: false
+                                        isBestseller: false,
+                                        menu_type: "RESTAURANT",
+                                        variant_prices: {},
+                                        price_options: []
                                     });
+                                    setVariantInput("");
+                                    setPriceOptionsInput("");
                                 } else {
                                     setShowAddForm(!showAddForm);
                                 }
@@ -480,6 +534,17 @@ export default function AdminDashboard() {
                                         onChange={(e) => setNewItem({ ...newItem, price: Number(e.target.value) })}
                                         required
                                     />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium text-muted-foreground">Menu Type</label>
+                                    <select
+                                        className="w-full bg-accent border-transparent rounded-xl p-3 outline-none focus:ring-1 focus:ring-primary transition-all font-bold"
+                                        value={newItem.menu_type}
+                                        onChange={(e) => setNewItem({ ...newItem, menu_type: e.target.value as "RESTAURANT" | "CAFE" })}
+                                    >
+                                        <option value="RESTAURANT">Restaurant Menu</option>
+                                        <option value="CAFE">Cafe Menu</option>
+                                    </select>
                                 </div>
                                 <div className="space-y-2">
                                     <div className="flex justify-between items-center">
@@ -622,6 +687,41 @@ export default function AdminDashboard() {
                                         required
                                     />
                                 </div>
+
+                                {newItem.menu_type === "CAFE" && (
+                                    <>
+                                        <div className="space-y-2 md:col-span-1">
+                                            <label className="text-sm font-medium text-muted-foreground">Variant Prices (JSON)</label>
+                                            <input
+                                                type="text"
+                                                placeholder='{"veg": 100, "chicken": 150}'
+                                                className="w-full bg-accent border-transparent rounded-xl p-3 text-xs outline-none focus:ring-1 focus:ring-primary transition-all"
+                                                value={variantInput}
+                                                onChange={(e) => {
+                                                    setVariantInput(e.target.value);
+                                                    try {
+                                                        const parsed = JSON.parse(e.target.value);
+                                                        setNewItem({ ...newItem, variant_prices: parsed });
+                                                    } catch (e) { }
+                                                }}
+                                            />
+                                        </div>
+                                        <div className="space-y-2 md:col-span-1">
+                                            <label className="text-sm font-medium text-muted-foreground">Price Options (Comma separated)</label>
+                                            <input
+                                                type="text"
+                                                placeholder="15, 20, 25"
+                                                className="w-full bg-accent border-transparent rounded-xl p-3 text-xs outline-none focus:ring-1 focus:ring-primary transition-all"
+                                                value={priceOptionsInput}
+                                                onChange={(e) => {
+                                                    setPriceOptionsInput(e.target.value);
+                                                    const parsed = e.target.value.split(",").map(v => parseInt(v.trim())).filter(v => !isNaN(v));
+                                                    setNewItem({ ...newItem, price_options: parsed });
+                                                }}
+                                            />
+                                        </div>
+                                    </>
+                                )}
                                 <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 items-start lg:items-center col-span-1 md:col-span-2 lg:col-span-3 pt-2">
                                     <div className="flex flex-wrap gap-x-6 gap-y-3 items-center w-full lg:w-auto">
                                         <label className="flex items-center gap-2 cursor-pointer group whitespace-nowrap">
@@ -727,10 +827,12 @@ export default function AdminDashboard() {
                 {/* ── EVENTS TAB ───────────────────────────── */}
                 {adminTab === 'events' && (
                     <div className="space-y-8">
-                        {/* Add Event Form */}
-                        <div className="bg-card border border-border rounded-3xl p-6 shadow-xl">
-                            <h2 className="text-xl font-bold font-heading mb-4">Add New Event</h2>
-                            <form onSubmit={handleAddEvent} className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        {/* Add/Edit Event Form */}
+                        <div id="event-form" className="bg-card border border-border rounded-3xl p-6 shadow-xl">
+                            <h2 className="text-xl font-bold font-heading mb-4">
+                                {isEditingEvent ? 'Edit Event' : 'Add New Event'}
+                            </h2>
+                            <form onSubmit={handleSaveEvent} className="grid grid-cols-1 md:grid-cols-2 gap-5">
                                 <div className="space-y-2">
                                     <label className="text-sm font-medium text-muted-foreground">Event Title *</label>
                                     <input required type="text" placeholder="e.g. Durga Puja Special Night"
@@ -751,7 +853,10 @@ export default function AdminDashboard() {
                                 </div>
                                 {/* Multi-image upload */}
                                 <div className="space-y-2 md:col-span-2">
-                                    <label className="text-sm font-medium text-muted-foreground">Event Images <span className="text-xs text-muted-foreground/60">(add as many as you want — they auto-scroll on the site)</span></label>
+                                    <label className="text-sm font-medium text-muted-foreground flex justify-between">
+                                        <span>Event Images <span className="text-xs text-muted-foreground/60">(max 10)</span></span>
+                                        <span className="text-[10px] font-bold text-primary">{eventImages.length}/10</span>
+                                    </label>
                                     {/* Thumbnails row */}
                                     {eventImages.length > 0 && (
                                         <div className="flex gap-2 flex-wrap mb-2">
@@ -759,7 +864,7 @@ export default function AdminDashboard() {
                                                 <div key={i} className="relative w-20 h-14 rounded-xl overflow-hidden border border-border group">
                                                     <img src={url} alt={`img ${i + 1}`} className="w-full h-full object-cover" />
                                                     <button type="button" onClick={() => removeEventImage(i)}
-                                                        className="absolute top-0.5 right-0.5 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity">
+                                                        className="absolute top-0.5 right-0.5 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
                                                         <X size={9} />
                                                     </button>
                                                     {i === 0 && <span className="absolute bottom-0.5 left-0.5 text-[8px] bg-primary text-primary-foreground px-1 rounded">Cover</span>}
@@ -768,27 +873,49 @@ export default function AdminDashboard() {
                                         </div>
                                     )}
                                     <div className="flex gap-2 items-center">
-                                        <label className="flex items-center gap-2 px-4 py-2.5 bg-primary/10 border border-primary/30 text-primary rounded-xl text-sm font-medium cursor-pointer hover:bg-primary/20 transition-all shrink-0">
+                                        <label className={cn(
+                                            "flex items-center gap-2 px-4 py-2.5 bg-primary/10 border border-primary/30 text-primary rounded-xl text-sm font-medium cursor-pointer hover:bg-primary/20 transition-all shrink-0",
+                                            eventImages.length >= 10 && "opacity-50 cursor-not-allowed pointer-events-none"
+                                        )}>
                                             {eventUploading ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />}
                                             {eventUploading ? 'Uploading...' : '+ Add Image'}
-                                            <input type="file" accept="image/*" className="hidden" onChange={handleEventPosterUpload} />
+                                            <input type="file" accept="image/*" className="hidden" onChange={handleEventPosterUpload} disabled={eventImages.length >= 10} />
                                         </label>
                                         <span className="text-xs text-muted-foreground">or</span>
-                                        <form className="flex-1 flex gap-2" onSubmit={e => {
-                                            e.preventDefault();
-                                            const input = e.currentTarget.querySelector('input') as HTMLInputElement;
-                                            if (input.value.trim()) { setEventImages(prev => [...prev, input.value.trim()]); input.value = ''; }
-                                        }}>
-                                            <input type="text" placeholder="Paste image URL then press Enter"
+                                        <div className="flex-1 flex gap-2">
+                                            <input type="text" placeholder="Paste image URL then press Add" id="url-input"
                                                 className="flex-1 bg-accent border-transparent rounded-xl p-2.5 text-sm outline-none focus:ring-1 focus:ring-primary" />
-                                            <button type="submit" className="px-3 py-2 bg-accent border border-border rounded-xl text-xs font-medium hover:bg-primary/10 transition">Add</button>
-                                        </form>
+                                            <button type="button"
+                                                onClick={(e) => {
+                                                    const input = document.getElementById('url-input') as HTMLInputElement;
+                                                    if (input.value.trim()) {
+                                                        if (eventImages.length < 10) {
+                                                            setEventImages(prev => [...prev, input.value.trim()]);
+                                                            input.value = '';
+                                                        } else {
+                                                            alert("Max 10 images allowed.");
+                                                        }
+                                                    }
+                                                }}
+                                                className="px-3 py-2 bg-accent border border-border rounded-xl text-xs font-medium hover:bg-primary/10 transition whitespace-nowrap"
+                                            >Add</button>
+                                        </div>
                                     </div>
                                 </div>
-                                <div className="md:col-span-2 flex justify-end">
+                                <div className="md:col-span-2 flex justify-end gap-3">
+                                    {isEditingEvent && (
+                                        <Button type="button" variant="outline" onClick={() => {
+                                            setIsEditingEvent(false);
+                                            setEditingEventId(null);
+                                            setEventForm({ title: '', description: '', event_date: '' });
+                                            setEventImages([]);
+                                        }}>
+                                            Cancel
+                                        </Button>
+                                    )}
                                     <Button type="submit" disabled={eventSaving} className="px-8 gap-2">
                                         {eventSaving && <Loader2 size={14} className="animate-spin" />}
-                                        Add Event
+                                        {isEditingEvent ? 'Update Event' : 'Add Event'}
                                     </Button>
                                 </div>
                             </form>
@@ -814,13 +941,19 @@ export default function AdminDashboard() {
                                                 <div className="flex items-start justify-between gap-2 mb-1">
                                                     <h3 className="font-bold text-sm leading-tight">{ev.title}</h3>
                                                     <div className="flex gap-1 shrink-0">
+                                                        <button onClick={() => handleEditEvent(ev)}
+                                                            className="p-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-all"
+                                                            title="Edit Event">
+                                                            <Pencil size={13} />
+                                                        </button>
                                                         <button onClick={() => handleToggleEvent(ev)}
                                                             className={`p-1.5 rounded-lg transition-all ${ev.is_active ? 'bg-green-500/15 text-green-500 hover:bg-green-500/30' : 'bg-red-500/15 text-red-500 hover:bg-red-500/30'}`}
                                                             title={ev.is_active ? 'Deactivate' : 'Activate'}>
                                                             {ev.is_active ? <Power size={13} /> : <PowerOff size={13} />}
                                                         </button>
                                                         <button onClick={() => handleDeleteEvent(ev.id)}
-                                                            className="p-1.5 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500/25 transition-all">
+                                                            className="p-1.5 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500/25 transition-all"
+                                                            title="Delete Event">
                                                             <Trash2 size={13} />
                                                         </button>
                                                     </div>
@@ -893,7 +1026,15 @@ export default function AdminDashboard() {
 
                                     <div className="flex-grow">
                                         <div className="flex justify-between items-start mb-2">
-                                            <h3 className="font-bold font-heading line-clamp-1">{item.name}</h3>
+                                            <div className="flex flex-col">
+                                                <h3 className="font-bold font-heading line-clamp-1">{item.name}</h3>
+                                                <span className={cn(
+                                                    "text-[9px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded w-fit mt-1",
+                                                    item.menu_type === "CAFE" ? "bg-amber-100 text-amber-700" : "bg-blue-100 text-blue-700"
+                                                )}>
+                                                    {item.menu_type || "RESTAURANT"}
+                                                </span>
+                                            </div>
                                             <span className="text-[10px] uppercase font-bold text-primary px-2 py-0.5 bg-primary/10 rounded-full">{item.category}</span>
                                         </div>
                                         <p className="text-xs text-muted-foreground line-clamp-2 mb-4">{item.description}</p>

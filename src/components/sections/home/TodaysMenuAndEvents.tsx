@@ -4,7 +4,8 @@ import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { Utensils, CalendarDays, Star, ChevronRight, Loader2, ChevronLeft, X, ArrowRight } from "lucide-react";
+import { Star, CalendarDays, Loader2, ChevronLeft, ChevronRight, ArrowRight, X, Utensils } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
 interface MenuItem {
@@ -16,6 +17,9 @@ interface MenuItem {
     image: string;
     isVeg: boolean;
     isBestseller?: boolean;
+    menu_type: "RESTAURANT" | "CAFE";
+    variant_prices?: Record<string, number>;
+    price_options?: number[];
     rating?: number;
 }
 
@@ -66,32 +70,76 @@ function EmptyState({ icon, text }: { icon: React.ReactNode; text: string }) {
 }
 
 // Auto-scrolling image carousel for event cards
+// Premium Auto-sliding image carousel with horizontal motion
 function EventImageCarousel({ images }: { images: string[] }) {
     const [idx, setIdx] = useState(0);
+    const [direction, setDirection] = useState(0); // 1 for right, -1 for left
+    const [isHovered, setIsHovered] = useState(false);
 
     useEffect(() => {
-        if (images.length <= 1) return;
-        const t = setInterval(() => setIdx(i => (i + 1) % images.length), 3000);
+        if (images.length <= 1 || isHovered) return;
+        const t = setInterval(() => {
+            setDirection(1);
+            setIdx(i => (i + 1) % images.length);
+        }, 5000); // 5s for slower premium feel
         return () => clearInterval(t);
-    }, [images.length]);
+    }, [images.length, isHovered]);
 
     if (images.length === 0) {
         return (
-            <div className="w-full h-52 flex flex-col items-center justify-center gap-2 bg-gradient-to-br from-primary/10 to-card">
+            <div className="w-full h-56 flex flex-col items-center justify-center gap-2 bg-gradient-to-br from-primary/10 to-card">
                 <CalendarDays size={36} className="text-primary/40" />
             </div>
         );
     }
 
+    const paginate = (newDirection: number) => {
+        setDirection(newDirection);
+        setIdx(i => (i + newDirection + images.length) % images.length);
+    };
+
+    const variants = {
+        enter: (direction: number) => ({
+            x: direction > 0 ? '100%' : '-100%',
+            opacity: 0,
+            scale: 1.1
+        }),
+        center: {
+            zIndex: 1,
+            x: 0,
+            opacity: 1,
+            scale: 1,
+            transition: {
+                x: { type: "spring" as const, stiffness: 300, damping: 30 },
+                opacity: { duration: 0.4 }
+            }
+        },
+        exit: (direction: number) => ({
+            zIndex: 0,
+            x: direction < 0 ? '100%' : '-100%',
+            opacity: 0,
+            scale: 0.9,
+            transition: {
+                x: { type: "spring" as const, stiffness: 300, damping: 30 },
+                opacity: { duration: 0.4 }
+            }
+        })
+    };
+
     return (
-        <div className="relative w-full h-52 overflow-hidden select-none">
-            <AnimatePresence mode="wait">
+        <div
+            className="relative w-full h-56 overflow-hidden select-none"
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+        >
+            <AnimatePresence initial={false} custom={direction}>
                 <motion.div
                     key={idx}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.5 }}
+                    custom={direction}
+                    variants={variants}
+                    initial="enter"
+                    animate="center"
+                    exit="exit"
                     className="absolute inset-0"
                 >
                     <img
@@ -106,25 +154,36 @@ function EventImageCarousel({ images }: { images: string[] }) {
                             }
                         }}
                     />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60" />
                 </motion.div>
             </AnimatePresence>
 
             {/* Prev / Next arrows */}
             {images.length > 1 && (
                 <>
-                    <button onClick={() => setIdx(i => (i - 1 + images.length) % images.length)}
-                        className="absolute left-2 top-1/2 -translate-y-1/2 w-6 h-6 bg-black/50 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-black/70 transition z-10">
-                        <ChevronLeft size={13} />
+                    <button
+                        onClick={(e) => { e.stopPropagation(); paginate(-1); }}
+                        className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/40 backdrop-blur-md rounded-full flex items-center justify-center text-white hover:bg-primary transition-all z-20 shadow-lg border border-white/10 group"
+                    >
+                        <ChevronLeft size={16} className="group-hover:-translate-x-0.5 transition-transform" />
                     </button>
-                    <button onClick={() => setIdx(i => (i + 1) % images.length)}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 bg-black/50 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-black/70 transition z-10">
-                        <ChevronRight size={13} />
+                    <button
+                        onClick={(e) => { e.stopPropagation(); paginate(1); }}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/40 backdrop-blur-md rounded-full flex items-center justify-center text-white hover:bg-primary transition-all z-20 shadow-lg border border-white/10 group"
+                    >
+                        <ChevronRight size={16} className="group-hover:translate-x-0.5 transition-transform" />
                     </button>
                     {/* Dots */}
-                    <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1 z-10">
+                    <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5 z-20">
                         {images.map((_, i) => (
-                            <button key={i} onClick={() => setIdx(i)}
-                                className={`w-1.5 h-1.5 rounded-full transition-all ${i === idx ? "bg-white w-4" : "bg-white/50"}`} />
+                            <button
+                                key={i}
+                                onClick={(e) => { e.stopPropagation(); setDirection(i > idx ? 1 : -1); setIdx(i); }}
+                                className={cn(
+                                    "w-1.5 h-1.5 rounded-full transition-all duration-300",
+                                    i === idx ? "bg-primary w-5 shadow-[0_0_8px_rgba(var(--primary),0.5)]" : "bg-white/40 hover:bg-white/60"
+                                )}
+                            />
                         ))}
                     </div>
                 </>
@@ -283,8 +342,13 @@ export function TodaysMenuAndEvents() {
                                                         />
                                                         : <div className="w-full h-full bg-card flex items-center justify-center"><Utensils size={24} className="text-muted-foreground" /></div>
                                                     }
-                                                    <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-sm px-2 py-0.5 rounded-full text-primary text-[10px] font-bold">
-                                                        ₹{item.price}
+                                                    <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-sm px-2 py-0.5 rounded-full text-primary text-[10px] font-bold border border-white/10">
+                                                        {item.variant_prices && Object.keys(item.variant_prices).length > 0
+                                                            ? `From ₹${Math.min(...Object.values(item.variant_prices as Record<string, number>))}`
+                                                            : item.price_options && Array.isArray(item.price_options) && item.price_options.length > 0
+                                                                ? `From ₹${Math.min(...(item.price_options as number[]))}`
+                                                                : `₹${item.price}`
+                                                        }
                                                     </div>
                                                     <div className="absolute top-2 left-2">
                                                         <div className={`w-2.5 h-2.5 rounded-full border border-white/20 shadow-[0_0_5px] ${item.isVeg ? "bg-green-500 shadow-green-500/40" : "bg-red-500 shadow-red-500/40"}`} />
@@ -386,9 +450,25 @@ export function TodaysMenuAndEvents() {
                                                 <div className="flex flex-col justify-center flex-1 min-w-0">
                                                     <div className="flex items-center justify-between mb-1">
                                                         <h4 className="font-bold text-sm text-foreground truncate">{item.name}</h4>
-                                                        <span className="text-primary font-bold text-sm shrink-0 ml-2">₹{item.price}</span>
+                                                        <span className="text-primary font-bold text-sm shrink-0 ml-2">
+                                                            {item.variant_prices && Object.keys(item.variant_prices).length > 0
+                                                                ? `From ₹${Math.min(...Object.values(item.variant_prices as Record<string, number>))}`
+                                                                : item.price_options && Array.isArray(item.price_options) && item.price_options.length > 0
+                                                                    ? `From ₹${Math.min(...(item.price_options as number[]))}`
+                                                                    : `₹${item.price}`
+                                                            }
+                                                        </span>
                                                     </div>
                                                     <p className="text-[11px] text-muted-foreground line-clamp-2 mb-1.5">{item.description || "Chef's special preparation for today."}</p>
+                                                    {item.variant_prices && Object.keys(item.variant_prices).length > 0 && (
+                                                        <div className="flex flex-wrap gap-1 mb-2">
+                                                            {Object.entries(item.variant_prices as Record<string, number>).map(([k, v]) => (
+                                                                <span key={k} className="text-[9px] bg-accent/40 px-1.5 py-0.5 rounded border border-border/30 text-muted-foreground">
+                                                                    <span className="font-bold text-primary mr-1">{k}:</span>₹{v}
+                                                                </span>
+                                                            ))}
+                                                        </div>
+                                                    )}
                                                     <div className="flex items-center justify-between">
                                                         <div className="flex items-center gap-2">
                                                             <span className="text-[10px] text-muted-foreground bg-muted px-2 py-0.5 rounded-full">{item.category}</span>

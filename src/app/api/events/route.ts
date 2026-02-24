@@ -59,6 +59,24 @@ export async function POST(request: Request) {
             return NextResponse.json({ success: true, event: data });
         }
 
+        if (action === "UPDATE") {
+            const { data, error } = await supabase
+                .from("events")
+                .update({
+                    title: event.title,
+                    description: event.description,
+                    event_date: event.event_date,
+                    poster_url: event.poster_url ?? null,
+                    image_urls: event.image_urls ?? [],
+                    is_active: event.is_active ?? true,
+                })
+                .eq("id", event.id)
+                .select()
+                .single();
+            if (error) throw error;
+            return NextResponse.json({ success: true, event: data });
+        }
+
         return NextResponse.json({ error: "Invalid action" }, { status: 400 });
     } catch (error: any) {
         return NextResponse.json({ error: error.message }, { status: 500 });

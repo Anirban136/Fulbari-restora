@@ -9,6 +9,10 @@ export interface MenuItem {
     image: string;
     isVeg: boolean;
     isBestseller?: boolean;
+    menu_type: "RESTAURANT" | "CAFE";
+    variant_prices?: Record<string, number>;
+    price_options?: number[];
+    available?: boolean;
 }
 
 export const menuItems: MenuItem[] = [
@@ -22,6 +26,7 @@ export const menuItems: MenuItem[] = [
         image: "https://images.unsplash.com/photo-1626776876729-bab4369a5a5a?q=80&w=2074&auto=format&fit=crop",
         isVeg: false,
         isBestseller: true,
+        menu_type: "RESTAURANT",
     },
     {
         id: "b2",
@@ -32,6 +37,7 @@ export const menuItems: MenuItem[] = [
         image: "https://images.unsplash.com/photo-1545247181-516773cae754?q=80&w=2080&auto=format&fit=crop",
         isVeg: false,
         isBestseller: true,
+        menu_type: "RESTAURANT",
     },
     {
         id: "b3",
@@ -41,6 +47,7 @@ export const menuItems: MenuItem[] = [
         category: "Bengali",
         image: "https://images.unsplash.com/photo-1585937421612-70a008356fbe?q=80&w=2036&auto=format&fit=crop",
         isVeg: true,
+        menu_type: "RESTAURANT",
     },
 
     // Indian
@@ -53,6 +60,7 @@ export const menuItems: MenuItem[] = [
         image: "https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?q=80&w=2070&auto=format&fit=crop",
         isVeg: false,
         isBestseller: true,
+        menu_type: "RESTAURANT",
     },
     {
         id: "i2",
@@ -62,6 +70,7 @@ export const menuItems: MenuItem[] = [
         category: "Indian",
         image: "https://images.unsplash.com/photo-1631452180519-c014fe946bc7?q=80&w=1974&auto=format&fit=crop",
         isVeg: true,
+        menu_type: "RESTAURANT",
     },
     {
         id: "i3",
@@ -71,6 +80,7 @@ export const menuItems: MenuItem[] = [
         category: "Indian",
         image: "https://images.unsplash.com/photo-1546833999-b9f58160280b?q=80&w=2072&auto=format&fit=crop",
         isVeg: true,
+        menu_type: "RESTAURANT",
     },
 
     // Chinese
@@ -82,6 +92,7 @@ export const menuItems: MenuItem[] = [
         category: "Chinese",
         image: "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?q=80&w=2080&auto=format&fit=crop",
         isVeg: false,
+        menu_type: "RESTAURANT",
     },
     {
         id: "c2",
@@ -92,6 +103,7 @@ export const menuItems: MenuItem[] = [
         image: "https://images.unsplash.com/photo-1525755662778-989d966695cc?q=80&w=1974&auto=format&fit=crop",
         isVeg: false,
         isBestseller: true,
+        menu_type: "RESTAURANT",
     },
 
     // Starters
@@ -103,6 +115,7 @@ export const menuItems: MenuItem[] = [
         category: "Starters",
         image: "https://images.unsplash.com/photo-1604135307399-86c6ce0aba8e?q=80&w=1974&auto=format&fit=crop",
         isVeg: false,
+        menu_type: "RESTAURANT",
     },
     {
         id: "s2",
@@ -112,6 +125,7 @@ export const menuItems: MenuItem[] = [
         category: "Starters",
         image: "https://images.unsplash.com/photo-1606923829579-0cb981a83e2e?q=80&w=2070&auto=format&fit=crop",
         isVeg: true,
+        menu_type: "RESTAURANT",
     },
 
     // Drinks
@@ -123,6 +137,7 @@ export const menuItems: MenuItem[] = [
         category: "Drinks",
         image: "https://images.unsplash.com/photo-1551538827-9c037cb4f32a?q=80&w=1965&auto=format&fit=crop",
         isVeg: true,
+        menu_type: "RESTAURANT",
     },
     {
         id: "d2",
@@ -132,6 +147,7 @@ export const menuItems: MenuItem[] = [
         category: "Drinks",
         image: "https://images.unsplash.com/photo-1581006852262-e4307cf6283a?q=80&w=1974&auto=format&fit=crop",
         isVeg: true,
+        menu_type: "RESTAURANT",
     },
 
     // Desserts
@@ -143,6 +159,7 @@ export const menuItems: MenuItem[] = [
         category: "Desserts",
         image: "https://images.unsplash.com/photo-1601050690597-df0568f70950?q=80&w=2070&auto=format&fit=crop",
         isVeg: true,
+        menu_type: "RESTAURANT",
     },
     {
         id: "de2",
@@ -153,5 +170,6 @@ export const menuItems: MenuItem[] = [
         image: "https://images.unsplash.com/photo-1488477181946-6428a0291777?q=80&w=1974&auto=format&fit=crop",
         isVeg: true,
         isBestseller: true,
+        menu_type: "RESTAURANT",
     },
 ];

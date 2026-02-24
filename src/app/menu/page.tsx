@@ -8,10 +8,12 @@ import { Button } from "@/components/ui/button";
 import { Category } from "@/data/menu";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, Leaf, Utensils, Loader2, ArrowLeft } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export default function MenuPage() {
     const [menuItems, setMenuItems] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [activeMenuTab, setActiveMenuTab] = useState<"RESTAURANT" | "CAFE">("RESTAURANT");
     const [activeCategory, setActiveCategory] = useState("All");
     const [searchQuery, setSearchQuery] = useState("");
 
@@ -28,11 +30,19 @@ export default function MenuPage() {
             });
     }, []);
 
-    // Derive categories dynamically from data
-    const categories = ["All", ...Array.from(new Set(menuItems.map(item => item.category)))];
+    // Derive categories dynamically from data based on active menu tab
+    const filteredByMenuType = menuItems.filter(item => (item.menu_type || "RESTAURANT") === activeMenuTab);
+    const categories = ["All", ...Array.from(new Set(filteredByMenuType.map(item => item.category)))];
+
+    // Reset sub-category if it doesn't exist in the new menu type
+    useEffect(() => {
+        if (activeCategory !== "All" && !categories.includes(activeCategory)) {
+            setActiveCategory("All");
+        }
+    }, [activeMenuTab, categories, activeCategory]);
 
     // Filter logic - Only show available items
-    const filteredItems = menuItems.filter((item) => {
+    const filteredItems = filteredByMenuType.filter((item) => {
         const isAvailable = item.available !== false;
         const matchesCategory = activeCategory === "All" || item.category === activeCategory;
         const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -45,11 +55,14 @@ export default function MenuPage() {
             <Navbar />
 
             {/* Menu Header */}
-            <section className="pt-24 md:pt-32 pb-12 md:pb-16 px-4 text-center relative overflow-hidden">
+            <section className="pt-24 md:pt-32 pb-8 md:pb-12 px-4 text-center relative overflow-hidden">
                 <div className="absolute inset-0">
                     <img
-                        src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1?q=80&w=2074&auto=format&fit=crop"
-                        alt="Delicious food spread"
+                        src={activeMenuTab === "RESTAURANT"
+                            ? "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?q=80&w=2074&auto=format&fit=crop"
+                            : "https://images.unsplash.com/photo-1554118811-1e0d58224f24?q=80&w=2047&auto=format&fit=crop"
+                        }
+                        alt="Menu background"
                         className="w-full h-full object-cover opacity-15"
                     />
                     <div className="absolute inset-0 bg-gradient-to-b from-background/30 to-background" />
@@ -63,36 +76,60 @@ export default function MenuPage() {
                         <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
                         <span className="text-sm font-medium">Back to Home</span>
                     </Link>
-                    <h1 className="text-2xl md:text-5xl font-bold font-heading mb-3 text-foreground">Our Menu</h1>
-                    <p className="text-muted-foreground text-sm md:text-base max-w-2xl mx-auto">
-                        Discover a symphony of flavors prepared with love and tradition.
-                        From spicy Bengali curries to comforting Chinese bowls.
+                    <h1 className="text-3xl md:text-5xl font-bold font-heading mb-3 text-foreground tracking-tight">
+                        Fulbari <span className="text-primary">{activeMenuTab === "RESTAURANT" ? "Restaurant" : "Cafe"}</span> Menu
+                    </h1>
+                    <p className="text-muted-foreground text-sm md:text-base max-w-2xl mx-auto uppercase tracking-widest font-bold opacity-80">
+                        {activeMenuTab === "RESTAURANT"
+                            ? "Traditional Flavors & Fine Dining"
+                            : "Quick Bites, Beverages & Comfort Food"
+                        }
                     </p>
                 </motion.div>
             </section>
 
-            {/* Our Mission Block */}
-            <div className="container mx-auto px-4 -mt-8 mb-12 relative z-20">
+            {/* Menu Tab Switcher */}
+            <div className="container mx-auto px-4 mb-4 relative z-20">
+                <div className="flex bg-card p-1.5 rounded-2xl border border-border w-full max-w-md mx-auto shadow-xl">
+                    <button
+                        onClick={() => setActiveMenuTab("RESTAURANT")}
+                        className={cn(
+                            "flex-1 py-3 rounded-xl text-sm font-bold transition-all duration-300",
+                            activeMenuTab === "RESTAURANT"
+                                ? "bg-primary text-primary-foreground shadow-lg scale-[1.02]"
+                                : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+                        )}
+                    >
+                        Restaurant Menu
+                    </button>
+                    <button
+                        onClick={() => setActiveMenuTab("CAFE")}
+                        className={cn(
+                            "flex-1 py-3 rounded-xl text-sm font-bold transition-all duration-300",
+                            activeMenuTab === "CAFE"
+                                ? "bg-primary text-primary-foreground shadow-lg scale-[1.02]"
+                                : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+                        )}
+                    >
+                        Cafe Menu
+                    </button>
+                </div>
+            </div>
+
+            {/* Our Mission Block - Optional hidden on mobile to save space if needed, but keeping for now */}
+            <div className="container mx-auto px-4 mb-8 relative z-20">
                 <motion.div
-                    initial={{ opacity: 0, scale: 0.95 }}
+                    initial={{ opacity: 0, scale: 0.98 }}
                     whileInView={{ opacity: 1, scale: 1 }}
                     viewport={{ once: true }}
-                    className="p-8 md:p-12 rounded-3xl bg-primary/5 border border-primary/20 text-center relative overflow-hidden backdrop-blur-sm"
+                    className="py-6 px-8 rounded-3xl bg-primary/5 border border-primary/20 text-center relative overflow-hidden backdrop-blur-sm"
                 >
-                    <div className="absolute top-0 right-0 p-4 opacity-10">
-                        <Utensils size={120} className="text-primary" />
-                    </div>
-                    <h3 className="text-xl md:text-2xl font-bold font-heading mb-6 text-primary flex items-center justify-center gap-3">
-                        <span className="w-8 h-[1px] bg-primary/30"></span>
-                        <span className="font-bengali-logo">আমাদের লক্ষ্য (Our Mission)</span>
-                        <span className="w-8 h-[1px] bg-primary/30"></span>
-                    </h3>
-                    <p className="text-base md:text-xl font-bengali font-bold italic text-foreground max-w-4xl mx-auto leading-relaxed md:leading-loose px-4">
-                        "ফুলবাড়ি রেস্তোরাঁতে আমরা কেবল খাবার পরিবেশন করি না, আমরা স্মৃতি তৈরি করি। আমাদের আন্তরিক আতিথেয়তা এবং মানসম্পন্ন খাবার আপনাকে বারবার ফিরে আসতে বাধ্য করবে।"
+                    <p className="text-sm md:text-lg font-bengali font-bold italic text-foreground max-w-4xl mx-auto leading-relaxed">
+                        {activeMenuTab === "RESTAURANT"
+                            ? "\"ফুলবাড়ি রেস্তোরাঁতে আমরা কেবল খাবার পরিবেশন করি না, আমরা স্মৃতি তৈরি করি।\""
+                            : "\"ফুলবাড়ি ক্যাফেতে প্রতিটি চুমুক এবং প্রতিটি কামড় আপনাকে তরতাজা করে তুলবে।\""
+                        }
                     </p>
-                    <div className="mt-8 flex justify-center">
-                        <div className="w-12 h-1 bg-primary/20 rounded-full"></div>
-                    </div>
                 </motion.div>
             </div>
 
@@ -148,7 +185,7 @@ export default function MenuPage() {
                         layout
                         className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
                     >
-                        <AnimatePresence>
+                        <AnimatePresence mode="popLayout">
                             {filteredItems.map((item) => (
                                 <motion.div
                                     key={item.id}
@@ -168,19 +205,22 @@ export default function MenuPage() {
                                             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                                         />
                                         {item.isBestseller && (
-                                            <div className="absolute top-2 left-2 bg-yellow-500 text-black text-xs font-bold px-2 py-1 rounded-sm shadow-md">
+                                            <div className="absolute top-2 left-2 bg-yellow-500 text-black text-[10px] uppercase font-black px-2 py-1 rounded-sm shadow-md tracking-widest">
                                                 Bestseller
                                             </div>
                                         )}
-                                        <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-sm text-white text-sm font-bold px-3 py-1 rounded-full">
-                                            ₹{item.price}
-                                        </div>
+                                        {/* Simple Price Tag (if no variants) */}
+                                        {!item.variant_prices && (
+                                            <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-sm text-white text-sm font-bold px-3 py-1 rounded-full border border-white/20">
+                                                ₹{item.price}
+                                            </div>
+                                        )}
                                     </div>
 
                                     {/* Content */}
                                     <div className="p-4 flex-grow flex flex-col">
                                         <div className="flex justify-between items-start mb-2">
-                                            <h3 className="font-heading font-bold text-lg text-foreground group-hover:text-primary transition-colors">
+                                            <h3 className="font-heading font-bold text-lg text-foreground group-hover:text-primary transition-colors pr-2">
                                                 {item.name}
                                             </h3>
                                             {item.isVeg ? (
@@ -193,9 +233,41 @@ export default function MenuPage() {
                                                 </div>
                                             )}
                                         </div>
-                                        <p className="text-muted-foreground text-sm line-clamp-3 flex-grow">
+                                        <p className="text-muted-foreground text-xs leading-relaxed line-clamp-2 mb-4">
                                             {item.description}
                                         </p>
+
+                                        {/* Complex Pricing Display */}
+                                        <div className="mt-auto pt-4 border-t border-border/40">
+                                            {item.variant_prices && Object.keys(item.variant_prices).length > 0 ? (
+                                                <div className="space-y-2">
+                                                    <div className="flex flex-wrap gap-2">
+                                                        {Object.entries(item.variant_prices as Record<string, number>).map(([key, value]) => (
+                                                            <div key={key} className="flex flex-col bg-accent/30 px-3 py-1.5 rounded-lg border border-border/50">
+                                                                <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-tighter">{key}</span>
+                                                                <span className="text-sm font-black text-foreground">₹{value}</span>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            ) : item.price_options && Array.isArray(item.price_options) && item.price_options.length > 0 ? (
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-tighter">Options:</span>
+                                                    <div className="flex gap-2">
+                                                        {item.price_options.map((p: number, idx: number) => (
+                                                            <span key={idx} className="text-sm font-black text-foreground">
+                                                                ₹{p}{idx < (item.price_options as number[]).length - 1 ? " |" : ""}
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <div className="flex items-center justify-between group-hover:bg-primary/5 transition-colors p-1 rounded-lg">
+                                                    <span className="text-xs font-medium text-muted-foreground uppercase tracking-widest">Price</span>
+                                                    <span className="text-xl font-black text-primary">₹{item.price}</span>
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
                                 </motion.div>
                             ))}
