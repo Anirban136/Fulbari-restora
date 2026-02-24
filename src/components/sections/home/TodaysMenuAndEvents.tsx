@@ -142,17 +142,11 @@ function EventImageCarousel({ images }: { images: string[] }) {
                     exit="exit"
                     className="absolute inset-0"
                 >
-                    <img
+                    <Image
                         src={sanitizeImageUrl(images[idx])}
                         alt={`Event image ${idx + 1}`}
-                        referrerPolicy="no-referrer"
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                            const target = e.target as HTMLImageElement;
-                            if (!target.src.includes('placeholder')) {
-                                target.src = "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=800&auto=format&fit=crop";
-                            }
-                        }}
+                        fill
+                        className="object-cover"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60" />
                 </motion.div>
@@ -192,67 +186,68 @@ function EventImageCarousel({ images }: { images: string[] }) {
     );
 }
 
-// Infinite scrolling marquee for event photos
-function EventPhotoMarquee({ images }: { images: string[] }) {
+// Modern, high-performance gallery with snap-scrolling (mobile) and Bento Grid (desktop)
+function ModernEventGallery({ images }: { images: string[] }) {
     if (images.length === 0) return null;
 
-    // Duplicate images to create a seamless loop
-    // If we have very few images, triple or quadruple them to fill the screen width
-    const displayImages = images.length < 10 ? [...images, ...images, ...images, ...images] : [...images, ...images];
-
     return (
-        <div className="relative w-screen left-1/2 right-1/2 -ml-[50vw] mr-[50vw] overflow-hidden py-4 md:py-6 bg-primary/5 select-none">
-            {/* Top row - scrolls left */}
-            <div className="flex gap-4 mb-4">
-                <motion.div
-                    animate={{ x: ["0%", "-50%"] }}
-                    transition={{
-                        duration: 40,
-                        repeat: Infinity,
-                        ease: "linear"
-                    }}
-                    className="flex gap-4 min-w-max px-2"
-                >
-                    {displayImages.map((img, i) => (
-                        <div key={`row1-${i}`} className="relative w-72 md:w-80 h-48 md:h-52 rounded-2xl overflow-hidden shadow-2xl border border-white/10 group">
-                            <img
+        <div className="relative w-full overflow-hidden">
+            {/* Mobile/Tablet: Native Snap Slider (Fast & Lean) */}
+            <div className="md:hidden flex gap-4 overflow-x-auto snap-x snap-mandatory px-4 pb-8 no-scrollbar">
+                {images.map((img, i) => (
+                    <div
+                        key={`snap-${i}`}
+                        className="flex-none w-[75vw] aspect-[4/5] snap-center snap-always"
+                    >
+                        <div className="relative w-full h-full rounded-2xl overflow-hidden shadow-xl border border-border/50">
+                            <Image
                                 src={sanitizeImageUrl(img)}
                                 alt=""
-                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                                fill
+                                sizes="75vw"
+                                className="object-cover"
+                                priority={i < 2}
                             />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
                         </div>
-                    ))}
-                </motion.div>
+                    </div>
+                ))}
             </div>
 
-            {/* Bottom row - scrolls right (offset and reverse) */}
-            <div className="flex gap-4">
-                <motion.div
-                    animate={{ x: ["-50%", "0%"] }}
-                    transition={{
-                        duration: 45,
-                        repeat: Infinity,
-                        ease: "linear"
-                    }}
-                    className="flex gap-4 min-w-max px-2"
-                >
-                    {displayImages.map((img, i) => (
-                        <div key={`row2-${i}`} className="relative w-72 md:w-80 h-48 md:h-52 rounded-2xl overflow-hidden shadow-2xl border border-white/10 group">
-                            <img
-                                src={sanitizeImageUrl(img)}
-                                alt=""
-                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                            />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-                        </div>
-                    ))}
-                </motion.div>
+            {/* Desktop: Premium Bento-style Grid (Aesthetic) */}
+            <div className="hidden md:grid grid-cols-4 grid-rows-2 gap-4 h-[500px] px-8 lg:px-12">
+                {images.slice(0, 5).map((img, i) => (
+                    <motion.div
+                        key={`bento-${i}`}
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        whileInView={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: i * 0.1, duration: 0.5 }}
+                        viewport={{ once: true }}
+                        className={cn(
+                            "relative rounded-3xl overflow-hidden shadow-2xl border border-white/10 group cursor-pointer",
+                            i === 0 ? "col-span-2 row-span-2" :
+                                i === 1 ? "col-span-1 row-span-1" :
+                                    i === 2 ? "col-span-1 row-span-2" :
+                                        "col-span-1 row-span-1"
+                        )}
+                    >
+                        <Image
+                            src={sanitizeImageUrl(img)}
+                            alt=""
+                            fill
+                            sizes={i === 0 ? "50vw" : "25vw"}
+                            className="object-cover group-hover:scale-110 transition-transform duration-700"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity" />
+
+                        {/* Hover accent */}
+                        <div className="absolute inset-0 ring-1 ring-inset ring-white/20 group-hover:ring-primary/40 transition-all rounded-3xl" />
+                    </motion.div>
+                ))}
             </div>
 
-            {/* Glassmorphism edges */}
-            <div className="absolute inset-y-0 left-0 w-20 md:w-60 bg-gradient-to-r from-background to-transparent z-10" />
-            <div className="absolute inset-y-0 right-0 w-20 md:w-60 bg-gradient-to-l from-background to-transparent z-10" />
+            {/* Background elements to add depth */}
+            <div className="absolute -z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-full bg-primary/2 opacity-20 blur-3xl pointer-events-none" />
         </div>
     );
 }
@@ -345,7 +340,7 @@ export function TodaysMenuAndEvents() {
                                             <h3 className="text-xl md:text-2xl font-bold font-heading">Event Gallery</h3>
                                             <div className="w-12 h-0.5 bg-primary mx-auto mt-2 rounded-full" />
                                         </div>
-                                        <EventPhotoMarquee images={
+                                        <ModernEventGallery images={
                                             events.flatMap(ev =>
                                                 (ev.image_urls && ev.image_urls.length > 0)
                                                     ? ev.image_urls
@@ -379,18 +374,11 @@ export function TodaysMenuAndEvents() {
                                             >
                                                 <div className="relative h-28 md:h-36 lg:h-40 overflow-hidden">
                                                     {item.image
-                                                        ? <img
+                                                        ? <Image
                                                             src={sanitizeImageUrl(item.image)}
                                                             alt={item.name}
-                                                            referrerPolicy="no-referrer"
-                                                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                                                            onError={(e) => {
-                                                                // fallback if image still fails
-                                                                const target = e.target as HTMLImageElement;
-                                                                if (!target.src.includes('placeholder')) {
-                                                                    target.src = "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=800&auto=format&fit=crop";
-                                                                }
-                                                            }}
+                                                            fill
+                                                            className="object-cover group-hover:scale-110 transition-transform duration-500"
                                                         />
                                                         : <div className="w-full h-full bg-card flex items-center justify-center"><Utensils size={24} className="text-muted-foreground" /></div>
                                                     }
@@ -484,17 +472,11 @@ export function TodaysMenuAndEvents() {
                                             >
                                                 <div className="relative w-24 h-24 rounded-lg overflow-hidden shrink-0 shadow-lg">
                                                     {item.image
-                                                        ? <img
+                                                        ? <Image
                                                             src={sanitizeImageUrl(item.image)}
                                                             alt={item.name}
-                                                            referrerPolicy="no-referrer"
-                                                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                                                            onError={(e) => {
-                                                                const target = e.target as HTMLImageElement;
-                                                                if (!target.src.includes('placeholder')) {
-                                                                    target.src = "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=800&auto=format&fit=crop";
-                                                                }
-                                                            }}
+                                                            fill
+                                                            className="object-cover group-hover:scale-110 transition-transform duration-500"
                                                         />
                                                         : <div className="w-full h-full bg-muted flex items-center justify-center"><Utensils size={24} className="text-muted-foreground" /></div>
                                                     }
