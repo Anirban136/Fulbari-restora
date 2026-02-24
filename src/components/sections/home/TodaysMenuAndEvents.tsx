@@ -187,13 +187,55 @@ function EventImageCarousel({ images }: { images: string[] }) {
 }
 
 // Modern, high-performance gallery with snap-scrolling (mobile) and Bento Grid (desktop)
+// Modern, high-performance gallery with auto-scrolling (mobile) and dynamic Bento Grid (desktop)
 function ModernEventGallery({ images }: { images: string[] }) {
+    const mobileScrollRef = useRef<HTMLDivElement>(null);
+    const [bentoOffset, setBentoOffset] = useState(0);
+
+    // Mobile Auto-scroll logic
+    useEffect(() => {
+        const el = mobileScrollRef.current;
+        if (!el || images.length <= 1) return;
+
+        const interval = setInterval(() => {
+            if (!el) return;
+            const scrollWidth = el.scrollWidth;
+            const clientWidth = el.clientWidth;
+            const currentScroll = el.scrollLeft;
+
+            // If we're at the end, jump back to start, else scroll one "page"
+            if (currentScroll + clientWidth >= scrollWidth - 10) {
+                el.scrollTo({ left: 0, behavior: 'smooth' });
+            } else {
+                el.scrollBy({ left: clientWidth * 0.8, behavior: 'smooth' });
+            }
+        }, 4000);
+
+        return () => clearInterval(interval);
+    }, [images.length]);
+
+    // Bento Grid dynamic cycling (every 6 seconds change the offset if many images)
+    useEffect(() => {
+        if (images.length <= 5) return;
+        const interval = setInterval(() => {
+            setBentoOffset(prev => (prev + 1) % (images.length - 4));
+        }, 6000);
+        return () => clearInterval(interval);
+    }, [images.length]);
+
     if (images.length === 0) return null;
+
+    const bentoImages = images.length > 5
+        ? images.slice(bentoOffset, bentoOffset + 5)
+        : images;
 
     return (
         <div className="relative w-full overflow-hidden">
-            {/* Mobile/Tablet: Native Snap Slider (Fast & Lean) */}
-            <div className="md:hidden flex gap-4 overflow-x-auto snap-x snap-mandatory px-4 pb-8 no-scrollbar">
+            {/* Mobile/Tablet: Native Snap Slider with JS Auto-scroll (Fast & Dynamic) */}
+            <div
+                ref={mobileScrollRef}
+                className="md:hidden flex gap-4 overflow-x-auto snap-x snap-mandatory px-4 pb-8 no-scrollbar scroll-smooth"
+            >
                 {images.map((img, i) => (
                     <div
                         key={`snap-${i}`}
@@ -214,36 +256,42 @@ function ModernEventGallery({ images }: { images: string[] }) {
                 ))}
             </div>
 
-            {/* Desktop: Premium Bento-style Grid (Aesthetic) */}
+            {/* Desktop: Premium Bento-style Grid with subtle cycling */}
             <div className="hidden md:grid grid-cols-4 grid-rows-2 gap-4 h-[500px] px-8 lg:px-12">
-                {images.slice(0, 5).map((img, i) => (
-                    <motion.div
-                        key={`bento-${i}`}
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        whileInView={{ opacity: 1, scale: 1 }}
-                        transition={{ delay: i * 0.1, duration: 0.5 }}
-                        viewport={{ once: true }}
-                        className={cn(
-                            "relative rounded-3xl overflow-hidden shadow-2xl border border-white/10 group cursor-pointer",
-                            i === 0 ? "col-span-2 row-span-2" :
-                                i === 1 ? "col-span-1 row-span-1" :
-                                    i === 2 ? "col-span-1 row-span-2" :
-                                        "col-span-1 row-span-1"
-                        )}
-                    >
-                        <Image
-                            src={sanitizeImageUrl(img)}
-                            alt=""
-                            fill
-                            sizes={i === 0 ? "50vw" : "25vw"}
-                            className="object-cover group-hover:scale-110 transition-transform duration-700"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity" />
-
-                        {/* Hover accent */}
-                        <div className="absolute inset-0 ring-1 ring-inset ring-white/20 group-hover:ring-primary/40 transition-all rounded-3xl" />
-                    </motion.div>
-                ))}
+                <AnimatePresence mode="popLayout">
+                    {bentoImages.slice(0, 5).map((img, i) => (
+                        <motion.div
+                            key={`bento-${img}-${i}`}
+                            layout
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.95 }}
+                            transition={{
+                                type: "spring",
+                                stiffness: 200,
+                                damping: 25,
+                                opacity: { duration: 0.4 }
+                            }}
+                            className={cn(
+                                "relative rounded-3xl overflow-hidden shadow-2xl border border-white/10 group cursor-pointer",
+                                i === 0 ? "col-span-2 row-span-2" :
+                                    i === 1 ? "col-span-1 row-span-1" :
+                                        i === 2 ? "col-span-1 row-span-2" :
+                                            "col-span-1 row-span-1"
+                            )}
+                        >
+                            <Image
+                                src={sanitizeImageUrl(img)}
+                                alt=""
+                                fill
+                                sizes={i === 0 ? "50vw" : "25vw"}
+                                className="object-cover group-hover:scale-110 transition-transform duration-700"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity" />
+                            <div className="absolute inset-0 ring-1 ring-inset ring-white/20 group-hover:ring-primary/40 transition-all rounded-3xl" />
+                        </motion.div>
+                    ))}
+                </AnimatePresence>
             </div>
 
             {/* Background elements to add depth */}
