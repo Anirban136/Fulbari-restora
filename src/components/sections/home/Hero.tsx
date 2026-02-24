@@ -119,14 +119,28 @@ export function Hero() {
                     <p className="text-muted-foreground text-xs sm:text-sm mb-5 font-light max-w-md">
                         A perfect blend of traditional Bengali cuisine and modern dining in the heart of Serampore.
                     </p>
-                    <div className="flex gap-3">
+                    <div className="flex flex-col gap-3">
                         <Link href="/menu">
-                            <Button size="sm">View Menu</Button>
+                            <Button size="lg" className="w-full text-sm font-bold shadow-xl shadow-primary/20">
+                                View Menu
+                            </Button>
                         </Link>
-                        <Link href="/contact">
-                            <Button size="sm" variant="outline">Book a Table</Button>
+                        <Link href="/contact" className="text-center group">
+                            <span className="text-muted-foreground group-hover:text-primary text-xs font-semibold py-2 transition-colors flex items-center justify-center gap-1">
+                                Or Book a Table <span className="text-primary group-hover:translate-x-1 transition-transform">→</span>
+                            </span>
                         </Link>
                     </div>
+
+                    {/* Scroll hint */}
+                    <motion.div
+                        animate={{ y: [0, 8, 0] }}
+                        transition={{ duration: 2, repeat: Infinity }}
+                        className="mt-8 flex flex-col items-center gap-2 opacity-50"
+                    >
+                        <span className="text-[10px] uppercase tracking-widest font-bold">What&apos;s on today</span>
+                        <div className="w-px h-10 bg-gradient-to-b from-primary to-transparent" />
+                    </motion.div>
                 </motion.div>
             </div>
         </section>

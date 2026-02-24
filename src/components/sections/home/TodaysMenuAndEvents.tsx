@@ -245,15 +245,13 @@ export function TodaysMenuAndEvents() {
                                                         ? <Image src={item.image} alt={item.name} fill className="object-cover" />
                                                         : <div className="w-full h-full bg-card flex items-center justify-center"><Utensils size={20} className="text-muted-foreground" /></div>
                                                     }
-                                                    <div className="absolute top-2 left-2">
-                                                        <div className={`w-4 h-4 rounded border-2 flex items-center justify-center ${item.isVeg ? "border-green-500 bg-green-500/10" : "border-red-500 bg-red-500/10"}`}>
-                                                            <div className={`w-1.5 h-1.5 rounded-full ${item.isVeg ? "bg-green-500" : "bg-red-500"}`} />
-                                                        </div>
-                                                    </div>
                                                 </div>
-                                                <div className="p-2.5">
-                                                    <p className="font-bold text-xs text-foreground leading-tight line-clamp-1">{item.name}</p>
-                                                    <p className="text-primary font-extrabold text-xs mt-0.5">₹{item.price}</p>
+                                                <div className="p-3 bg-gradient-to-b from-card/80 to-card">
+                                                    <div className="flex items-center justify-between gap-2 mb-1">
+                                                        <div className={`w-3 h-3 rounded-full border border-white/20 shadow-[0_0_8px] ${item.isVeg ? "bg-green-500 shadow-green-500/40" : "bg-red-500 shadow-red-500/40"}`} />
+                                                        <p className="text-primary font-black text-xs">₹{item.price}</p>
+                                                    </div>
+                                                    <p className="font-bold text-sm text-foreground leading-tight line-clamp-1 group-hover:text-primary transition-colors">{item.name}</p>
                                                 </div>
                                             </motion.div>
                                         ))}
