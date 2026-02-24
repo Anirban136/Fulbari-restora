@@ -214,7 +214,7 @@ function EventPhotoMarquee({ images }: { images: string[] }) {
                     className="flex gap-4 min-w-max px-2"
                 >
                     {displayImages.map((img, i) => (
-                        <div key={`row1-${i}`} className="relative w-48 md:w-80 h-32 md:h-52 rounded-2xl overflow-hidden shadow-2xl border border-white/10 group">
+                        <div key={`row1-${i}`} className="relative w-72 md:w-80 h-48 md:h-52 rounded-2xl overflow-hidden shadow-2xl border border-white/10 group">
                             <img
                                 src={sanitizeImageUrl(img)}
                                 alt=""
@@ -238,7 +238,7 @@ function EventPhotoMarquee({ images }: { images: string[] }) {
                     className="flex gap-4 min-w-max px-2"
                 >
                     {displayImages.map((img, i) => (
-                        <div key={`row2-${i}`} className="relative w-48 md:w-80 h-32 md:h-52 rounded-2xl overflow-hidden shadow-2xl border border-white/10 group">
+                        <div key={`row2-${i}`} className="relative w-72 md:w-80 h-48 md:h-52 rounded-2xl overflow-hidden shadow-2xl border border-white/10 group">
                             <img
                                 src={sanitizeImageUrl(img)}
                                 alt=""
