@@ -192,6 +192,71 @@ function EventImageCarousel({ images }: { images: string[] }) {
     );
 }
 
+// Infinite scrolling marquee for event photos
+function EventPhotoMarquee({ images }: { images: string[] }) {
+    if (images.length === 0) return null;
+
+    // Duplicate images to create a seamless loop
+    // If we have very few images, triple or quadruple them to fill the screen width
+    const displayImages = images.length < 10 ? [...images, ...images, ...images, ...images] : [...images, ...images];
+
+    return (
+        <div className="relative w-screen left-1/2 right-1/2 -ml-[50vw] mr-[50vw] overflow-hidden py-6 md:py-10 bg-primary/5 select-none">
+            {/* Top row - scrolls left */}
+            <div className="flex gap-4 mb-4">
+                <motion.div
+                    animate={{ x: ["0%", "-50%"] }}
+                    transition={{
+                        duration: 40,
+                        repeat: Infinity,
+                        ease: "linear"
+                    }}
+                    className="flex gap-4 min-w-max px-2"
+                >
+                    {displayImages.map((img, i) => (
+                        <div key={`row1-${i}`} className="relative w-48 md:w-80 h-32 md:h-52 rounded-2xl overflow-hidden shadow-2xl border border-white/10 group">
+                            <img
+                                src={sanitizeImageUrl(img)}
+                                alt=""
+                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                        </div>
+                    ))}
+                </motion.div>
+            </div>
+
+            {/* Bottom row - scrolls right (offset and reverse) */}
+            <div className="flex gap-4">
+                <motion.div
+                    animate={{ x: ["-50%", "0%"] }}
+                    transition={{
+                        duration: 45,
+                        repeat: Infinity,
+                        ease: "linear"
+                    }}
+                    className="flex gap-4 min-w-max px-2"
+                >
+                    {displayImages.map((img, i) => (
+                        <div key={`row2-${i}`} className="relative w-48 md:w-80 h-32 md:h-52 rounded-2xl overflow-hidden shadow-2xl border border-white/10 group">
+                            <img
+                                src={sanitizeImageUrl(img)}
+                                alt=""
+                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                        </div>
+                    ))}
+                </motion.div>
+            </div>
+
+            {/* Glassmorphism edges */}
+            <div className="absolute inset-y-0 left-0 w-20 md:w-60 bg-gradient-to-r from-background to-transparent z-10" />
+            <div className="absolute inset-y-0 right-0 w-20 md:w-60 bg-gradient-to-l from-background to-transparent z-10" />
+        </div>
+    );
+}
+
 export function TodaysMenuAndEvents() {
     const [activeTab, setActiveTab] = useState<"events" | "menu">("menu");
     const [specials, setSpecials] = useState<MenuItem[]>([]);
@@ -273,35 +338,52 @@ export function TodaysMenuAndEvents() {
                             ) : events.length === 0 ? (
                                 <EmptyState icon={<CalendarDays size={26} />} text="No upcoming events right now. Follow us for announcements!" />
                             ) : (
-                                <motion.div variants={tabVariants} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                                    {events.map(event => {
-                                        // Build image list: prefer image_urls array, fallback to poster_url
-                                        const imgs: string[] = (event.image_urls && event.image_urls.length > 0)
-                                            ? event.image_urls
-                                            : event.poster_url ? [event.poster_url] : [];
+                                <>
+                                    {/* Infinite Marquee - Hero Visual */}
+                                    <div className="mb-12 md:mb-16">
+                                        <div className="text-center mb-6">
+                                            <h3 className="text-xl md:text-2xl font-bold font-heading">Event Gallery</h3>
+                                            <div className="w-12 h-0.5 bg-primary mx-auto mt-2 rounded-full" />
+                                        </div>
+                                        <EventPhotoMarquee images={
+                                            events.flatMap(ev =>
+                                                (ev.image_urls && ev.image_urls.length > 0)
+                                                    ? ev.image_urls
+                                                    : ev.poster_url ? [ev.poster_url] : []
+                                            ).filter((v, i, a) => a.indexOf(v) === i) // unique
+                                        } />
+                                    </div>
 
-                                        return (
-                                            <motion.div
-                                                key={event.id}
-                                                variants={cardVariants}
-                                                whileHover={{ y: -5 }}
-                                                className="group bg-card/60 rounded-2xl overflow-hidden border border-border/50 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/10 transition-all duration-300"
-                                            >
-                                                <EventImageCarousel images={imgs} />
-                                                {/* Date chip */}
-                                                <div className="px-5 pt-4 pb-5">
-                                                    <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-primary/10 text-primary text-[11px] font-bold rounded-full mb-3">
-                                                        <CalendarDays size={11} /> {formatEventDate(event.event_date)}
-                                                    </span>
-                                                    <h3 className="font-bold text-foreground text-base leading-snug mb-1">{event.title}</h3>
-                                                    {event.description && (
-                                                        <p className="text-muted-foreground text-sm line-clamp-2 leading-relaxed">{event.description}</p>
-                                                    )}
-                                                </div>
-                                            </motion.div>
-                                        );
-                                    })}
-                                </motion.div>
+                                    <motion.div variants={tabVariants} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                                        {events.map(event => {
+                                            // Build image list: prefer image_urls array, fallback to poster_url
+                                            const imgs: string[] = (event.image_urls && event.image_urls.length > 0)
+                                                ? event.image_urls
+                                                : event.poster_url ? [event.poster_url] : [];
+
+                                            return (
+                                                <motion.div
+                                                    key={event.id}
+                                                    variants={cardVariants}
+                                                    whileHover={{ y: -5 }}
+                                                    className="group bg-card/60 rounded-2xl overflow-hidden border border-border/50 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/10 transition-all duration-300"
+                                                >
+                                                    <EventImageCarousel images={imgs} />
+                                                    {/* Date chip */}
+                                                    <div className="px-5 pt-4 pb-5">
+                                                        <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-primary/10 text-primary text-[11px] font-bold rounded-full mb-3">
+                                                            <CalendarDays size={11} /> {formatEventDate(event.event_date)}
+                                                        </span>
+                                                        <h3 className="font-bold text-foreground text-base leading-snug mb-1">{event.title}</h3>
+                                                        {event.description && (
+                                                            <p className="text-muted-foreground text-sm line-clamp-2 leading-relaxed">{event.description}</p>
+                                                        )}
+                                                    </div>
+                                                </motion.div>
+                                            );
+                                        })}
+                                    </motion.div>
+                                </>
                             )}
                         </motion.div>
                     )}
