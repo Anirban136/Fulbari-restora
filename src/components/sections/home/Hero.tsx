@@ -120,16 +120,16 @@ export function Hero() {
                     <p className="text-muted-foreground text-xs sm:text-sm mb-5 font-light max-w-md">
                         A perfect blend of traditional Bengali cuisine and modern dining in the heart of Serampore.
                     </p>
-                    <div className="flex flex-col gap-3">
-                        <Link href="/menu">
-                            <Button size="lg" className="w-full text-sm font-bold shadow-xl shadow-primary/20">
+                    <div className="flex gap-3">
+                        <Link href="/menu" className="flex-1">
+                            <Button className="w-full text-[13px] font-bold shadow-lg shadow-primary/20">
                                 View Menu
                             </Button>
                         </Link>
-                        <Link href="/contact" className="text-center group">
-                            <span className="text-muted-foreground group-hover:text-primary text-xs font-semibold py-2 transition-colors flex items-center justify-center gap-1">
-                                Or Book a Table <span className="text-primary group-hover:translate-x-1 transition-transform">→</span>
-                            </span>
+                        <Link href="/contact" className="flex-1">
+                            <Button variant="outline" className="w-full text-[13px] font-bold">
+                                Book Table
+                            </Button>
                         </Link>
                     </div>
 
