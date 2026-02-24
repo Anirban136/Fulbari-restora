@@ -308,11 +308,7 @@ export function TodaysMenuAndEvents() {
                                 </>
                             )}
 
-                            <div className="text-center mt-8">
-                                <Link href="/menu">
-                                    <Button variant="outline" className="gap-2 px-6">View Full Menu <ChevronRight size={15} /></Button>
-                                </Link>
-                            </div>
+
                         </motion.div>
                     )}
                 </AnimatePresence>
