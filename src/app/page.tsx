@@ -3,6 +3,7 @@ import { Footer } from "@/components/layout/Footer";
 import { Hero } from "@/components/sections/home/Hero";
 import { TodaysMenuAndEvents } from "@/components/sections/home/TodaysMenuAndEvents";
 import { About } from "@/components/sections/home/About";
+import { TopFlavours } from "@/components/sections/home/TopFlavours";
 import { GoogleReviews } from "@/components/sections/home/GoogleReviews";
 
 export default function Home() {
@@ -13,11 +14,13 @@ export default function Home() {
         <Hero />
         <TodaysMenuAndEvents />
         <About />
+        <TopFlavours />
         <GoogleReviews />
       </main>
       <Footer />
     </div>
   );
 }
+
 
 
