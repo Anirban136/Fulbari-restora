@@ -27,8 +27,21 @@ import {
     ImagePlus,
     Loader2,
     CheckCircle2,
-    AlertCircle
+    AlertCircle,
+    CalendarDays,
+    Star,
+    Search,
+    X
 } from "lucide-react";
+
+interface EventItem {
+    id: string;
+    title: string;
+    description: string;
+    event_date: string;
+    poster_url: string | null;
+    is_active: boolean;
+}
 
 interface MenuItem {
     id: string;
@@ -57,6 +70,19 @@ export default function AdminDashboard() {
     });
     const router = useRouter();
 
+    // ── Today's Special state ──
+    const [adminTab, setAdminTab] = useState<'menu' | 'specials' | 'events'>('menu');
+    const [todaysSpecialIds, setTodaysSpecialIds] = useState<string[]>([]);
+    const [specSearch, setSpecSearch] = useState('');
+    const [togglingSpecial, setTogglingSpecial] = useState<string | null>(null);
+
+    // ── Events state ──
+    const [events, setEvents] = useState<EventItem[]>([]);
+    const [eventsLoading, setEventsLoading] = useState(false);
+    const [eventForm, setEventForm] = useState({ title: '', description: '', event_date: '', poster_url: '' });
+    const [eventUploading, setEventUploading] = useState(false);
+    const [eventSaving, setEventSaving] = useState(false);
+
     const [newItem, setNewItem] = useState({
         name: "",
         description: "",
@@ -71,14 +97,93 @@ export default function AdminDashboard() {
     const [isCustomCategory, setIsCustomCategory] = useState(false);
 
     useEffect(() => {
-        // Simple protected route check
         const isLoggedIn = localStorage.getItem("adminLoggedIn");
-        if (!isLoggedIn) {
-            router.push("/admin/login");
-            return;
-        }
+        if (!isLoggedIn) { router.push("/admin/login"); return; }
         fetchMenu();
+        fetchTodaysSpecials();
+        fetchEvents();
     }, []);
+
+    const fetchTodaysSpecials = async () => {
+        try {
+            const res = await fetch('/api/daily-specials');
+            const data = await res.json();
+            setTodaysSpecialIds((data ?? []).map((i: MenuItem) => i.id));
+        } catch { }
+    };
+
+    const fetchEvents = async () => {
+        setEventsLoading(true);
+        try {
+            const res = await fetch('/api/events');
+            const data = await res.json();
+            setEvents(Array.isArray(data) ? data : []);
+        } catch { }
+        finally { setEventsLoading(false); }
+    };
+
+    const toggleSpecial = async (item: MenuItem) => {
+        const isSpecial = todaysSpecialIds.includes(item.id);
+        setTogglingSpecial(item.id);
+        try {
+            await fetch('/api/daily-specials', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: isSpecial ? 'REMOVE' : 'ADD', menu_item_id: item.id }),
+            });
+            setTodaysSpecialIds(prev => isSpecial ? prev.filter(id => id !== item.id) : [...prev, item.id]);
+        } catch { }
+        finally { setTogglingSpecial(null); }
+    };
+
+    const handleEventPosterUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        setEventUploading(true);
+        const fd = new FormData();
+        fd.append('file', file);
+        fd.append('bucket', 'events');
+        try {
+            const res = await fetch('/api/upload', { method: 'POST', body: fd });
+            const data = await res.json();
+            if (data.url) setEventForm(f => ({ ...f, poster_url: data.url }));
+        } catch { }
+        finally { setEventUploading(false); }
+    };
+
+    const handleAddEvent = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setEventSaving(true);
+        try {
+            await fetch('/api/events', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'ADD', event: eventForm }),
+            });
+            setEventForm({ title: '', description: '', event_date: '', poster_url: '' });
+            fetchEvents();
+        } catch { }
+        finally { setEventSaving(false); }
+    };
+
+    const handleDeleteEvent = async (id: string) => {
+        if (!confirm('Delete this event?')) return;
+        await fetch('/api/events', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'DELETE', event: { id } }),
+        });
+        fetchEvents();
+    };
+
+    const handleToggleEvent = async (ev: EventItem) => {
+        await fetch('/api/events', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'TOGGLE', event: ev }),
+        });
+        fetchEvents();
+    };
 
     // Derive categories from existing items
     const existingCategories = Array.from(new Set(menuItems.map(item => item.category)));
@@ -286,7 +391,7 @@ export default function AdminDashboard() {
                             <span className="text-sm font-medium">Back to Home</span>
                         </Link>
                         <h1 className="text-3xl font-bold font-heading text-foreground mb-1">Admin Dashboard</h1>
-                        <p className="text-muted-foreground">Manage your restaurant menu items dynamically</p>
+                        <p className="text-muted-foreground">Manage menu, today&apos;s specials &amp; events</p>
                     </div>
                     <div className="flex gap-4">
                         <Button
@@ -539,86 +644,256 @@ export default function AdminDashboard() {
                     )}
                 </AnimatePresence>
 
-                {/* Items List */}
-                <div className="bg-card border border-border rounded-3xl overflow-hidden shadow-2xl">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 p-6">
-                        {menuItems.map((item) => (
-                            <motion.div
-                                key={item.id}
-                                layout
-                                className={`relative group p-4 rounded-2xl border transition-all flex flex-col ${item.available ? "bg-accent/50 border-border" : "bg-accent/20 border-border/50 opacity-60"}`}
-                            >
-                                <div className="relative h-40 rounded-xl overflow-hidden mb-4">
-                                    <img
-                                        src={item.image}
-                                        alt={item.name}
-                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                                    />
-                                    <div className="absolute top-2 right-2 flex flex-col gap-2">
-                                        <button
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                toggleAvailability(item);
-                                            }}
-                                            className={`w-12 h-6 rounded-full relative transition-all duration-300 backdrop-blur-md border border-white/20 ${item.available ? "bg-green-500/80" : "bg-red-500/80"}`}
-                                            title={item.available ? "Disable Item" : "Enable Item"}
-                                        >
-                                            <motion.div
-                                                animate={{ x: item.available ? 24 : 4 }}
-                                                className="absolute top-1 w-4 h-4 bg-white rounded-full shadow-lg"
-                                            />
-                                        </button>
-                                        <button
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                handleEditItem(item);
-                                            }}
-                                            className="p-2 rounded-full bg-black/60 backdrop-blur-md text-white border border-white/20 hover:bg-primary transition-all"
-                                            title="Edit Item"
-                                        >
-                                            <Pencil size={18} />
-                                        </button>
-                                        <button
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                handleDelete(item.id);
-                                            }}
-                                            className="p-2 rounded-full bg-black/60 backdrop-blur-md text-white border border-white/20 hover:bg-red-500 transition-all"
-                                            title="Delete Item"
-                                        >
-                                            <Trash2 size={18} />
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <div className="flex-grow">
-                                    <div className="flex justify-between items-start mb-2">
-                                        <h3 className="font-bold font-heading line-clamp-1">{item.name}</h3>
-                                        <span className="text-[10px] uppercase font-bold text-primary px-2 py-0.5 bg-primary/10 rounded-full">{item.category}</span>
-                                    </div>
-                                    <p className="text-xs text-muted-foreground line-clamp-2 mb-4">{item.description}</p>
-
-                                    <div className="flex items-center gap-3 mt-auto">
-                                        <span className="text-sm font-bold text-foreground">₹</span>
-                                        <input
-                                            type="number"
-                                            defaultValue={item.price}
-                                            onBlur={(e) => updatePrice(item.id, Number(e.target.value))}
-                                            className="w-20 bg-background border-border border rounded-lg px-2 py-1 text-sm font-bold focus:ring-1 focus:ring-primary outline-none"
-                                        />
-                                        <div className={`ml-auto w-3 h-3 rounded-full ${item.available ? "bg-green-500 animate-pulse" : "bg-red-500"}`} />
-                                    </div>
-                                </div>
-                            </motion.div>
-                        ))}
-                    </div>
-                    {menuItems.length === 0 && (
-                        <div className="text-center py-20">
-                            <Utensils size={48} className="mx-auto text-muted-foreground mb-4 opacity-20" />
-                            <p className="text-muted-foreground">Your menu is currently empty.</p>
-                        </div>
-                    )}
+                {/* ── Admin Tab Switcher ─────────────────────── */}
+                <div className="flex items-center gap-2 mb-6 bg-card border border-border rounded-2xl p-1.5 w-fit">
+                    {([
+                        { key: 'menu', label: 'Menu Items', icon: <Utensils size={14} /> },
+                        { key: 'specials', label: "Today's Special", icon: <Star size={14} /> },
+                        { key: 'events', label: 'Events', icon: <CalendarDays size={14} /> },
+                    ] as const).map(t => (
+                        <button key={t.key} onClick={() => setAdminTab(t.key)}
+                            className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-bold transition-all duration-200
+                                ${adminTab === t.key ? 'bg-primary text-primary-foreground shadow' : 'text-muted-foreground hover:text-foreground'}`}>
+                            {t.icon}{t.label}
+                        </button>
+                    ))}
                 </div>
+
+                {/* ── TODAY'S SPECIAL TAB ───────────────────── */}
+                {adminTab === 'specials' && (
+                    <div className="bg-card border border-border rounded-3xl p-6 shadow-xl mb-8">
+                        <h2 className="text-xl font-bold font-heading mb-1">Today&apos;s Special</h2>
+                        <p className="text-muted-foreground text-sm mb-5">Toggle any item to feature it on the homepage today.</p>
+                        {/* Search */}
+                        <div className="relative mb-5">
+                            <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                            <input
+                                type="text" placeholder="Search menu items..."
+                                value={specSearch} onChange={e => setSpecSearch(e.target.value)}
+                                className="w-full pl-9 pr-4 py-2.5 bg-accent border-transparent rounded-xl text-sm outline-none focus:ring-1 focus:ring-primary"
+                            />
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                            {menuItems
+                                .filter(i => i.name.toLowerCase().includes(specSearch.toLowerCase()))
+                                .map(item => {
+                                    const isSpecial = todaysSpecialIds.includes(item.id);
+                                    return (
+                                        <div key={item.id}
+                                            className={`relative flex items-center gap-3 p-3 rounded-2xl border cursor-pointer transition-all duration-200 group
+                                                ${isSpecial ? 'border-primary bg-primary/10' : 'border-border bg-accent/40 hover:border-primary/40'}`}
+                                            onClick={() => toggleSpecial(item)}
+                                        >
+                                            {/* Item image */}
+                                            <div className="relative w-12 h-12 rounded-xl overflow-hidden shrink-0">
+                                                {item.image
+                                                    ? <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                                                    : <div className="w-full h-full bg-card flex items-center justify-center"><Utensils size={16} className="text-muted-foreground" /></div>
+                                                }
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <p className="font-bold text-sm truncate">{item.name}</p>
+                                                <p className="text-xs text-muted-foreground">₹{item.price} · {item.category}</p>
+                                            </div>
+                                            {/* Toggle star */}
+                                            <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 transition-all
+                                                ${isSpecial ? 'bg-primary text-primary-foreground' : 'bg-card text-muted-foreground group-hover:bg-primary/20'}`}>
+                                                {togglingSpecial === item.id
+                                                    ? <Loader2 size={13} className="animate-spin" />
+                                                    : <Star size={13} fill={isSpecial ? 'currentColor' : 'none'} />
+                                                }
+                                            </div>
+                                        </div>
+                                    );
+                                })
+                            }
+                        </div>
+                    </div>
+                )}
+
+                {/* ── EVENTS TAB ───────────────────────────── */}
+                {adminTab === 'events' && (
+                    <div className="space-y-8">
+                        {/* Add Event Form */}
+                        <div className="bg-card border border-border rounded-3xl p-6 shadow-xl">
+                            <h2 className="text-xl font-bold font-heading mb-4">Add New Event</h2>
+                            <form onSubmit={handleAddEvent} className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium text-muted-foreground">Event Title *</label>
+                                    <input required type="text" placeholder="e.g. Durga Puja Special Night"
+                                        value={eventForm.title} onChange={e => setEventForm(f => ({ ...f, title: e.target.value }))}
+                                        className="w-full bg-accent border-transparent rounded-xl p-3 text-sm outline-none focus:ring-1 focus:ring-primary" />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium text-muted-foreground">Event Date *</label>
+                                    <input required type="date"
+                                        value={eventForm.event_date} onChange={e => setEventForm(f => ({ ...f, event_date: e.target.value }))}
+                                        className="w-full bg-accent border-transparent rounded-xl p-3 text-sm outline-none focus:ring-1 focus:ring-primary" />
+                                </div>
+                                <div className="space-y-2 md:col-span-2">
+                                    <label className="text-sm font-medium text-muted-foreground">Description</label>
+                                    <textarea placeholder="Describe the event..." rows={3}
+                                        value={eventForm.description} onChange={e => setEventForm(f => ({ ...f, description: e.target.value }))}
+                                        className="w-full bg-accent border-transparent rounded-xl p-3 text-sm outline-none focus:ring-1 focus:ring-primary resize-none" />
+                                </div>
+                                {/* Poster upload */}
+                                <div className="space-y-2 md:col-span-2">
+                                    <label className="text-sm font-medium text-muted-foreground">Event Poster</label>
+                                    <div className="flex gap-3 items-start">
+                                        <label className="flex items-center gap-2 px-4 py-2.5 bg-primary/10 border border-primary/30 text-primary rounded-xl text-sm font-medium cursor-pointer hover:bg-primary/20 transition-all shrink-0">
+                                            {eventUploading ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />}
+                                            {eventUploading ? 'Uploading...' : 'Upload Poster'}
+                                            <input type="file" accept="image/*" className="hidden" onChange={handleEventPosterUpload} />
+                                        </label>
+                                        {eventForm.poster_url && (
+                                            <div className="relative w-20 h-14 rounded-xl overflow-hidden border border-border">
+                                                <img src={eventForm.poster_url} alt="poster preview" className="w-full h-full object-cover" />
+                                                <button type="button" onClick={() => setEventForm(f => ({ ...f, poster_url: '' }))}
+                                                    className="absolute top-0.5 right-0.5 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center text-white">
+                                                    <X size={9} />
+                                                </button>
+                                            </div>
+                                        )}
+                                        <input type="text" placeholder="Or paste image URL..."
+                                            value={eventForm.poster_url} onChange={e => setEventForm(f => ({ ...f, poster_url: e.target.value }))}
+                                            className="flex-1 bg-accent border-transparent rounded-xl p-3 text-sm outline-none focus:ring-1 focus:ring-primary" />
+                                    </div>
+                                </div>
+                                <div className="md:col-span-2 flex justify-end">
+                                    <Button type="submit" disabled={eventSaving} className="px-8 gap-2">
+                                        {eventSaving && <Loader2 size={14} className="animate-spin" />}
+                                        Add Event
+                                    </Button>
+                                </div>
+                            </form>
+                        </div>
+
+                        {/* Events List */}
+                        <div className="bg-card border border-border rounded-3xl p-6 shadow-xl">
+                            <h2 className="text-xl font-bold font-heading mb-5">All Events</h2>
+                            {eventsLoading ? (
+                                <div className="flex justify-center py-12"><Loader2 className="animate-spin text-primary" size={28} /></div>
+                            ) : events.length === 0 ? (
+                                <div className="text-center py-12 text-muted-foreground text-sm">No events yet. Add one above!</div>
+                            ) : (
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                                    {events.map(ev => (
+                                        <div key={ev.id} className={`rounded-2xl border overflow-hidden transition-all ${ev.is_active ? 'border-border' : 'border-border/30 opacity-60'}`}>
+                                            {ev.poster_url && (
+                                                <div className="relative w-full h-36">
+                                                    <img src={ev.poster_url} alt={ev.title} className="w-full h-full object-cover" />
+                                                </div>
+                                            )}
+                                            <div className="p-4">
+                                                <div className="flex items-start justify-between gap-2 mb-1">
+                                                    <h3 className="font-bold text-sm leading-tight">{ev.title}</h3>
+                                                    <div className="flex gap-1 shrink-0">
+                                                        <button onClick={() => handleToggleEvent(ev)}
+                                                            className={`p-1.5 rounded-lg transition-all ${ev.is_active ? 'bg-green-500/15 text-green-500 hover:bg-green-500/30' : 'bg-red-500/15 text-red-500 hover:bg-red-500/30'}`}
+                                                            title={ev.is_active ? 'Deactivate' : 'Activate'}>
+                                                            {ev.is_active ? <Power size={13} /> : <PowerOff size={13} />}
+                                                        </button>
+                                                        <button onClick={() => handleDeleteEvent(ev.id)}
+                                                            className="p-1.5 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500/25 transition-all">
+                                                            <Trash2 size={13} />
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <p className="text-xs text-primary font-medium mb-1">
+                                                    {new Date(ev.event_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}
+                                                </p>
+                                                {ev.description && <p className="text-xs text-muted-foreground line-clamp-2">{ev.description}</p>}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )}
+
+                {/* ── MENU ITEMS TAB ───────────────────────── */}
+                {adminTab === 'menu' && (
+                    <div className="bg-card border border-border rounded-3xl overflow-hidden shadow-2xl">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 p-6">
+                            {menuItems.map((item) => (
+                                <motion.div
+                                    key={item.id}
+                                    layout
+                                    className={`relative group p-4 rounded-2xl border transition-all flex flex-col ${item.available ? "bg-accent/50 border-border" : "bg-accent/20 border-border/50 opacity-60"}`}
+                                >
+                                    <div className="relative h-40 rounded-xl overflow-hidden mb-4">
+                                        <img
+                                            src={item.image}
+                                            alt={item.name}
+                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                        />
+                                        <div className="absolute top-2 right-2 flex flex-col gap-2">
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    toggleAvailability(item);
+                                                }}
+                                                className={`w-12 h-6 rounded-full relative transition-all duration-300 backdrop-blur-md border border-white/20 ${item.available ? "bg-green-500/80" : "bg-red-500/80"}`}
+                                                title={item.available ? "Disable Item" : "Enable Item"}
+                                            >
+                                                <motion.div
+                                                    animate={{ x: item.available ? 24 : 4 }}
+                                                    className="absolute top-1 w-4 h-4 bg-white rounded-full shadow-lg"
+                                                />
+                                            </button>
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleEditItem(item);
+                                                }}
+                                                className="p-2 rounded-full bg-black/60 backdrop-blur-md text-white border border-white/20 hover:bg-primary transition-all"
+                                                title="Edit Item"
+                                            >
+                                                <Pencil size={18} />
+                                            </button>
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleDelete(item.id);
+                                                }}
+                                                className="p-2 rounded-full bg-black/60 backdrop-blur-md text-white border border-white/20 hover:bg-red-500 transition-all"
+                                                title="Delete Item"
+                                            >
+                                                <Trash2 size={18} />
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex-grow">
+                                        <div className="flex justify-between items-start mb-2">
+                                            <h3 className="font-bold font-heading line-clamp-1">{item.name}</h3>
+                                            <span className="text-[10px] uppercase font-bold text-primary px-2 py-0.5 bg-primary/10 rounded-full">{item.category}</span>
+                                        </div>
+                                        <p className="text-xs text-muted-foreground line-clamp-2 mb-4">{item.description}</p>
+
+                                        <div className="flex items-center gap-3 mt-auto">
+                                            <span className="text-sm font-bold text-foreground">₹</span>
+                                            <input
+                                                type="number"
+                                                defaultValue={item.price}
+                                                onBlur={(e) => updatePrice(item.id, Number(e.target.value))}
+                                                className="w-20 bg-background border-border border rounded-lg px-2 py-1 text-sm font-bold focus:ring-1 focus:ring-primary outline-none"
+                                            />
+                                            <div className={`ml-auto w-3 h-3 rounded-full ${item.available ? "bg-green-500 animate-pulse" : "bg-red-500"}`} />
+                                        </div>
+                                    </div>
+                                </motion.div>
+                            ))}
+                        </div>
+                        {menuItems.length === 0 && (
+                            <div className="text-center py-20">
+                                <Utensils size={48} className="mx-auto text-muted-foreground mb-4 opacity-20" />
+                                <p className="text-muted-foreground">Your menu is currently empty.</p>
+                            </div>
+                        )}
+                    </div>
+                )}
             </main>
             <Footer />
         </div>

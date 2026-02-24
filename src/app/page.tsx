@@ -3,7 +3,7 @@ import { Footer } from "@/components/layout/Footer";
 import { Hero } from "@/components/sections/home/Hero";
 import { TopFlavours } from "@/components/sections/home/TopFlavours";
 import { About } from "@/components/sections/home/About";
-import { Specialties } from "@/components/sections/home/Specialties";
+import { TodaysMenuAndEvents } from "@/components/sections/home/TodaysMenuAndEvents";
 import { GoogleReviews } from "@/components/sections/home/GoogleReviews";
 
 export default function Home() {
@@ -14,10 +14,11 @@ export default function Home() {
         <Hero />
         <TopFlavours />
         <About />
-        <Specialties />
+        <TodaysMenuAndEvents />
         <GoogleReviews />
       </main>
       <Footer />
     </div>
   );
 }
+
