@@ -26,14 +26,11 @@ export function Footer() {
                             প্রকৃতির সান্নিধ্যে এক অনন্য স্বাদের ঠিকানা
                         </p>
                         <div className="flex items-center gap-4">
-                            <Link href="#" className="w-10 h-10 rounded-full bg-accent flex items-center justify-center text-primary hover:bg-primary hover:text-primary-foreground transition-all">
+                            <Link href="https://www.facebook.com/share/1CJLS6rvRd/" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-accent flex items-center justify-center text-primary hover:bg-primary hover:text-primary-foreground transition-all">
                                 <Facebook size={18} />
                             </Link>
-                            <Link href="#" className="w-10 h-10 rounded-full bg-accent flex items-center justify-center text-primary hover:bg-primary hover:text-primary-foreground transition-all">
+                            <Link href="https://www.instagram.com/fulbarirestora?" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-accent flex items-center justify-center text-primary hover:bg-primary hover:text-primary-foreground transition-all">
                                 <Instagram size={18} />
-                            </Link>
-                            <Link href="#" className="w-10 h-10 rounded-full bg-accent flex items-center justify-center text-primary hover:bg-primary hover:text-primary-foreground transition-all">
-                                <Twitter size={18} />
                             </Link>
                         </div>
                     </div>
