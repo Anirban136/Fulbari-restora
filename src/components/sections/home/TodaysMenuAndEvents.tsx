@@ -135,7 +135,7 @@ export function TodaysMenuAndEvents() {
     }, []);
 
     return (
-        <section className="py-14 md:py-20 bg-background relative overflow-hidden">
+        <section className={`py-12 md:py-20 bg-background relative overflow-hidden ${showSpecialsPopup ? "z-[100]" : "z-10"}`}>
             {/* Background accents */}
             <div className="absolute -top-40 -right-40 w-[500px] h-[500px] rounded-full bg-primary/5 blur-3xl pointer-events-none" />
             <div className="absolute -bottom-40 -left-40 w-[400px] h-[400px] rounded-full bg-primary/5 blur-3xl pointer-events-none" />
@@ -297,7 +297,7 @@ export function TodaysMenuAndEvents() {
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
                             transition={{ duration: 0.25 }}
-                            className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8"
+                            className="fixed inset-0 z-[150] flex items-center justify-center p-4 md:p-8"
                             onClick={() => setShowSpecialsPopup(false)}
                         >
                             <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
