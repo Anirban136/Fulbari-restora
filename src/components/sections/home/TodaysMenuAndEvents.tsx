@@ -111,7 +111,7 @@ function EventImageCarousel({ images }: { images: string[] }) {
 }
 
 export function TodaysMenuAndEvents() {
-    const [activeTab, setActiveTab] = useState<"events" | "menu">("events");
+    const [activeTab, setActiveTab] = useState<"events" | "menu">("menu");
     const [specials, setSpecials] = useState<MenuItem[]>([]);
     const [events, setEvents] = useState<Event[]>([]);
     const [loadingMenu, setLoadingMenu] = useState(true);
@@ -162,8 +162,8 @@ export function TodaysMenuAndEvents() {
                 <div className="flex justify-center mb-8">
                     <div className="inline-flex items-center gap-1 bg-card/60 border border-border/50 rounded-2xl p-1.5 backdrop-blur-sm shadow-lg">
                         {([
-                            { key: "events", label: "Events", icon: <CalendarDays size={14} /> },
                             { key: "menu", label: "Today's Special", icon: <Star size={14} /> },
+                            { key: "events", label: "Events", icon: <CalendarDays size={14} /> },
                         ] as const).map(tab => (
                             <button
                                 key={tab.key}
