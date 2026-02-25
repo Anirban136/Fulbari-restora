@@ -95,7 +95,7 @@ function VenueImageSlider({ images, label }: { images: string[], label: string }
 
     return (
         <div
-            className="relative group overflow-hidden rounded-[2rem] shadow-2xl h-[300px] md:h-[480px] lg:h-[560px] touch-pan-y border border-white/10"
+            className="relative group overflow-hidden rounded-[2rem] shadow-2xl h-[280px] md:h-[440px] lg:h-[500px] touch-pan-y border border-white/10"
             onMouseEnter={() => setIsPaused(true)}
             onMouseLeave={() => setIsPaused(false)}
         >
@@ -162,37 +162,37 @@ export function About() {
     const current = venues[activeVenue];
 
     return (
-        <section className="py-16 md:py-24 lg:py-32 bg-background relative overflow-hidden">
+        <section className="py-12 md:py-16 lg:py-20 bg-background relative overflow-hidden">
             {/* Artistic Background Elements */}
             <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] -translate-y-1/2 pointer-events-none" />
             <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] translate-y-1/2 pointer-events-none" />
 
             <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10">
-                <div className="flex flex-col lg:flex-row gap-16 lg:gap-24 items-start">
+                <div className="flex flex-col lg:flex-row gap-12 lg:gap-16 items-center">
 
                     {/* Left Side: Dynamic Content */}
                     <div className="w-full lg:w-5/12 order-2 lg:order-1">
-                        <header className="mb-10 lg:mb-12">
+                        <header className="mb-8 lg:mb-10">
                             <motion.div
                                 initial={{ opacity: 0, x: -20 }}
                                 whileInView={{ opacity: 1, x: 0 }}
                                 viewport={{ once: true }}
-                                className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold tracking-widest uppercase mb-4"
+                                className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-[10px] font-bold tracking-widest uppercase mb-4"
                             >
-                                <Sparkles size={14} /> Discovery
+                                <Sparkles size={12} /> Discovery
                             </motion.div>
                             <motion.h2
                                 initial={{ opacity: 0, y: 20 }}
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
                                 transition={{ delay: 0.1 }}
-                                className="text-4xl md:text-5xl font-bold font-heading mb-6 tracking-tight"
+                                className="text-3xl md:text-4xl xl:text-5xl font-bold font-heading mb-6 tracking-tight"
                             >
                                 Experience <span className="text-primary italic">Fulbari</span>
                             </motion.h2>
 
                             {/* Modern Tab Switcher */}
-                            <div className="flex flex-wrap gap-2 p-1.5 bg-card/50 border border-border/50 rounded-2xl backdrop-blur-md mb-8">
+                            <div className="flex flex-wrap gap-1.5 p-1.5 bg-card/50 border border-border/50 rounded-2xl backdrop-blur-md mb-6">
                                 {(Object.keys(venues) as VenueKey[]).map((key) => {
                                     const venue = venues[key];
                                     const isActive = activeVenue === key;
@@ -201,7 +201,7 @@ export function About() {
                                             key={key}
                                             onClick={() => setActiveVenue(key)}
                                             className={cn(
-                                                "relative px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 flex items-center gap-2 z-10",
+                                                "relative px-4 py-2.5 rounded-xl text-xs font-bold transition-all duration-300 flex items-center gap-2 z-10",
                                                 isActive ? "text-primary-foreground" : "text-muted-foreground hover:text-foreground"
                                             )}
                                         >
@@ -227,12 +227,12 @@ export function About() {
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, y: -10 }}
                                 transition={{ duration: 0.4, ease: "easeOut" }}
-                                className="space-y-8"
+                                className="space-y-6"
                             >
                                 <div className="space-y-4">
-                                    <h3 className="text-2xl md:text-3xl font-bold font-heading text-foreground tracking-tight">
+                                    <h3 className="text-xl md:text-2xl font-bold font-heading text-foreground tracking-tight">
                                         {current.label}
-                                        <span className="block text-primary text-sm font-medium tracking-widest uppercase mt-2 opacity-80">
+                                        <span className="block text-primary text-[10px] font-medium tracking-widest uppercase mt-1.5 opacity-80">
                                             {current.tagline}
                                         </span>
                                     </h3>
@@ -256,25 +256,25 @@ export function About() {
                                 </div>
 
                                 {/* Modern Highlight Grid */}
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                     {current.highlights.map((item, i) => (
                                         <motion.div
                                             key={item}
                                             initial={{ opacity: 0, scale: 0.95 }}
                                             animate={{ opacity: 1, scale: 1 }}
                                             transition={{ delay: 0.1 + (i * 0.05) }}
-                                            className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border/40 hover:border-primary/30 transition-colors group"
+                                            className="flex items-center gap-2.5 p-2.5 rounded-xl bg-card border border-border/40 hover:border-primary/30 transition-colors group"
                                         >
-                                            <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary group-hover:text-primary-foreground transition-all">
-                                                <Star size={14} fill="currentColor" />
+                                            <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary group-hover:text-primary-foreground transition-all">
+                                                <Star size={12} fill="currentColor" />
                                             </div>
-                                            <span className="text-sm font-bold tracking-tight">{item}</span>
+                                            <span className="text-[11px] font-bold tracking-tight">{item}</span>
                                         </motion.div>
                                     ))}
                                 </div>
 
                                 {/* Info Bar */}
-                                <div className="flex flex-wrap gap-3 pt-8">
+                                <div className="flex flex-wrap gap-2.5 pt-6">
                                     {[
                                         { icon: Users, label: current.capacity },
                                         { icon: Clock, label: current.timing },
@@ -282,9 +282,9 @@ export function About() {
                                     ].map((info, i) => (
                                         <div
                                             key={i}
-                                            className="flex items-center gap-2.5 px-4 py-2 bg-accent/40 backdrop-blur-md rounded-full border border-border/40 text-xs font-bold uppercase tracking-wider"
+                                            className="flex items-center gap-2 px-3.5 py-1.5 bg-accent/40 backdrop-blur-md rounded-full border border-border/40 text-[10px] font-bold uppercase tracking-wider"
                                         >
-                                            <info.icon size={14} className="text-primary" />
+                                            <info.icon size={13} className="text-primary" />
                                             {info.label}
                                         </div>
                                     ))}
