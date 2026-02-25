@@ -8,6 +8,24 @@ import { Utensils, Coffee, Building2, PartyPopper, Users, Clock, MapPin, Star, C
 type VenueKey = "restaurant" | "cafe" | "community" | "banquet";
 
 const venues = {
+    cafe: {
+        icon: Coffee,
+        label: "Café",
+        tagline: "Brews & Bites",
+        description:
+            "Unwind with freshly brewed coffee, artisan teas, and light bites in our cozy café corner. Perfect for casual meetups, work sessions, or a quiet afternoon escape.",
+        highlights: ["Specialty Coffee", "Fresh Pastries", "Free Wi-Fi", "Cozy Ambience"],
+        capacity: "40+ Guests",
+        timing: "8:00 AM - 9:00 PM",
+        taglineClassName: "text-primary font-medium",
+        descriptionClassName: "text-muted-foreground",
+        images: [
+            "/cafe/cafe1.jpeg",
+            "/cafe/cafe2.jpeg",
+            "/cafe/cafe3.jpeg",
+            "/cafe/cafe4.jpeg",
+        ],
+    },
     restaurant: {
         icon: Utensils,
         label: "Restaurant",
@@ -25,24 +43,6 @@ const venues = {
             "/restaurant/r3.jpg",
             "/restaurant/r4.jpg",
             "/restaurant/r5.jpg",
-        ],
-    },
-    cafe: {
-        icon: Coffee,
-        label: "Café",
-        tagline: "Brews & Bites",
-        description:
-            "Unwind with freshly brewed coffee, artisan teas, and light bites in our cozy café corner. Perfect for casual meetups, work sessions, or a quiet afternoon escape.",
-        highlights: ["Specialty Coffee", "Fresh Pastries", "Free Wi-Fi", "Cozy Ambience"],
-        capacity: "40+ Guests",
-        timing: "8:00 AM - 9:00 PM",
-        taglineClassName: "text-primary font-medium",
-        descriptionClassName: "text-muted-foreground",
-        images: [
-            "/cafe/cafe1.jpeg",
-            "/cafe/cafe2.jpeg",
-            "/cafe/cafe3.jpeg",
-            "/cafe/cafe4.jpeg",
         ],
     },
     community: {
@@ -177,7 +177,7 @@ function VenueImageSlider({ images, label }: { images: string[], label: string }
 }
 
 export function About() {
-    const [activeVenue, setActiveVenue] = useState<VenueKey>("restaurant");
+    const [activeVenue, setActiveVenue] = useState<VenueKey>("cafe");
     const current = venues[activeVenue];
     const IconComponent = current.icon;
 
