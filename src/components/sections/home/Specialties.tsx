@@ -8,31 +8,35 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Utensils, Coffee, Wine, Cake, X, Leaf } from "lucide-react";
 import { type Category } from "@/data/menu";
 
-// Category configuration with icons and mapping
+// Category configuration with icons and precise database mapping
 const categoryConfig = [
     {
         icon: Utensils,
         label: "Main Course",
         image: "https://images.unsplash.com/photo-1585937421612-70a008356fbe?q=80&w=400&auto=format&fit=crop",
-        menuCategories: ["Bengali", "Indian", "Chinese"] as Category[],
+        menuCategories: ["Indian Main Course"] as Category[],
+        menuType: "RESTAURANT",
     },
     {
         icon: Coffee,
         label: "Breakfast",
         image: "https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?q=80&w=400&auto=format&fit=crop",
-        menuCategories: ["Starters"] as Category[],
+        menuCategories: ["breakfast"] as Category[],
+        menuType: "CAFE",
     },
     {
         icon: Wine,
         label: "Drinks",
         image: "https://images.unsplash.com/photo-1551538827-9c037cb4f32a?q=80&w=400&auto=format&fit=crop",
-        menuCategories: ["Drinks"] as Category[],
+        menuCategories: ["Beverages"] as Category[],
+        // Any menu type
     },
     {
         icon: Cake,
         label: "Desserts",
         image: "https://images.unsplash.com/photo-1488477181946-6428a0291777?q=80&w=400&auto=format&fit=crop",
-        menuCategories: ["Desserts"] as Category[],
+        menuCategories: ["Desserts", "Ice Cream"] as Category[],
+        menuType: "RESTAURANT",
     },
 ];
 
@@ -56,10 +60,12 @@ export function Specialties() {
 
     // Dynamically calculate counts and filter items
     const categoriesWithCounts = useMemo(() => {
-        return categoryConfig.map(cat => {
-            const items = liveMenu.filter(item =>
-                (cat.menuCategories as string[]).includes(item.category) && item.available !== false
-            );
+        return (categoryConfig as any[]).map(cat => {
+            const items = liveMenu.filter(item => {
+                const categoryMatch = (cat.menuCategories as string[]).includes(item.category);
+                const typeMatch = cat.menuType ? item.menu_type === cat.menuType : true;
+                return categoryMatch && typeMatch && item.available !== false;
+            });
             return {
                 ...cat,
                 count: items.length > 0 ? `${items.length}+ Items` : "Items coming soon",
