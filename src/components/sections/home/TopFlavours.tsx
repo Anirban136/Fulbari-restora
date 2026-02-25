@@ -107,6 +107,7 @@ export function TopFlavours() {
                                         src={sanitizeImageUrl(item.image)}
                                         alt={item.name}
                                         fill
+                                        priority={index < 4}
                                         sizes="(max-width: 768px) 33vw, 15vw"
                                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                                     />

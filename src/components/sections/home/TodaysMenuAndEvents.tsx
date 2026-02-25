@@ -137,6 +137,7 @@ function EventImageCarousel({ images }: { images: string[] }) {
                         src={sanitizeImageUrl(images[idx])}
                         alt={`Event image ${idx + 1}`}
                         fill
+                        priority={idx === 0}
                         className="object-cover"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60" />
@@ -417,6 +418,7 @@ export function TodaysMenuAndEvents() {
                                                             src={sanitizeImageUrl(item.image)}
                                                             alt={item.name}
                                                             fill
+                                                            priority={index < 4}
                                                             className="object-cover group-hover:scale-110 transition-transform duration-500"
                                                         />
                                                         : <div className="w-full h-full bg-card flex items-center justify-center"><Utensils size={24} className="text-muted-foreground" /></div>

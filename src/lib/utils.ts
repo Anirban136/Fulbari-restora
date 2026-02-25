@@ -7,10 +7,16 @@ export function cn(...inputs: ClassValue[]) {
 
 export function sanitizeImageUrl(url: string | undefined | null) {
     if (!url) return "";
+    let s = url.trim();
     // Handle Unsplash optimization if missing
-    if (url.includes("unsplash.com") && !url.includes("auto=format")) {
-        return `${url}${url.includes("?") ? "&" : "?"}auto=format&fit=crop&q=80&w=800`;
+    if (s.includes("unsplash.com") && !s.includes("auto=format")) {
+        const separator = s.includes("?") ? "&" : "?";
+        s = `${s}${separator}auto=format&fit=crop&q=80&w=800`;
     }
-    // Handle spaces in URLs by encoding them
-    return url.replace(/ /g, "%20");
+    // Encode the URL cleanly
+    try {
+        return encodeURI(s);
+    } catch (e) {
+        return s.replace(/ /g, "%20");
+    }
 }

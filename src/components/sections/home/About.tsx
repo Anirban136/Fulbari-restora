@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { Utensils, Coffee, Building2, PartyPopper, Users, Clock, MapPin, Star, ChevronLeft, ChevronRight } from "lucide-react";
+import { sanitizeImageUrl } from "@/lib/utils";
 
 type VenueKey = "restaurant" | "cafe" | "community" | "banquet";
 
@@ -126,7 +127,7 @@ function VenueImageSlider({ images, label }: { images: string[], label: string }
                     className="relative w-full h-full"
                 >
                     <Image
-                        src={images[currentIndex]}
+                        src={sanitizeImageUrl(images[currentIndex])}
                         alt={`${label} photo ${currentIndex + 1}`}
                         fill
                         sizes="(max-width: 768px) 100vw, 50vw"

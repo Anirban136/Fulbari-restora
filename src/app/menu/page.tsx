@@ -189,7 +189,7 @@ export default function MenuPage() {
                         className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
                     >
                         <AnimatePresence mode="popLayout">
-                            {filteredItems.map((item) => (
+                            {filteredItems.map((item, idx) => (
                                 <motion.div
                                     key={item.id}
                                     layout
@@ -206,6 +206,7 @@ export default function MenuPage() {
                                             src={sanitizeImageUrl(item.image)}
                                             alt={item.name}
                                             fill
+                                            priority={idx < 4}
                                             sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw"
                                             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                                         />

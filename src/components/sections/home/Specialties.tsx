@@ -155,6 +155,7 @@ export function Specialties() {
                                             src={sanitizeImageUrl(item.image)}
                                             alt={item.label}
                                             fill
+                                            priority={i === 0}
                                             sizes="(max-width: 768px) 50vw, 25vw"
                                             className="object-cover group-hover:scale-110 transition-transform duration-500"
                                         />

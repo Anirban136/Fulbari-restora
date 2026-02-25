@@ -6,6 +6,7 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { motion } from "framer-motion";
 import { Loader2 } from "lucide-react";
+import { sanitizeImageUrl } from "@/lib/utils";
 
 interface GalleryItem {
     id: string;
@@ -107,10 +108,11 @@ export default function GalleryPage() {
                             >
                                 <div className="relative w-full h-full">
                                     <Image
-                                        src={img.url}
+                                        src={sanitizeImageUrl(img.url)}
                                         alt={`${img.category} - Gallery image ${idx + 1}`}
                                         width={800}
                                         height={600}
+                                        priority={idx < 4}
                                         sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
                                         className="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-105"
                                     />

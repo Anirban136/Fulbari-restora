@@ -7,7 +7,7 @@ import Image from "next/image";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { cn, sanitizeImageUrl } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import {
     Plus,
@@ -761,7 +761,7 @@ export default function AdminDashboard() {
                                                 ) : newItem.image ? (
                                                     <div className="absolute inset-0 w-full h-full">
                                                         <img
-                                                            src={fixUnsplashUrl(newItem.image)}
+                                                            src={sanitizeImageUrl(fixUnsplashUrl(newItem.image))}
                                                             alt="Preview"
                                                             className="w-full h-full object-cover transition-transform duration-500 group-hover/upload:scale-105"
                                                         />
@@ -967,7 +967,7 @@ export default function AdminDashboard() {
                                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
                                     {galleryItems.map(item => (
                                         <div key={item.id} className="relative aspect-square rounded-2xl overflow-hidden border border-border group shadow-sm bg-accent/20">
-                                            <img src={item.url} alt={item.category} className="w-full h-full object-cover transition-transform group-hover:scale-110" />
+                                            <img src={sanitizeImageUrl(item.url)} alt={item.category} className="w-full h-full object-cover transition-transform group-hover:scale-110" />
                                             <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2 p-2">
                                                 <span className="text-[10px] font-bold text-white bg-primary/80 px-2 py-0.5 rounded-full">{item.category}</span>
                                                 <button
@@ -1014,7 +1014,7 @@ export default function AdminDashboard() {
                                             {/* Item image */}
                                             <div className="relative w-12 h-12 rounded-xl overflow-hidden shrink-0">
                                                 {item.image
-                                                    ? <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                                                    ? <img src={sanitizeImageUrl(item.image)} alt={item.name} className="w-full h-full object-cover" />
                                                     : <div className="w-full h-full bg-card flex items-center justify-center"><Utensils size={16} className="text-muted-foreground" /></div>
                                                 }
                                             </div>
@@ -1076,7 +1076,7 @@ export default function AdminDashboard() {
                                         <div className="flex gap-2 flex-wrap mb-2">
                                             {eventImages.map((url, i) => (
                                                 <div key={i} className="relative w-20 h-14 rounded-xl overflow-hidden border border-border group">
-                                                    <img src={url} alt={`img ${i + 1}`} className="w-full h-full object-cover" />
+                                                    <img src={sanitizeImageUrl(url)} alt={`img ${i + 1}`} className="w-full h-full object-cover" />
                                                     <button type="button" onClick={() => removeEventImage(i)}
                                                         className="absolute top-0.5 right-0.5 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
                                                         <X size={9} />
@@ -1148,7 +1148,7 @@ export default function AdminDashboard() {
                                         <div key={ev.id} className={`rounded-2xl border overflow-hidden transition-all ${ev.is_active ? 'border-border' : 'border-border/30 opacity-60'}`}>
                                             {ev.poster_url && (
                                                 <div className="relative w-full h-36">
-                                                    <img src={ev.poster_url} alt={ev.title} className="w-full h-full object-cover" />
+                                                    <img src={sanitizeImageUrl(ev.poster_url)} alt={ev.title} className="w-full h-full object-cover" />
                                                 </div>
                                             )}
                                             <div className="p-4">
@@ -1254,7 +1254,7 @@ export default function AdminDashboard() {
                                         >
                                             <div className="relative h-40 rounded-xl overflow-hidden mb-4">
                                                 <img
-                                                    src={item.image}
+                                                    src={sanitizeImageUrl(item.image)}
                                                     alt={item.name}
                                                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                                                 />
