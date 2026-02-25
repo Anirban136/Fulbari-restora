@@ -107,7 +107,7 @@ export default function AdminDashboard() {
     const [newItem, setNewItem] = useState({
         name: "",
         description: "",
-        price: 0,
+        price: "" as any,
         category: "Bengali",
         image: "",
         isVeg: false,
@@ -495,7 +495,7 @@ export default function AdminDashboard() {
                 setNewItem({
                     name: "",
                     description: "",
-                    price: 0,
+                    price: "" as any,
                     category: "Bengali",
                     image: "",
                     isVeg: false,
@@ -590,7 +590,7 @@ export default function AdminDashboard() {
                                     setNewItem({
                                         name: "",
                                         description: "",
-                                        price: 0,
+                                        price: "" as any,
                                         category: "Bengali",
                                         image: "",
                                         isVeg: false,
@@ -657,8 +657,11 @@ export default function AdminDashboard() {
                                         type="number"
                                         placeholder="0"
                                         className="w-full bg-accent border-transparent rounded-xl p-3 outline-none focus:ring-1 focus:ring-primary transition-all"
-                                        value={newItem.price}
-                                        onChange={(e) => setNewItem({ ...newItem, price: Number(e.target.value) })}
+                                        value={newItem.price === 0 && !isEditing ? "" : newItem.price}
+                                        onChange={(e) => {
+                                            const val = e.target.value;
+                                            setNewItem({ ...newItem, price: val === "" ? "" as any : Number(val) });
+                                        }}
                                         required
                                     />
                                 </div>
