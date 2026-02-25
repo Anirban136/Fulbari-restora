@@ -27,3 +27,22 @@ export function sanitizeImageUrl(url: string | undefined | null) {
         .replace(/\(/g, "%28")
         .replace(/\)/g, "%29");
 }
+
+/**
+ * Converts standard Unsplash photo page links to direct image URLs.
+ */
+export function fixUnsplashUrl(url: string | undefined | null) {
+    if (!url) return "";
+    const s = url.trim();
+    // If it's a standard Unsplash photo page link
+    // Example: https://unsplash.com/photos/a-bowl-of-soup-gDwy_JEoz8k
+    if (s.includes("unsplash.com/photos/")) {
+        const parts = s.split("/");
+        const id = parts[parts.length - 1];
+        // If the ID has a slug name before it (e.g., bowl-of-soup-ABC123)
+        const idParts = id.split("-");
+        const actualId = idParts[idParts.length - 1];
+        return `https://images.unsplash.com/photo-${actualId}?q=80&w=2070&auto=format&fit=crop`;
+    }
+    return s;
+}

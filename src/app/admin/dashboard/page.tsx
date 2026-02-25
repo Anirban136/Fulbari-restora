@@ -7,7 +7,7 @@ import Image from "next/image";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
-import { cn, sanitizeImageUrl } from "@/lib/utils";
+import { cn, sanitizeImageUrl, fixUnsplashUrl } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import {
     Plus,
@@ -216,8 +216,8 @@ export default function AdminDashboard() {
                     event: {
                         ...eventForm,
                         id: editingEventId,
-                        poster_url: eventImages[0] ?? null,
-                        image_urls: eventImages,
+                        poster_url: eventImages[0] ? fixUnsplashUrl(eventImages[0]) : null,
+                        image_urls: eventImages.map(url => fixUnsplashUrl(url)),
                     }
                 }),
             });
@@ -307,8 +307,10 @@ export default function AdminDashboard() {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    action: 'ADD',
-                    item: galleryForm
+                    item: {
+                        ...galleryForm,
+                        url: fixUnsplashUrl(galleryForm.url)
+                    }
                 }),
             });
             const data = await res.json();
@@ -456,20 +458,6 @@ export default function AdminDashboard() {
         }
     };
 
-    const fixUnsplashUrl = (url: string) => {
-        if (!url) return "";
-        // If it's a standard Unsplash photo page link
-        // Example: https://unsplash.com/photos/a-bowl-of-soup-gDwy_JEoz8k
-        if (url.includes("unsplash.com/photos/")) {
-            const parts = url.split("/");
-            const id = parts[parts.length - 1];
-            // If the ID has a slug name before it (e.g., bowl-of-soup-ABC123)
-            const idParts = id.split("-");
-            const actualId = idParts[idParts.length - 1];
-            return `https://images.unsplash.com/photo-${actualId}?q=80&w=2070&auto=format&fit=crop`;
-        }
-        return url;
-    };
 
     const handleAddItem = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -764,6 +752,11 @@ export default function AdminDashboard() {
                                                             src={sanitizeImageUrl(fixUnsplashUrl(newItem.image))}
                                                             alt="Preview"
                                                             className="w-full h-full object-cover transition-transform duration-500 group-hover/upload:scale-105"
+                                                            onError={(e) => {
+                                                                const target = e.target as HTMLImageElement;
+                                                                console.error(`Admin menu item preview failed: ${target.src}`);
+                                                                target.src = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=800&auto=format&fit=crop';
+                                                            }}
                                                         />
                                                         <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover/upload:opacity-100 transition-opacity">
                                                             <div className="flex flex-col items-center gap-1">
@@ -967,7 +960,16 @@ export default function AdminDashboard() {
                                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
                                     {galleryItems.map(item => (
                                         <div key={item.id} className="relative aspect-square rounded-2xl overflow-hidden border border-border group shadow-sm bg-accent/20">
-                                            <img src={sanitizeImageUrl(item.url)} alt={item.category} className="w-full h-full object-cover transition-transform group-hover:scale-110" />
+                                            <img
+                                                src={sanitizeImageUrl(item.url)}
+                                                alt={item.category}
+                                                className="w-full h-full object-cover transition-transform group-hover:scale-110"
+                                                onError={(e) => {
+                                                    const target = e.target as HTMLImageElement;
+                                                    console.error(`Admin gallery thumbnail failed: ${target.src}`);
+                                                    target.src = 'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?q=80&w=800&auto=format&fit=crop';
+                                                }}
+                                            />
                                             <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2 p-2">
                                                 <span className="text-[10px] font-bold text-white bg-primary/80 px-2 py-0.5 rounded-full">{item.category}</span>
                                                 <button
@@ -1014,7 +1016,16 @@ export default function AdminDashboard() {
                                             {/* Item image */}
                                             <div className="relative w-12 h-12 rounded-xl overflow-hidden shrink-0">
                                                 {item.image
-                                                    ? <img src={sanitizeImageUrl(item.image)} alt={item.name} className="w-full h-full object-cover" />
+                                                    ? <img
+                                                        src={sanitizeImageUrl(item.image)}
+                                                        alt={item.name}
+                                                        className="w-full h-full object-cover"
+                                                        onError={(e) => {
+                                                            const target = e.target as HTMLImageElement;
+                                                            console.error(`Admin special item list image failed: ${target.src}`);
+                                                            target.src = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=800&auto=format&fit=crop';
+                                                        }}
+                                                    />
                                                     : <div className="w-full h-full bg-card flex items-center justify-center"><Utensils size={16} className="text-muted-foreground" /></div>
                                                 }
                                             </div>
@@ -1076,7 +1087,16 @@ export default function AdminDashboard() {
                                         <div className="flex gap-2 flex-wrap mb-2">
                                             {eventImages.map((url, i) => (
                                                 <div key={i} className="relative w-20 h-14 rounded-xl overflow-hidden border border-border group">
-                                                    <img src={sanitizeImageUrl(url)} alt={`img ${i + 1}`} className="w-full h-full object-cover" />
+                                                    <img
+                                                        src={sanitizeImageUrl(url)}
+                                                        alt={`img ${i + 1}`}
+                                                        className="w-full h-full object-cover"
+                                                        onError={(e) => {
+                                                            const target = e.target as HTMLImageElement;
+                                                            console.error(`Admin event form thumbnail failed: ${target.src}`);
+                                                            target.src = 'https://images.unsplash.com/photo-1559339352-11d035aa65de?q=80&w=800&auto=format&fit=crop';
+                                                        }}
+                                                    />
                                                     <button type="button" onClick={() => removeEventImage(i)}
                                                         className="absolute top-0.5 right-0.5 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
                                                         <X size={9} />
@@ -1148,7 +1168,16 @@ export default function AdminDashboard() {
                                         <div key={ev.id} className={`rounded-2xl border overflow-hidden transition-all ${ev.is_active ? 'border-border' : 'border-border/30 opacity-60'}`}>
                                             {ev.poster_url && (
                                                 <div className="relative w-full h-36">
-                                                    <img src={sanitizeImageUrl(ev.poster_url)} alt={ev.title} className="w-full h-full object-cover" />
+                                                    <img
+                                                        src={sanitizeImageUrl(ev.poster_url)}
+                                                        alt={ev.title}
+                                                        className="w-full h-full object-cover"
+                                                        onError={(e) => {
+                                                            const target = e.target as HTMLImageElement;
+                                                            console.error(`Admin event list image failed: ${target.src}`);
+                                                            target.src = 'https://images.unsplash.com/photo-1559339352-11d035aa65de?q=80&w=800&auto=format&fit=crop';
+                                                        }}
+                                                    />
                                                 </div>
                                             )}
                                             <div className="p-4">
@@ -1257,6 +1286,11 @@ export default function AdminDashboard() {
                                                     src={sanitizeImageUrl(item.image)}
                                                     alt={item.name}
                                                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                                    onError={(e) => {
+                                                        const target = e.target as HTMLImageElement;
+                                                        console.error(`Admin menu list image failed: ${target.src}`);
+                                                        target.src = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=800&auto=format&fit=crop';
+                                                    }}
                                                 />
                                                 <div className="absolute top-2 right-2 flex flex-col gap-2">
                                                     <button
