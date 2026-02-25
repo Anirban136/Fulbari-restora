@@ -236,7 +236,7 @@ export function Specialties() {
                             {/* Items List */}
                             <div className="p-4 md:p-6 overflow-y-auto max-h-[calc(85vh-12rem)] custom-scrollbar">
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    {filteredItems.map((item, index) => (
+                                    {filteredItems.map((item: any, index: number) => (
                                         <motion.div
                                             key={item.id}
                                             initial={{ opacity: 0, y: 15 }}
