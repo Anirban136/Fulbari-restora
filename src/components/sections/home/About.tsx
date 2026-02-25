@@ -243,11 +243,11 @@ export function About() {
                                         </p>
 
                                         {activeVenue === "restaurant" && (
-                                            <div className="p-6 rounded-2xl bg-primary/5 border-l-4 border-primary/50 relative overflow-hidden group">
-                                                <div className="absolute top-0 right-0 p-2 opacity-10 group-hover:rotate-12 transition-transform">
-                                                    <Utensils size={48} />
+                                            <div className="p-4 rounded-2xl bg-primary/5 border-l-4 border-primary/50 relative overflow-hidden group">
+                                                <div className="absolute top-0 right-0 p-1.5 opacity-10 group-hover:rotate-12 transition-transform">
+                                                    <Utensils size={40} />
                                                 </div>
-                                                <p className="font-bengali text-lg leading-relaxed text-foreground font-bold italic">
+                                                <p className="font-bengali text-base md:text-lg leading-relaxed text-foreground font-bold italic">
                                                     {current.bengaliDescription}
                                                 </p>
                                             </div>
