@@ -126,14 +126,14 @@ function VenueImageSlider({ images, label }: { images: string[], label: string }
                     transition={{ duration: 0.5 }}
                     className="relative w-full h-full"
                 >
-                    <Image
+                    <img
                         src={sanitizeImageUrl(images[currentIndex])}
                         alt={`${label} photo ${currentIndex + 1}`}
-                        fill
-                        unoptimized
-                        sizes="(max-width: 768px) 100vw, 50vw"
-                        className="object-cover"
-                        priority
+                        className="absolute inset-0 w-full h-full object-cover"
+                        loading="eager"
+                        onError={(e) => {
+                            (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=800&auto=format&fit=crop';
+                        }}
                     />
                     <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black/80 to-transparent" />
                 </motion.div>

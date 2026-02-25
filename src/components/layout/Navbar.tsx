@@ -43,6 +43,7 @@ export function Navbar() {
                             src="/logo.png"
                             alt="Fulbari Restaurant Logo"
                             fill
+                            unoptimized
                             className="object-contain"
                             style={{ objectPosition: 'center', rotate: '0deg' }}
                             priority

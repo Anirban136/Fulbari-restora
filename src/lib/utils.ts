@@ -8,11 +8,21 @@ export function cn(...inputs: ClassValue[]) {
 export function sanitizeImageUrl(url: string | undefined | null) {
     if (!url) return "";
     let s = url.trim();
-    // Handle Unsplash optimization if missing
+
+    // 1. Force HTTPS to prevent mixed content issues on Vercel
+    if (s.startsWith("http://")) {
+        s = s.replace("http://", "https://");
+    }
+
+    // 2. Handle Unsplash optimization
     if (s.includes("unsplash.com") && !s.includes("auto=format")) {
         const separator = s.includes("?") ? "&" : "?";
-        s = `${s}${separator}auto=format&fit=crop&q=80&w=800`;
+        s = `${s}${separator}auto=format&fit=crop&q=80&w=1200`;
     }
-    // Handle spaces in URLs by encoding them simply
-    return s.replace(/ /g, "%20");
+
+    // 3. Handle spaces and basic special characters safely
+    // We avoid full encodeURI as it can break some Supabase signed URL parameters
+    return s.replace(/ /g, "%20")
+        .replace(/\(/g, "%20")
+        .replace(/\)/g, "%20");
 }

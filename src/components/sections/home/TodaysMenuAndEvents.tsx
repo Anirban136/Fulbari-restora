@@ -133,13 +133,14 @@ function EventImageCarousel({ images }: { images: string[] }) {
                     exit="exit"
                     className="absolute inset-0"
                 >
-                    <Image
+                    <img
                         src={sanitizeImageUrl(images[idx])}
-                        alt={`Event image ${idx + 1}`}
-                        fill
-                        unoptimized
-                        priority={idx === 0}
-                        className="object-cover"
+                        alt={`Event at Fulbari - image ${idx + 1}`}
+                        loading={idx === 0 ? "eager" : "lazy"}
+                        className="absolute inset-0 w-full h-full object-cover"
+                        onError={(e) => {
+                            (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?q=80&w=800&auto=format&fit=crop';
+                        }}
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60" />
                 </motion.div>
@@ -235,14 +236,14 @@ function ModernEventGallery({ images }: { images: string[] }) {
                         className="flex-none w-[75vw] aspect-[4/5] snap-center snap-always"
                     >
                         <div className="relative w-full h-full rounded-2xl overflow-hidden shadow-xl border border-border/50">
-                            <Image
+                            <img
                                 src={sanitizeImageUrl(img)}
-                                alt=""
-                                fill
-                                unoptimized
-                                sizes="75vw"
-                                className="object-cover"
-                                priority={i < 2}
+                                alt="Event Atmosphere"
+                                loading={i < 2 ? "eager" : "lazy"}
+                                className="absolute inset-0 w-full h-full object-cover"
+                                onError={(e) => {
+                                    (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1559339352-11d035aa65de?q=80&w=800&auto=format&fit=crop';
+                                }}
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
                         </div>
@@ -274,13 +275,14 @@ function ModernEventGallery({ images }: { images: string[] }) {
                                             "col-span-1 row-span-1"
                             )}
                         >
-                            <Image
+                            <img
                                 src={sanitizeImageUrl(img)}
-                                alt=""
-                                fill
-                                unoptimized
-                                sizes={i === 0 ? "50vw" : "25vw"}
-                                className="object-cover group-hover:scale-110 transition-transform duration-700"
+                                alt="Featured Event Gallery"
+                                loading={i === 0 ? "eager" : "lazy"}
+                                className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                                onError={(e) => {
+                                    (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1552566626-52f8b828add9?q=80&w=800&auto=format&fit=crop';
+                                }}
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity" />
                             <div className="absolute inset-0 ring-1 ring-inset ring-white/20 group-hover:ring-primary/40 transition-all rounded-3xl" />
@@ -417,13 +419,14 @@ export function TodaysMenuAndEvents() {
                                             >
                                                 <div className="relative h-28 md:h-36 lg:h-40 overflow-hidden">
                                                     {item.image
-                                                        ? <Image
+                                                        ? <img
                                                             src={sanitizeImageUrl(item.image)}
                                                             alt={item.name}
-                                                            fill
-                                                            unoptimized
-                                                            priority={index < 4}
-                                                            className="object-cover group-hover:scale-110 transition-transform duration-500"
+                                                            loading={index < 4 ? "eager" : "lazy"}
+                                                            className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                                                            onError={(e) => {
+                                                                (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=800&auto=format&fit=crop';
+                                                            }}
                                                         />
                                                         : <div className="w-full h-full bg-card flex items-center justify-center"><Utensils size={24} className="text-muted-foreground" /></div>
                                                     }
@@ -517,11 +520,14 @@ export function TodaysMenuAndEvents() {
                                             >
                                                 <div className="relative w-24 h-24 rounded-lg overflow-hidden shrink-0 shadow-lg">
                                                     {item.image
-                                                        ? <Image
+                                                        ? <img
                                                             src={sanitizeImageUrl(item.image)}
                                                             alt={item.name}
-                                                            fill
-                                                            className="object-cover group-hover:scale-110 transition-transform duration-500"
+                                                            loading="lazy"
+                                                            className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                                                            onError={(e) => {
+                                                                (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=800&auto=format&fit=crop';
+                                                            }}
                                                         />
                                                         : <div className="w-full h-full bg-muted flex items-center justify-center"><Utensils size={24} className="text-muted-foreground" /></div>
                                                     }

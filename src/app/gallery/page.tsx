@@ -107,14 +107,14 @@ export default function GalleryPage() {
                                 className="break-inside-avoid rounded-2xl overflow-hidden relative group shadow-lg"
                             >
                                 <div className="relative w-full h-full">
-                                    <Image
+                                    <img
                                         src={sanitizeImageUrl(img.url)}
-                                        alt={`${img.category} - Gallery image ${idx + 1}`}
-                                        width={800}
-                                        height={600}
-                                        unoptimized
-                                        priority={idx < 4}
-                                        className="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-105"
+                                        alt={`${img.category} at Fulbari Restaurant - Gallery item`}
+                                        loading={idx < 4 ? "eager" : "lazy"}
+                                        className="w-full h-auto min-h-[200px] object-cover transition-transform duration-700 group-hover:scale-105"
+                                        onError={(e) => {
+                                            (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?q=80&w=800&auto=format&fit=crop';
+                                        }}
                                     />
                                 </div>
                                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
