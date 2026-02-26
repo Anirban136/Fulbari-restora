@@ -31,6 +31,7 @@ import {
     CalendarDays,
     Star,
     Search,
+    ShieldAlert,
     X
 } from "lucide-react";
 
@@ -82,7 +83,7 @@ export default function AdminDashboard() {
     const router = useRouter();
 
     // ── Navigation ──
-    const [adminTab, setAdminTab] = useState<'menu' | 'specials' | 'events' | 'gallery'>('menu');
+    const [adminTab, setAdminTab] = useState<'menu' | 'specials' | 'events'>('menu');
     const [todaysSpecialIds, setTodaysSpecialIds] = useState<string[]>([]);
     const [specSearch, setSpecSearch] = useState('');
     const [togglingSpecial, setTogglingSpecial] = useState<string | null>(null);
@@ -127,6 +128,30 @@ export default function AdminDashboard() {
 
     const [customCategory, setCustomCategory] = useState("");
     const [isCustomCategory, setIsCustomCategory] = useState(false);
+
+    const [storageStatus, setStorageStatus] = useState<any>(null);
+    const [isCheckingStorage, setIsCheckingStorage] = useState(false);
+
+    const checkStorage = async () => {
+        setIsCheckingStorage(true);
+        try {
+            const res = await fetch('/api/init-storage');
+            const data = await res.json();
+            setStorageStatus(data.buckets);
+            if (data.success) {
+                setShowToast({
+                    show: true,
+                    message: "Storage Status Checked!",
+                    type: 'success'
+                });
+            }
+        } catch (error) {
+            console.error("Storage check failed", error);
+        } finally {
+            setIsCheckingStorage(false);
+            setTimeout(() => setShowToast(p => ({ ...p, show: false })), 3000);
+        }
+    };
 
     useEffect(() => {
         const isLoggedIn = localStorage.getItem("adminLoggedIn");
@@ -307,6 +332,7 @@ export default function AdminDashboard() {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
+                    action: 'ADD',
                     item: {
                         ...galleryForm,
                         url: fixUnsplashUrl(galleryForm.url)
@@ -525,8 +551,8 @@ export default function AdminDashboard() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ action: "UPDATE_PRICE", item: { id, price: newPrice } }),
             });
-        } catch (error) {
-            console.error("Price update failed");
+        } catch (error: any) {
+            console.error("Price update failed", error);
         }
     };
 
@@ -600,6 +626,18 @@ export default function AdminDashboard() {
                         </Button>
                         <Button
                             variant="outline"
+                            onClick={checkStorage}
+                            disabled={isCheckingStorage}
+                            className={cn(
+                                "rounded-full border-blue-500/20 text-blue-500 hover:bg-blue-500/10",
+                                storageStatus && Object.values(storageStatus).some((s: any) => s.status !== 'OK') && "border-amber-500 text-amber-500 animate-pulse"
+                            )}
+                        >
+                            {isCheckingStorage ? <Loader2 size={18} className="animate-spin mr-2" /> : <ShieldAlert className="mr-2" size={18} />}
+                            {storageStatus ? "Storage Checked" : "Setup Storage"}
+                        </Button>
+                        <Button
+                            variant="outline"
                             onClick={handleLogout}
                             className="rounded-full border-red-500/20 text-red-500 hover:bg-red-500/10"
                         >
@@ -608,6 +646,45 @@ export default function AdminDashboard() {
                         </Button>
                     </div>
                 </header>
+
+                {/* Storage Status Banner */}
+                {storageStatus && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="mb-8 p-4 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex flex-col md:flex-row gap-4 items-center justify-between"
+                    >
+                        <div className="flex items-center gap-3">
+                            <AlertCircle className="text-blue-500" size={20} />
+                            <div>
+                                <h3 className="text-sm font-bold">Supabase Storage Status</h3>
+                                <div className="flex gap-4 mt-1 flex-wrap">
+                                    {Object.entries(storageStatus).map(([name, info]: [string, any]) => (
+                                        <div key={name} className="flex flex-col gap-1">
+                                            <span className={cn(
+                                                "text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full inline-block w-fit",
+                                                info.status === 'OK' ? "bg-green-500/20 text-green-500" : "bg-red-500/20 text-red-500"
+                                            )}>
+                                                {name}: {info.status}
+                                            </span>
+                                            {info.message && info.status !== 'OK' && (
+                                                <span className="text-[9px] text-red-400 max-w-[150px] leading-tight font-medium">
+                                                    {info.message}
+                                                </span>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                        {Object.values(storageStatus).some((s: any) => s.status !== 'OK') && (
+                            <p className="text-[10px] text-muted-foreground italic md:max-w-md">
+                                Tip: Ensure your Supabase buckets are set to <strong>'Public'</strong>
+                                in the Supabase Dashboard {' > '} Storage.
+                            </p>
+                        )}
+                    </motion.div>
+                )}
 
                 {/* Add Item Form */}
                 <AnimatePresence>
@@ -886,7 +963,6 @@ export default function AdminDashboard() {
                         { key: 'menu', label: 'Menu Items', icon: <Utensils size={14} /> },
                         { key: 'specials', label: "Today's Special", icon: <Star size={14} /> },
                         { key: 'events', label: 'Events', icon: <CalendarDays size={14} /> },
-                        { key: 'gallery', label: 'Gallery', icon: <ImageIcon size={14} /> },
                     ] as const).map(t => (
                         <button key={t.key} onClick={() => setAdminTab(t.key)}
                             className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-bold transition-all duration-200
@@ -896,97 +972,6 @@ export default function AdminDashboard() {
                     ))}
                 </div>
 
-                {/* ── GALLERY TAB ──────────────────────────── */}
-                {adminTab === 'gallery' && (
-                    <div className="space-y-8">
-                        {/* Gallery Upload Form */}
-                        <div className="bg-card border border-border rounded-3xl p-6 shadow-xl">
-                            <h2 className="text-xl font-bold font-heading mb-4">Add Image to Gallery</h2>
-                            <form onSubmit={handleSaveGalleryItem} className="grid grid-cols-1 md:grid-cols-2 gap-5 items-end">
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium text-muted-foreground">Category</label>
-                                    <select
-                                        className="w-full bg-accent border-transparent rounded-xl p-3 text-sm outline-none focus:ring-1 focus:ring-primary font-bold"
-                                        value={galleryForm.category}
-                                        onChange={(e) => setGalleryForm({ ...galleryForm, category: e.target.value as any })}
-                                    >
-                                        <option value="Cafe">Cafe</option>
-                                        <option value="Restaurant">Restaurant</option>
-                                        <option value="Ambience">Ambience</option>
-                                        <option value="Food">Food</option>
-                                        <option value="Other">Other</option>
-                                    </select>
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium text-muted-foreground">Image Source</label>
-                                    <div className="flex gap-2">
-                                        <label className="flex items-center gap-2 px-4 py-2.5 bg-primary/10 border border-primary/30 text-primary rounded-xl text-sm font-medium cursor-pointer hover:bg-primary/20 transition-all shrink-0">
-                                            {galleryUploading ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />}
-                                            {galleryUploading ? 'Uploading...' : 'Upload'}
-                                            <input type="file" accept="image/*" className="hidden" onChange={handleGalleryImageUpload} />
-                                        </label>
-                                        <input
-                                            type="text"
-                                            placeholder="or Paste Image URL"
-                                            className="flex-1 bg-accent border-transparent rounded-xl p-3 text-sm outline-none focus:ring-1 focus:ring-primary"
-                                            value={galleryForm.url}
-                                            onChange={(e) => setGalleryForm({ ...galleryForm, url: e.target.value })}
-                                        />
-                                    </div>
-                                </div>
-                                <div className="md:col-span-2 flex justify-end">
-                                    <Button type="submit" disabled={gallerySaving || !galleryForm.url} className="px-8 gap-2">
-                                        {gallerySaving && <Loader2 size={14} className="animate-spin" />}
-                                        Save to Gallery
-                                    </Button>
-                                </div>
-                            </form>
-                        </div>
-
-                        {/* Gallery Grid */}
-                        <div className="bg-card border border-border rounded-3xl p-6 shadow-xl">
-                            <div className="flex justify-between items-center mb-6">
-                                <h2 className="text-xl font-bold font-heading">Gallery Collection</h2>
-                                <span className="text-xs font-bold text-muted-foreground bg-accent px-3 py-1 rounded-full">
-                                    {galleryItems.length} Total Images
-                                </span>
-                            </div>
-
-                            {galleryLoading ? (
-                                <div className="flex justify-center py-12"><Loader2 className="animate-spin text-primary" size={28} /></div>
-                            ) : galleryItems.length === 0 ? (
-                                <div className="text-center py-12 text-muted-foreground text-sm">No images in gallery yet.</div>
-                            ) : (
-                                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-                                    {galleryItems.map(item => (
-                                        <div key={item.id} className="relative aspect-square rounded-2xl overflow-hidden border border-border group shadow-sm bg-accent/20">
-                                            <img
-                                                src={sanitizeImageUrl(item.url)}
-                                                alt={item.category}
-                                                className="w-full h-full object-cover transition-transform group-hover:scale-110"
-                                                onError={(e) => {
-                                                    const target = e.target as HTMLImageElement;
-                                                    console.error(`Admin gallery thumbnail failed: ${target.src}`);
-                                                    target.src = 'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?q=80&w=800&auto=format&fit=crop';
-                                                }}
-                                            />
-                                            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2 p-2">
-                                                <span className="text-[10px] font-bold text-white bg-primary/80 px-2 py-0.5 rounded-full">{item.category}</span>
-                                                <button
-                                                    onClick={() => handleDeleteGalleryItem(item.id)}
-                                                    className="p-2 rounded-full bg-red-500 text-white hover:bg-red-600 transition-all shadow-lg active:scale-95"
-                                                    title="Delete Image"
-                                                >
-                                                    <Trash2 size={14} />
-                                                </button>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                )}
 
                 {/* ── TODAY'S SPECIAL TAB ───────────────────── */}
                 {adminTab === 'specials' && (
@@ -1167,9 +1152,9 @@ export default function AdminDashboard() {
                                     {events.map(ev => (
                                         <div key={ev.id} className={`rounded-2xl border overflow-hidden transition-all ${ev.is_active ? 'border-border' : 'border-border/30 opacity-60'}`}>
                                             {ev.poster_url && (
-                                                <div className="relative w-full h-36">
+                                                <div className="relative w-full h-36 bg-accent/30 flex items-center justify-center">
                                                     <img
-                                                        src={sanitizeImageUrl(ev.poster_url)}
+                                                        src={sanitizeImageUrl(ev.poster_url) || 'https://images.unsplash.com/photo-1559339352-11d035aa65de?q=80&w=800&auto=format&fit=crop'}
                                                         alt={ev.title}
                                                         className="w-full h-full object-cover"
                                                         onError={(e) => {

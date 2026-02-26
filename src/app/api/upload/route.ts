@@ -28,6 +28,7 @@ export async function POST(request: Request) {
 
         return NextResponse.json({ success: true, url: publicUrl });
     } catch (error: any) {
+        console.error("Upload Route Error:", error);
         return NextResponse.json({
             error: error.message || "Upload failed."
         }, { status: 500 });

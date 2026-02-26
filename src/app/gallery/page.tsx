@@ -25,11 +25,26 @@ export default function GalleryPage() {
     useEffect(() => {
         const fetchGallery = async () => {
             try {
-                const res = await fetch('/api/gallery');
-                const data = await res.json();
-                setGalleryItems(Array.isArray(data) ? data : []);
+                // Generate 10 dummy images for each category
+                const categories: GalleryItem['category'][] = ['Cafe', 'Restaurant', 'Ambience', 'Food', 'Other'];
+                const dummyItems: GalleryItem[] = [];
+
+                categories.forEach(category => {
+                    for (let i = 1; i <= 10; i++) {
+                        dummyItems.push({
+                            id: `${category}-${i}`,
+                            url: `https://picsum.photos/seed/${category}-${i}/800/800`,
+                            category: category,
+                            created_at: new Date().toISOString()
+                        });
+                    }
+                });
+
+                // Shuffle them so all tab looks diverse
+                const shuffled = dummyItems.sort(() => Math.random() - 0.5);
+                setGalleryItems(shuffled);
             } catch (err) {
-                console.error("Failed to fetch gallery:", err);
+                console.error("Failed to generate gallery:", err);
             } finally {
                 setLoading(false);
             }
