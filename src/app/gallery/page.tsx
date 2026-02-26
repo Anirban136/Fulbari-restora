@@ -17,39 +17,79 @@ interface GalleryItem {
 
 const filterTabs = ["All", "Cafe", "Restaurant", "Ambience", "Food", "Other"];
 
+// Define the static gallery images here. 
+// Simply replace the 'url' property with your real image paths (e.g. "/images/my-image.jpg" from the public folder)
+const galleryData: GalleryItem[] = [
+    // --- CAFE ---
+    { id: "cafe-1", url: "https://picsum.photos/seed/Cafe-1/800/800", category: "Cafe", created_at: "2024-01-01T00:00:00Z" },
+    { id: "cafe-2", url: "https://picsum.photos/seed/Cafe-2/800/800", category: "Cafe", created_at: "2024-01-01T00:00:00Z" },
+    { id: "cafe-3", url: "https://picsum.photos/seed/Cafe-3/800/800", category: "Cafe", created_at: "2024-01-01T00:00:00Z" },
+    { id: "cafe-4", url: "https://picsum.photos/seed/Cafe-4/800/800", category: "Cafe", created_at: "2024-01-01T00:00:00Z" },
+    { id: "cafe-5", url: "https://picsum.photos/seed/Cafe-5/800/800", category: "Cafe", created_at: "2024-01-01T00:00:00Z" },
+    { id: "cafe-6", url: "https://picsum.photos/seed/Cafe-6/800/800", category: "Cafe", created_at: "2024-01-01T00:00:00Z" },
+    { id: "cafe-7", url: "https://picsum.photos/seed/Cafe-7/800/800", category: "Cafe", created_at: "2024-01-01T00:00:00Z" },
+    { id: "cafe-8", url: "https://picsum.photos/seed/Cafe-8/800/800", category: "Cafe", created_at: "2024-01-01T00:00:00Z" },
+    { id: "cafe-9", url: "https://picsum.photos/seed/Cafe-9/800/800", category: "Cafe", created_at: "2024-01-01T00:00:00Z" },
+    { id: "cafe-10", url: "https://picsum.photos/seed/Cafe-10/800/800", category: "Cafe", created_at: "2024-01-01T00:00:00Z" },
+
+    // --- RESTAURANT ---
+    { id: "restaurant-1", url: "https://picsum.photos/seed/Restaurant-1/800/800", category: "Restaurant", created_at: "2024-01-01T00:00:00Z" },
+    { id: "restaurant-2", url: "https://picsum.photos/seed/Restaurant-2/800/800", category: "Restaurant", created_at: "2024-01-01T00:00:00Z" },
+    { id: "restaurant-3", url: "https://picsum.photos/seed/Restaurant-3/800/800", category: "Restaurant", created_at: "2024-01-01T00:00:00Z" },
+    { id: "restaurant-4", url: "https://picsum.photos/seed/Restaurant-4/800/800", category: "Restaurant", created_at: "2024-01-01T00:00:00Z" },
+    { id: "restaurant-5", url: "https://picsum.photos/seed/Restaurant-5/800/800", category: "Restaurant", created_at: "2024-01-01T00:00:00Z" },
+    { id: "restaurant-6", url: "https://picsum.photos/seed/Restaurant-6/800/800", category: "Restaurant", created_at: "2024-01-01T00:00:00Z" },
+    { id: "restaurant-7", url: "https://picsum.photos/seed/Restaurant-7/800/800", category: "Restaurant", created_at: "2024-01-01T00:00:00Z" },
+    { id: "restaurant-8", url: "https://picsum.photos/seed/Restaurant-8/800/800", category: "Restaurant", created_at: "2024-01-01T00:00:00Z" },
+    { id: "restaurant-9", url: "https://picsum.photos/seed/Restaurant-9/800/800", category: "Restaurant", created_at: "2024-01-01T00:00:00Z" },
+    { id: "restaurant-10", url: "https://picsum.photos/seed/Restaurant-10/800/800", category: "Restaurant", created_at: "2024-01-01T00:00:00Z" },
+
+    // --- AMBIENCE ---
+    { id: "ambience-1", url: "https://picsum.photos/seed/Ambience-1/800/800", category: "Ambience", created_at: "2024-01-01T00:00:00Z" },
+    { id: "ambience-2", url: "https://picsum.photos/seed/Ambience-2/800/800", category: "Ambience", created_at: "2024-01-01T00:00:00Z" },
+    { id: "ambience-3", url: "https://picsum.photos/seed/Ambience-3/800/800", category: "Ambience", created_at: "2024-01-01T00:00:00Z" },
+    { id: "ambience-4", url: "https://picsum.photos/seed/Ambience-4/800/800", category: "Ambience", created_at: "2024-01-01T00:00:00Z" },
+    { id: "ambience-5", url: "https://picsum.photos/seed/Ambience-5/800/800", category: "Ambience", created_at: "2024-01-01T00:00:00Z" },
+    { id: "ambience-6", url: "https://picsum.photos/seed/Ambience-6/800/800", category: "Ambience", created_at: "2024-01-01T00:00:00Z" },
+    { id: "ambience-7", url: "https://picsum.photos/seed/Ambience-7/800/800", category: "Ambience", created_at: "2024-01-01T00:00:00Z" },
+    { id: "ambience-8", url: "https://picsum.photos/seed/Ambience-8/800/800", category: "Ambience", created_at: "2024-01-01T00:00:00Z" },
+    { id: "ambience-9", url: "https://picsum.photos/seed/Ambience-9/800/800", category: "Ambience", created_at: "2024-01-01T00:00:00Z" },
+    { id: "ambience-10", url: "https://picsum.photos/seed/Ambience-10/800/800", category: "Ambience", created_at: "2024-01-01T00:00:00Z" },
+
+    // --- FOOD ---
+    { id: "food-1", url: "https://picsum.photos/seed/Food-1/800/800", category: "Food", created_at: "2024-01-01T00:00:00Z" },
+    { id: "food-2", url: "https://picsum.photos/seed/Food-2/800/800", category: "Food", created_at: "2024-01-01T00:00:00Z" },
+    { id: "food-3", url: "https://picsum.photos/seed/Food-3/800/800", category: "Food", created_at: "2024-01-01T00:00:00Z" },
+    { id: "food-4", url: "https://picsum.photos/seed/Food-4/800/800", category: "Food", created_at: "2024-01-01T00:00:00Z" },
+    { id: "food-5", url: "https://picsum.photos/seed/Food-5/800/800", category: "Food", created_at: "2024-01-01T00:00:00Z" },
+    { id: "food-6", url: "https://picsum.photos/seed/Food-6/800/800", category: "Food", created_at: "2024-01-01T00:00:00Z" },
+    { id: "food-7", url: "https://picsum.photos/seed/Food-7/800/800", category: "Food", created_at: "2024-01-01T00:00:00Z" },
+    { id: "food-8", url: "https://picsum.photos/seed/Food-8/800/800", category: "Food", created_at: "2024-01-01T00:00:00Z" },
+    { id: "food-9", url: "https://picsum.photos/seed/Food-9/800/800", category: "Food", created_at: "2024-01-01T00:00:00Z" },
+    { id: "food-10", url: "https://picsum.photos/seed/Food-10/800/800", category: "Food", created_at: "2024-01-01T00:00:00Z" },
+
+    // --- OTHER ---
+    { id: "other-1", url: "https://picsum.photos/seed/Other-1/800/800", category: "Other", created_at: "2024-01-01T00:00:00Z" },
+    { id: "other-2", url: "https://picsum.photos/seed/Other-2/800/800", category: "Other", created_at: "2024-01-01T00:00:00Z" },
+    { id: "other-3", url: "https://picsum.photos/seed/Other-3/800/800", category: "Other", created_at: "2024-01-01T00:00:00Z" },
+    { id: "other-4", url: "https://picsum.photos/seed/Other-4/800/800", category: "Other", created_at: "2024-01-01T00:00:00Z" },
+    { id: "other-5", url: "https://picsum.photos/seed/Other-5/800/800", category: "Other", created_at: "2024-01-01T00:00:00Z" },
+    { id: "other-6", url: "https://picsum.photos/seed/Other-6/800/800", category: "Other", created_at: "2024-01-01T00:00:00Z" },
+    { id: "other-7", url: "https://picsum.photos/seed/Other-7/800/800", category: "Other", created_at: "2024-01-01T00:00:00Z" },
+    { id: "other-8", url: "https://picsum.photos/seed/Other-8/800/800", category: "Other", created_at: "2024-01-01T00:00:00Z" },
+    { id: "other-9", url: "https://picsum.photos/seed/Other-9/800/800", category: "Other", created_at: "2024-01-01T00:00:00Z" },
+    { id: "other-10", url: "https://picsum.photos/seed/Other-10/800/800", category: "Other", created_at: "2024-01-01T00:00:00Z" }
+];
+
 export default function GalleryPage() {
     const [activeFilter, setActiveFilter] = useState("All");
     const [galleryItems, setGalleryItems] = useState<GalleryItem[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const fetchGallery = async () => {
-            try {
-                // Generate 10 dummy images for each category
-                const categories: GalleryItem['category'][] = ['Cafe', 'Restaurant', 'Ambience', 'Food', 'Other'];
-                const dummyItems: GalleryItem[] = [];
-
-                categories.forEach(category => {
-                    for (let i = 1; i <= 10; i++) {
-                        dummyItems.push({
-                            id: `${category}-${i}`,
-                            url: `https://picsum.photos/seed/${category}-${i}/800/800`,
-                            category: category,
-                            created_at: new Date().toISOString()
-                        });
-                    }
-                });
-
-                // Shuffle them so all tab looks diverse
-                const shuffled = dummyItems.sort(() => Math.random() - 0.5);
-                setGalleryItems(shuffled);
-            } catch (err) {
-                console.error("Failed to generate gallery:", err);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchGallery();
+        // Load the static data
+        setGalleryItems(galleryData);
+        setLoading(false);
     }, []);
 
     const filteredImages = activeFilter === "All"
