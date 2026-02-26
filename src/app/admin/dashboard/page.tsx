@@ -216,7 +216,7 @@ export default function AdminDashboard() {
         setEventUploading(true);
         const fd = new FormData();
         fd.append('file', file);
-        fd.append('bucket', 'events');
+        fd.append('bucket', 'menu-images');
         try {
             const res = await fetch('/api/upload', { method: 'POST', body: fd });
             const data = await res.json();
@@ -832,7 +832,6 @@ export default function AdminDashboard() {
                                                             onError={(e) => {
                                                                 const target = e.target as HTMLImageElement;
                                                                 console.error(`Admin menu item preview failed: ${target.src}`);
-                                                                target.src = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=800&auto=format&fit=crop';
                                                             }}
                                                         />
                                                         <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover/upload:opacity-100 transition-opacity">
@@ -1008,7 +1007,6 @@ export default function AdminDashboard() {
                                                         onError={(e) => {
                                                             const target = e.target as HTMLImageElement;
                                                             console.error(`Admin special item list image failed: ${target.src}`);
-                                                            target.src = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=800&auto=format&fit=crop';
                                                         }}
                                                     />
                                                     : <div className="w-full h-full bg-card flex items-center justify-center"><Utensils size={16} className="text-muted-foreground" /></div>
@@ -1079,7 +1077,6 @@ export default function AdminDashboard() {
                                                         onError={(e) => {
                                                             const target = e.target as HTMLImageElement;
                                                             console.error(`Admin event form thumbnail failed: ${target.src}`);
-                                                            target.src = 'https://images.unsplash.com/photo-1559339352-11d035aa65de?q=80&w=800&auto=format&fit=crop';
                                                         }}
                                                     />
                                                     <button type="button" onClick={() => removeEventImage(i)}
@@ -1154,13 +1151,12 @@ export default function AdminDashboard() {
                                             {ev.poster_url && (
                                                 <div className="relative w-full h-36 bg-accent/30 flex items-center justify-center">
                                                     <img
-                                                        src={sanitizeImageUrl(ev.poster_url) || 'https://images.unsplash.com/photo-1559339352-11d035aa65de?q=80&w=800&auto=format&fit=crop'}
+                                                        src={sanitizeImageUrl(ev.poster_url)}
                                                         alt={ev.title}
                                                         className="w-full h-full object-cover"
                                                         onError={(e) => {
                                                             const target = e.target as HTMLImageElement;
                                                             console.error(`Admin event list image failed: ${target.src}`);
-                                                            target.src = 'https://images.unsplash.com/photo-1559339352-11d035aa65de?q=80&w=800&auto=format&fit=crop';
                                                         }}
                                                     />
                                                 </div>
