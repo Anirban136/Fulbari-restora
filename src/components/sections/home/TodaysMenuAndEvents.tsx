@@ -227,74 +227,33 @@ function ModernEventGallery({ images }: { images: string[] }) {
 
     return (
         <div className="relative w-full overflow-hidden">
-            {/* Mobile/Tablet: Native Snap Slider with JS Auto-scroll (Fast & Dynamic) */}
+            {/* Native Snap Slider with JS Auto-scroll (Fast & Dynamic) */}
             <div
                 ref={mobileScrollRef}
-                className="md:hidden flex gap-4 overflow-x-auto snap-x snap-mandatory px-4 pb-8 no-scrollbar scroll-smooth"
+                className="flex gap-4 overflow-x-auto snap-x snap-mandatory px-4 pb-8 no-scrollbar scroll-smooth"
             >
                 {images.map((img, i) => (
                     <div
                         key={`snap-${i}`}
-                        className="flex-none w-[75vw] aspect-[4/5] snap-center snap-always"
+                        className="flex-none w-[85vw] md:w-[60vw] lg:w-[40vw] xl:w-[30vw] aspect-[4/3] snap-center snap-always"
                     >
-                        <div className="relative w-full h-full rounded-2xl overflow-hidden shadow-xl border border-border/50">
+                        <div className="relative w-full h-full rounded-2xl overflow-hidden shadow-xl border border-border/50 group">
                             <img
                                 src={sanitizeImageUrl(img)}
                                 alt="Event Atmosphere"
                                 loading={i < 2 ? "eager" : "lazy"}
-                                className="absolute inset-0 w-full h-full object-cover"
+                                className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                                 onError={(e) => {
                                     const target = e.target as HTMLImageElement;
                                     console.error(`Event grid image failed: ${target.src}`);
                                     target.src = 'https://images.unsplash.com/photo-1559339352-11d035aa65de?q=80&w=800&auto=format&fit=crop';
                                 }}
                             />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity" />
+                            <div className="absolute inset-0 ring-1 ring-inset ring-white/20 group-hover:ring-primary/40 transition-all rounded-2xl" />
                         </div>
                     </div>
                 ))}
-            </div>
-
-            {/* Desktop: Premium Bento-style Grid with subtle cycling */}
-            <div className="hidden md:grid grid-cols-4 grid-rows-2 gap-4 h-[500px] px-8 lg:px-12">
-                <AnimatePresence mode="popLayout">
-                    {bentoImages.slice(0, 5).map((img, i) => (
-                        <motion.div
-                            key={`bento-${img}-${i}`}
-                            layout
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.95 }}
-                            transition={{
-                                type: "spring",
-                                stiffness: 200,
-                                damping: 25,
-                                opacity: { duration: 0.4 }
-                            }}
-                            className={cn(
-                                "relative rounded-3xl overflow-hidden shadow-2xl border border-white/10 group cursor-pointer",
-                                i === 0 ? "col-span-2 row-span-2" :
-                                    i === 1 ? "col-span-1 row-span-1" :
-                                        i === 2 ? "col-span-1 row-span-2" :
-                                            "col-span-1 row-span-1"
-                            )}
-                        >
-                            <img
-                                src={sanitizeImageUrl(img)}
-                                alt="Featured Event Gallery"
-                                loading={i === 0 ? "eager" : "lazy"}
-                                className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                                onError={(e) => {
-                                    const target = e.target as HTMLImageElement;
-                                    console.error(`Featured gallery image failed: ${target.src}`);
-                                    target.src = 'https://images.unsplash.com/photo-1552566626-52f8b828add9?q=80&w=800&auto=format&fit=crop';
-                                }}
-                            />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity" />
-                            <div className="absolute inset-0 ring-1 ring-inset ring-white/20 group-hover:ring-primary/40 transition-all rounded-3xl" />
-                        </motion.div>
-                    ))}
-                </AnimatePresence>
             </div>
 
             {/* Background elements to add depth */}
