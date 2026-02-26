@@ -243,8 +243,9 @@ function ModernEventGallery({ images }: { images: string[] }) {
                             <img
                                 src={sanitizeImageUrl(img)}
                                 alt="Event Atmosphere"
-                                loading={i < 2 ? "eager" : "lazy"}
-                                className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                                loading="eager"
+                                fetchPriority={i === 0 ? "high" : "auto"}
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 bg-black/20"
                                 onError={(e) => {
                                     const target = e.target as HTMLImageElement;
                                     console.error(`Event grid image failed: ${target.src}`);
@@ -273,13 +274,13 @@ export function TodaysMenuAndEvents() {
     const scrollRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        fetch("/api/daily-specials")
+        fetch("/api/daily-specials", { cache: 'no-store' })
             .then(r => r.json())
             .then(data => setSpecials(Array.isArray(data) ? data : []))
             .catch(() => setSpecials([]))
             .finally(() => setLoadingMenu(false));
 
-        fetch("/api/events")
+        fetch("/api/events", { cache: 'no-store' })
             .then(r => r.json())
             .then(data => setEvents(Array.isArray(data) ? data : []))
             .catch(() => setEvents([]))
@@ -356,7 +357,7 @@ export function TodaysMenuAndEvents() {
                                                 (ev.image_urls && ev.image_urls.length > 0)
                                                     ? ev.image_urls
                                                     : ev.poster_url ? [ev.poster_url] : []
-                                            ).filter((v, i, a) => a.indexOf(v) === i) // unique
+                                            ).filter((v, i, a) => Boolean(v) && v.trim() !== "" && a.indexOf(v) === i) // strict true & unique
                                         } />
                                     </div>
                                 </>
