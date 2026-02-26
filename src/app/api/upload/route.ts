@@ -13,14 +13,12 @@ export async function POST(request: Request) {
 
         const fileExtension = file.name.split(".").pop();
         const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExtension}`;
-
-        const buffer = Buffer.from(await file.arrayBuffer());
-
+        const arrayBuffer = await file.arrayBuffer();
         console.log(`Attempting to upload to bucket: ${bucket} using anon key`);
 
         const { data, error } = await supabase.storage
             .from(bucket)
-            .upload(fileName, buffer, {
+            .upload(fileName, arrayBuffer, {
                 cacheControl: "3600",
                 upsert: false,
                 contentType: file.type || 'image/jpeg'
@@ -33,7 +31,7 @@ export async function POST(request: Request) {
                 console.log("Fallback: Attempting to use menu-images bucket instead...");
                 const { data: fbData, error: fbError } = await supabase.storage
                     .from("menu-images")
-                    .upload(`events/${fileName}`, buffer, {
+                    .upload(`events/${fileName}`, arrayBuffer, {
                         cacheControl: "3600",
                         upsert: false,
                         contentType: file.type || 'image/jpeg'

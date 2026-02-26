@@ -182,43 +182,8 @@ function EventImageCarousel({ images }: { images: string[] }) {
     );
 }
 
-// Modern, high-performance gallery with snap-scrolling (mobile) and Bento Grid (desktop)
 // Modern, high-performance gallery with auto-scrolling (mobile) and dynamic Bento Grid (desktop)
-function ModernEventGallery({ images }: { images: string[] }) {
-    const mobileScrollRef = useRef<HTMLDivElement>(null);
-    const [bentoOffset, setBentoOffset] = useState(0);
-
-    // Mobile Auto-scroll logic
-    useEffect(() => {
-        const el = mobileScrollRef.current;
-        if (!el || images.length <= 1) return;
-
-        const interval = setInterval(() => {
-            if (!el) return;
-            const scrollWidth = el.scrollWidth;
-            const clientWidth = el.clientWidth;
-            const currentScroll = el.scrollLeft;
-
-            // If we're at the end, jump back to start, else scroll one "page"
-            if (currentScroll + clientWidth >= scrollWidth - 10) {
-                el.scrollTo({ left: 0, behavior: 'smooth' });
-            } else {
-                el.scrollBy({ left: clientWidth * 0.8, behavior: 'smooth' });
-            }
-        }, 4000);
-
-        return () => clearInterval(interval);
-    }, [images.length]);
-
-    // Bento Grid dynamic cycling (every 6 seconds change the offset if many images)
-    useEffect(() => {
-        if (images.length <= 5) return;
-        const interval = setInterval(() => {
-            setBentoOffset(prev => (prev + 1) % (images.length - 4));
-        }, 6000);
-        return () => clearInterval(interval);
-    }, [images.length]);
-
+export function ModernEventGallery({ images }: { images: string[] }) {
     if (images.length === 0) {
         return (
             <div className="flex justify-center items-center h-48 border border-dashed border-border/50 rounded-2xl mx-4">
@@ -228,32 +193,24 @@ function ModernEventGallery({ images }: { images: string[] }) {
     }
 
     return (
-        <div className="relative w-full overflow-hidden">
-            {/* Native Snap Slider with JS Auto-scroll (Fast & Dynamic) */}
-            <div
-                ref={mobileScrollRef}
-                className="flex gap-4 overflow-x-auto snap-x snap-mandatory px-4 pb-8 no-scrollbar scroll-smooth"
-            >
+        <div className="relative w-full overflow-hidden px-4 md:px-8 pb-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {images.map((img, i) => (
                     <div
-                        key={`snap-${i}`}
-                        className="flex-none w-[85vw] md:w-[60vw] lg:w-[40vw] xl:w-[30vw] aspect-[4/3] snap-center snap-always"
+                        key={`grid-${i}`}
+                        className="relative w-full aspect-[4/3] rounded-2xl overflow-hidden shadow-xl border border-border/50 group bg-card"
                     >
-                        <div className="relative w-full h-full rounded-2xl overflow-hidden shadow-xl border border-border/50 group bg-card">
-                            <img
-                                src={sanitizeImageUrl(img)}
-                                alt="Event Atmosphere"
-                                loading="eager"
-                                fetchPriority={i === 0 ? "high" : "auto"}
-                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 bg-black/20"
-                                onError={(e) => {
-                                    const target = e.target as HTMLImageElement;
-                                    console.error(`Event grid image failed: ${target.src}`);
-                                }}
-                            />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity" />
-                            <div className="absolute inset-0 ring-1 ring-inset ring-white/20 group-hover:ring-primary/40 transition-all rounded-2xl" />
-                        </div>
+                        {/* 
+                         Using a background-image div here specifically avoids 
+                         the Safari/Brave iOS 'lazy blank' <img> issue entirely 
+                         because CSS paints it deterministically.
+                        */}
+                        <div
+                            className="w-full h-full bg-cover bg-center group-hover:scale-105 transition-transform duration-700"
+                            style={{ backgroundImage: `url(${sanitizeImageUrl(img)})` }}
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity" />
+                        <div className="absolute inset-0 ring-1 ring-inset ring-white/20 group-hover:ring-primary/40 transition-all rounded-2xl" />
                     </div>
                 ))}
             </div>
