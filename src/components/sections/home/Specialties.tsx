@@ -160,7 +160,7 @@ export function Specialties() {
                                             <img
                                                 src={sanitizeImageUrl(item.image)}
                                                 alt={item.label}
-                                                className="w-full h-full object-cover opacity-60 group-hover:opacity-100 group-hover:scale-110 transition-all duration-1000 grayscale group-hover:grayscale-0"
+                                                className="w-full h-full object-cover group-hover:scale-110 transition-all duration-1000"
                                                 onError={(e) => {
                                                     const target = e.target as HTMLImageElement;
                                                     target.src = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=800&auto=format&fit=crop';

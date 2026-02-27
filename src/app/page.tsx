@@ -34,8 +34,8 @@ export default function Home() {
       <Navbar />
       <main className="flex-grow">
         <Hero />
-        <TodaysMenuAndEvents />
         <About />
+        <TodaysMenuAndEvents />
         <Specialties />
         <GoogleReviews />
       </main>
