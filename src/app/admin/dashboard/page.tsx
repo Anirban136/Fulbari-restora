@@ -8,6 +8,7 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { cn, sanitizeImageUrl, fixUnsplashUrl } from "@/lib/utils";
+import { uploadFileToBucket } from "@/lib/supabase-browser";
 import { motion, AnimatePresence } from "framer-motion";
 import {
     Plus,
@@ -214,21 +215,17 @@ export default function AdminDashboard() {
         }
 
         setEventUploading(true);
-        const fd = new FormData();
-        fd.append('file', file);
-        fd.append('bucket', 'events');
         try {
-            const res = await fetch('/api/upload', { method: 'POST', body: fd });
-            const data = await res.json();
-            if (res.ok && data.url) {
-                setEventImages(prev => [...prev, data.url]);
-            } else {
-                alert(`Upload failed: ${data.error || "Unknown error"}`);
-            }
-        } catch (e: any) {
-            alert(`Network error uploading file: ${e.message}`);
+            // Upload directly from browser to Supabase — bypasses Vercel's 4.5MB serverless limit
+            const publicUrl = await uploadFileToBucket(file, 'events');
+            setEventImages(prev => [...prev, publicUrl]);
+        } catch (err: any) {
+            alert(`Upload failed: ${err.message}`);
+        } finally {
+            setEventUploading(false);
+            // Reset file input so same file can be re-selected
+            e.target.value = '';
         }
-        finally { setEventUploading(false); }
     };
 
     const removeEventImage = (idx: number) => {
@@ -304,27 +301,17 @@ export default function AdminDashboard() {
         if (!file) return;
 
         setGalleryUploading(true);
-        const formData = new FormData();
-        formData.append("file", file);
-        formData.append("bucket", "gallery");
-
         try {
-            const res = await fetch("/api/upload", {
-                method: "POST",
-                body: formData,
-            });
-            const data = await res.json();
-            if (data.success || data.url) {
-                setGalleryForm(prev => ({ ...prev, url: data.url }));
-                setShowToast({ show: true, message: "Image Uploaded Successfully!", type: 'success' });
-            } else {
-                alert("Upload failed: " + data.error);
-            }
-        } catch (error) {
-            console.error("Upload Error:", error);
-            alert("Upload failed! Please ensure you created the 'gallery' bucket in Supabase, set it to Public, and added the appropriate policies.");
+            // Upload directly from browser to Supabase — bypasses Vercel's 4.5MB serverless limit
+            const publicUrl = await uploadFileToBucket(file, 'gallery');
+            setGalleryForm(prev => ({ ...prev, url: publicUrl }));
+            setShowToast({ show: true, message: "Image Uploaded Successfully!", type: 'success' });
+        } catch (err: any) {
+            console.error("Gallery Upload Error:", err);
+            alert(err.message);
         } finally {
             setGalleryUploading(false);
+            e.target.value = '';
             setTimeout(() => setShowToast(p => ({ ...p, show: false })), 3000);
         }
     };
@@ -468,25 +455,16 @@ export default function AdminDashboard() {
         if (!file) return;
 
         setIsUploading(true);
-        const formData = new FormData();
-        formData.append("file", file);
-
         try {
-            const res = await fetch("/api/upload", {
-                method: "POST",
-                body: formData,
-            });
-            const data = await res.json();
-            if (data.success) {
-                setNewItem({ ...newItem, image: data.url });
-            } else {
-                alert("Upload failed: " + data.error);
-            }
-        } catch (error) {
-            console.error("Upload Error:", error);
-            alert("Upload failed! Please ensure you created the 'menu-images' bucket in Supabase and set it to Public.");
+            // Upload directly from browser to Supabase — bypasses Vercel's 4.5MB serverless limit
+            const publicUrl = await uploadFileToBucket(file, 'menu-images');
+            setNewItem(prev => ({ ...prev, image: publicUrl }));
+        } catch (err: any) {
+            console.error("Menu Image Upload Error:", err);
+            alert(err.message);
         } finally {
             setIsUploading(false);
+            e.target.value = '';
         }
     };
 

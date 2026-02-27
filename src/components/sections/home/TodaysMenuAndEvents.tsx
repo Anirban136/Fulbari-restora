@@ -182,7 +182,7 @@ function EventImageCarousel({ images }: { images: string[] }) {
     );
 }
 
-// Modern, high-performance gallery with auto-scrolling (mobile) and dynamic Bento Grid (desktop)
+// Modern reliable gallery using <img> tags (works on ALL browsers including iOS Safari, Mobile Chrome)
 export function ModernEventGallery({ images }: { images: string[] }) {
     if (images.length === 0) {
         return (
@@ -200,26 +200,36 @@ export function ModernEventGallery({ images }: { images: string[] }) {
                         key={`grid-${i}`}
                         className="relative w-full aspect-[4/3] rounded-2xl overflow-hidden shadow-xl border border-border/50 group bg-card"
                     >
-                        {/* 
-                         Using a background-image div here specifically avoids 
-                         the Safari/Brave iOS 'lazy blank' <img> issue entirely 
-                         because CSS paints it deterministically.
-                        */}
-                        <div
-                            className="w-full h-full bg-cover bg-center group-hover:scale-105 transition-transform duration-700"
-                            style={{ backgroundImage: `url(${sanitizeImageUrl(img)})` }}
+                        {/* Skeleton shimmer shown while image loads */}
+                        <div className="absolute inset-0 bg-gradient-to-br from-card to-accent/30 animate-pulse" />
+                        {/* Use <img> — reliable on ALL browsers (not CSS background-image) */}
+                        <img
+                            src={sanitizeImageUrl(img)}
+                            alt={`Fulbari event image ${i + 1}`}
+                            loading={i < 3 ? "eager" : "lazy"}
+                            decoding="async"
+                            className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                            onLoad={(e) => {
+                                // Hide the skeleton once image loads
+                                const prev = (e.target as HTMLImageElement).previousElementSibling as HTMLElement;
+                                if (prev) prev.style.display = 'none';
+                            }}
+                            onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                console.error(`Event gallery image failed to load: ${target.src}`);
+                                // Show a fallback placeholder
+                                target.style.display = 'none';
+                            }}
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity" />
                         <div className="absolute inset-0 ring-1 ring-inset ring-white/20 group-hover:ring-primary/40 transition-all rounded-2xl" />
                     </div>
                 ))}
             </div>
-
-            {/* Background elements to add depth */}
-            <div className="absolute -z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-full bg-primary/2 opacity-20 blur-3xl pointer-events-none" />
         </div>
     );
 }
+
 
 export function TodaysMenuAndEvents() {
     const [activeTab, setActiveTab] = useState<"events" | "menu">("events");
