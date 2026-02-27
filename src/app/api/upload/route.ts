@@ -14,12 +14,12 @@ export async function POST(request: Request) {
         const fileExtension = file.name.split(".").pop();
         const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExtension}`;
         const arrayBuffer = await file.arrayBuffer();
-        console.log(`Attempting to upload to bucket: ${bucket} using anon key`);
+        console.log(`Uploading file: ${fileName} to bucket: ${bucket}`);
 
         const { data, error } = await supabase.storage
             .from(bucket)
             .upload(fileName, arrayBuffer, {
-                cacheControl: "3600",
+                cacheControl: "0, max-age=0",  // No cache to ensure fresh images
                 upsert: false,
                 contentType: file.type || 'image/jpeg'
             });
@@ -35,6 +35,7 @@ export async function POST(request: Request) {
             .from(bucket)
             .getPublicUrl(fileName);
 
+        console.log(`File uploaded successfully: ${publicUrl}`);
         return NextResponse.json({ success: true, url: publicUrl });
     } catch (error: any) {
         console.error("Upload Route Error:", error);

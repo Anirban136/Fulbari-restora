@@ -2,6 +2,13 @@ import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
+const CACHE_HEADERS = {
+    "Cache-Control": "public, max-age=0, must-revalidate",
+    "Pragma": "no-cache",
+    "Expires": "0",
+};
 
 export async function GET() {
     try {
@@ -11,20 +18,21 @@ export async function GET() {
             .order("created_at", { ascending: false });
 
         if (error) throw error;
-        return NextResponse.json(data ?? [], {
-            headers: {
-                "Cache-Control": "no-store, no-cache, must-revalidate",
-                "Pragma": "no-cache",
-            },
+        
+        // Clean up gallery items - ensure URLs are valid
+        const cleanedData = (data ?? []).map(item => ({
+            ...item,
+            url: item.url && typeof item.url === 'string' ? item.url.trim() : null
+        })).filter(item => item.url);
+        
+        return NextResponse.json(cleanedData, {
+            headers: CACHE_HEADERS,
         });
     } catch (error: any) {
         console.error("Gallery GET error:", error);
         return NextResponse.json([], {
             status: 200,
-            headers: {
-                "Cache-Control": "no-store, no-cache, must-revalidate",
-                "Pragma": "no-cache",
-            },
+            headers: CACHE_HEADERS,
         });
     }
 }
@@ -35,10 +43,15 @@ export async function POST(request: Request) {
         const { action, item } = body;
 
         if (action === "ADD") {
+            // Validate URL
+            if (!item.url || typeof item.url !== 'string' || item.url.trim() === '') {
+                return NextResponse.json({ error: "Invalid image URL" }, { status: 400 });
+            }
+
             const { data, error } = await supabase
                 .from("gallery_items")
                 .insert([{
-                    url: item.url,
+                    url: item.url.trim(),
                     category: item.category,
                 }])
                 .select()
@@ -58,6 +71,7 @@ export async function POST(request: Request) {
 
         return NextResponse.json({ error: "Invalid action" }, { status: 400 });
     } catch (error: any) {
+        console.error("Gallery POST error:", error);
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }

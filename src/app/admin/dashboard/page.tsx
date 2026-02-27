@@ -252,8 +252,8 @@ export default function AdminDashboard() {
                     event: {
                         ...eventForm,
                         id: editingEventId,
-                        poster_url: eventImages[0] ? fixUnsplashUrl(eventImages[0]) : null,
-                        image_urls: eventImages.map(url => fixUnsplashUrl(url)),
+                        poster_url: eventImages[0] ? eventImages[0] : null,
+                        image_urls: eventImages,
                     }
                 }),
             });
@@ -345,7 +345,7 @@ export default function AdminDashboard() {
                     action: 'ADD',
                     item: {
                         ...galleryForm,
-                        url: fixUnsplashUrl(galleryForm.url)
+                        url: galleryForm.url
                     }
                 }),
             });

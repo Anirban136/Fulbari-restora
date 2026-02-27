@@ -2,6 +2,13 @@ import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
+const CACHE_HEADERS = {
+    "Cache-Control": "public, max-age=0, must-revalidate",
+    "Pragma": "no-cache",
+    "Expires": "0",
+};
 
 export async function GET() {
     try {
@@ -12,20 +19,23 @@ export async function GET() {
             .order("event_date", { ascending: true });
 
         if (error) throw error;
-        return NextResponse.json(data ?? [], {
-            headers: {
-                "Cache-Control": "no-store, no-cache, must-revalidate",
-                "Pragma": "no-cache",
-            },
+        
+        // Filter out any events with empty image arrays and ensure image URLs are valid
+        const cleanedData = (data ?? []).map(event => ({
+            ...event,
+            image_urls: Array.isArray(event.image_urls) 
+                ? event.image_urls.filter((url: string) => url && url.trim() !== "")
+                : []
+        }));
+        
+        return NextResponse.json(cleanedData, {
+            headers: CACHE_HEADERS,
         });
     } catch (error: any) {
         console.error("Events GET error:", error);
         return NextResponse.json([], {
             status: 200,
-            headers: {
-                "Cache-Control": "no-store, no-cache, must-revalidate",
-                "Pragma": "no-cache",
-            },
+            headers: CACHE_HEADERS,
         });
     }
 }
@@ -36,6 +46,11 @@ export async function POST(request: Request) {
         const { action, event } = body;
 
         if (action === "ADD") {
+            // Clean up image URLs - remove empty strings and ensure they're strings
+            const cleanImageUrls = (Array.isArray(event.image_urls) 
+                ? event.image_urls.filter((url: any) => url && typeof url === 'string' && url.trim() !== "")
+                : []) as string[];
+
             const { data, error } = await supabase
                 .from("events")
                 .insert([{
@@ -43,7 +58,7 @@ export async function POST(request: Request) {
                     description: event.description,
                     event_date: event.event_date,
                     poster_url: event.poster_url ?? null,
-                    image_urls: event.image_urls ?? [],
+                    image_urls: cleanImageUrls,
                     is_active: true,
                 }])
                 .select()
@@ -73,6 +88,11 @@ export async function POST(request: Request) {
         }
 
         if (action === "UPDATE") {
+            // Clean up image URLs - remove empty strings and ensure they're strings
+            const cleanImageUrls = (Array.isArray(event.image_urls) 
+                ? event.image_urls.filter((url: any) => url && typeof url === 'string' && url.trim() !== "")
+                : []) as string[];
+
             const { data, error } = await supabase
                 .from("events")
                 .update({
@@ -80,7 +100,7 @@ export async function POST(request: Request) {
                     description: event.description,
                     event_date: event.event_date,
                     poster_url: event.poster_url ?? null,
-                    image_urls: event.image_urls ?? [],
+                    image_urls: cleanImageUrls,
                     is_active: event.is_active ?? true,
                 })
                 .eq("id", event.id)
@@ -92,6 +112,7 @@ export async function POST(request: Request) {
 
         return NextResponse.json({ error: "Invalid action" }, { status: 400 });
     } catch (error: any) {
+        console.error("Events POST error:", error);
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }

@@ -9,20 +9,42 @@ export function sanitizeImageUrl(url: string | undefined | null) {
     if (!url) return "";
     let s = url.trim();
 
+    // Don't process empty strings
+    if (s === "") return "";
+
     // 1. Force HTTPS to prevent mixed content issues on Vercel
     if (s.startsWith("http://")) {
         s = s.replace("http://", "https://");
     }
 
-    // 2. Handle Unsplash optimization
-    if (s.includes("unsplash.com") && !s.includes("auto=format")) {
+    // 2. Handle Supabase storage URLs - add cache busting and formatting
+    if (s.includes("supabase.co")) {
+        // Ensure HTTPS
+        if (!s.startsWith("https://")) {
+            s = "https://" + s.replace(/^https?:\/\//, "");
+        }
+        // Add query params for image optimization if not already there
         const separator = s.includes("?") ? "&" : "?";
-        s = `${s}${separator}auto=format&fit=crop&q=80&w=1200`;
+        if (!s.includes("auto=format")) {
+            s = `${s}${separator}auto=format&fit=crop&q=80`;
+        }
+        // Add cache buster to prevent stale images
+        if (!s.includes("t=")) {
+            const finalSep = s.includes("?") ? "&" : "?";
+            s = `${s}${finalSep}t=${Date.now()}`;
+        }
+        return s.replace(/ /g, "%20").replace(/\(/g, "%28").replace(/\)/g, "%29");
     }
 
-    // 3. Handle spaces and basic special characters safely
-    // We avoid full encodeURI as it can break some Supabase signed URL parameters
-    // but we must use proper hex codes for parentheses
+    // 3. Handle Unsplash optimization
+    if (s.includes("unsplash.com")) {
+        if (!s.includes("auto=format")) {
+            const separator = s.includes("?") ? "&" : "?";
+            s = `${s}${separator}auto=format&fit=crop&q=80&w=1200`;
+        }
+    }
+
+    // 4. Handle spaces and special characters
     return s.replace(/ /g, "%20")
         .replace(/\(/g, "%28")
         .replace(/\)/g, "%29");

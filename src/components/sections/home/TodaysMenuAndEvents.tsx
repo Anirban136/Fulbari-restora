@@ -66,27 +66,41 @@ function EventImageCarousel({ images }: { images: string[] }) {
     const [idx, setIdx] = useState(0);
     const [direction, setDirection] = useState(0); // 1 for right, -1 for left
     const [isHovered, setIsHovered] = useState(false);
+    const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
+
+    // Filter out failed images
+    const validImages = images.filter(img => !failedImages.has(img));
 
     useEffect(() => {
-        if (images.length <= 1 || isHovered) return;
+        if (validImages.length <= 1 || isHovered) return;
         const t = setInterval(() => {
             setDirection(1);
-            setIdx(i => (i + 1) % images.length);
+            setIdx(i => (i + 1) % validImages.length);
         }, 5000); // 5s for slower premium feel
         return () => clearInterval(t);
-    }, [images.length, isHovered]);
+    }, [validImages.length, isHovered]);
 
-    if (images.length === 0) {
+    const handleImageError = (failedUrl: string) => {
+        console.error(`Event image failed to load: ${failedUrl}`);
+        setFailedImages(prev => new Set([...prev, failedUrl]));
+        // Move to next valid image
+        if (validImages.length > 0) {
+            setIdx(i => (i + 1) % validImages.length);
+        }
+    };
+
+    if (validImages.length === 0) {
         return (
             <div className="w-full h-56 flex flex-col items-center justify-center gap-2 bg-gradient-to-br from-primary/10 to-card">
                 <CalendarDays size={36} className="text-primary/40" />
+                <p className="text-sm text-muted-foreground">No event images available</p>
             </div>
         );
     }
 
     const paginate = (newDirection: number) => {
         setDirection(newDirection);
-        setIdx(i => (i + newDirection + images.length) % images.length);
+        setIdx(i => (i + newDirection + validImages.length) % validImages.length);
     };
 
     const variants = {
@@ -134,14 +148,13 @@ function EventImageCarousel({ images }: { images: string[] }) {
                     className="absolute inset-0"
                 >
                     <img
-                        src={sanitizeImageUrl(images[idx])}
+                        src={sanitizeImageUrl(validImages[idx])}
                         alt={`Event at Fulbari - image ${idx + 1}`}
                         loading={idx === 0 ? "eager" : "lazy"}
                         className="absolute inset-0 w-full h-full object-cover"
                         onError={(e) => {
                             const target = e.target as HTMLImageElement;
-                            console.error(`Event image failed: ${target.src}`);
-                            target.src = 'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?q=80&w=800&auto=format&fit=crop';
+                            handleImageError(validImages[idx]);
                         }}
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60" />
@@ -149,7 +162,7 @@ function EventImageCarousel({ images }: { images: string[] }) {
             </AnimatePresence>
 
             {/* Prev / Next arrows */}
-            {images.length > 1 && (
+            {validImages.length > 1 && (
                 <>
                     <button
                         onClick={(e) => { e.stopPropagation(); paginate(-1); }}
@@ -165,7 +178,7 @@ function EventImageCarousel({ images }: { images: string[] }) {
                     </button>
                     {/* Dots */}
                     <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5 z-20">
-                        {images.map((_, i) => (
+                        {validImages.map((_, i) => (
                             <button
                                 key={i}
                                 onClick={(e) => { e.stopPropagation(); setDirection(i > idx ? 1 : -1); setIdx(i); }}
@@ -184,10 +197,23 @@ function EventImageCarousel({ images }: { images: string[] }) {
 
 // Modern reliable gallery using <img> tags (works on ALL browsers including iOS Safari, Mobile Chrome)
 export function ModernEventGallery({ images }: { images: string[] }) {
-    if (images.length === 0) {
+    const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
+    
+    // Filter out failed images
+    const validImages = images.filter(img => !failedImages.has(img));
+
+    const handleImageError = (failedUrl: string) => {
+        console.error(`Event gallery image failed to load: ${failedUrl}`);
+        setFailedImages(prev => new Set([...prev, failedUrl]));
+    };
+
+    if (validImages.length === 0) {
         return (
             <div className="flex justify-center items-center h-48 border border-dashed border-border/50 rounded-2xl mx-4">
-                <p className="text-muted-foreground text-sm">No event images available yet. Admin: Upload images in the dashboard to see them here.</p>
+                <div className="text-center">
+                    <p className="text-muted-foreground text-sm">No event images available yet.</p>
+                    <p className="text-muted-foreground text-xs mt-1">Admin: Upload images in the dashboard to see them here.</p>
+                </div>
             </div>
         );
     }
@@ -195,7 +221,7 @@ export function ModernEventGallery({ images }: { images: string[] }) {
     return (
         <div className="relative w-full overflow-hidden px-4 md:px-8 pb-8">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {images.map((img, i) => (
+                {validImages.map((img, i) => (
                     <div
                         key={`grid-${i}`}
                         className="relative w-full aspect-[4/3] rounded-2xl overflow-hidden shadow-xl border border-border/50 group bg-card"
@@ -216,7 +242,7 @@ export function ModernEventGallery({ images }: { images: string[] }) {
                             }}
                             onError={(e) => {
                                 const target = e.target as HTMLImageElement;
-                                console.error(`Event gallery image failed to load: ${target.src}`);
+                                handleImageError(img);
                                 // Show a fallback placeholder
                                 target.style.display = 'none';
                             }}
@@ -242,15 +268,37 @@ export function TodaysMenuAndEvents() {
 
     useEffect(() => {
         const ts = Date.now();
-        fetch(`/api/daily-specials?t=${ts}`, { cache: 'no-store' })
+        // Add cache buster to prevent stale responses
+        fetch(`/api/daily-specials?t=${ts}`, { 
+            cache: 'no-store',
+            headers: {
+                'Cache-Control': 'no-store, no-cache, must-revalidate',
+                'Pragma': 'no-cache',
+            }
+        })
             .then(r => r.json())
             .then(data => setSpecials(Array.isArray(data) ? data : []))
             .catch(() => setSpecials([]))
             .finally(() => setLoadingMenu(false));
 
-        fetch(`/api/events?t=${ts}`, { cache: 'no-store' })
+        fetch(`/api/events?t=${ts}`, { 
+            cache: 'no-store',
+            headers: {
+                'Cache-Control': 'no-store, no-cache, must-revalidate',
+                'Pragma': 'no-cache',
+            }
+        })
             .then(r => r.json())
-            .then(data => setEvents(Array.isArray(data) ? data : []))
+            .then(data => {
+                // Ensure image_urls is valid and filter empty URLs
+                const cleanedEvents = (Array.isArray(data) ? data : []).map((ev: Event) => ({
+                    ...ev,
+                    image_urls: Array.isArray(ev.image_urls) 
+                        ? ev.image_urls.filter((url: string) => url && url.trim() !== "")
+                        : []
+                }));
+                setEvents(cleanedEvents);
+            })
             .catch(() => setEvents([]))
             .finally(() => setLoadingEvents(false));
     }, []);
@@ -321,11 +369,29 @@ export function TodaysMenuAndEvents() {
                                             <div className="w-12 h-0.5 bg-primary mx-auto mt-2 rounded-full" />
                                         </div>
                                         <ModernEventGallery images={
-                                            events.flatMap(ev =>
-                                                (ev.image_urls && ev.image_urls.length > 0)
-                                                    ? ev.image_urls
-                                                    : ev.poster_url ? [ev.poster_url] : []
-                                            ).filter((v, i, a) => Boolean(v) && v.trim() !== "" && a.indexOf(v) === i) // strict true & unique
+                                            events.flatMap(ev => {
+                                                // Collect all valid image URLs from each event
+                                                const urls: string[] = [];
+                                                
+                                                // Add image_urls if they exist and are valid
+                                                if (Array.isArray(ev.image_urls) && ev.image_urls.length > 0) {
+                                                    ev.image_urls.forEach((url: string) => {
+                                                        if (url && typeof url === 'string' && url.trim() !== '') {
+                                                            urls.push(url);
+                                                        }
+                                                    });
+                                                }
+                                                
+                                                // Fallback to poster_url if no image_urls
+                                                if (urls.length === 0 && ev.poster_url && typeof ev.poster_url === 'string' && ev.poster_url.trim() !== '') {
+                                                    urls.push(ev.poster_url);
+                                                }
+                                                
+                                                return urls;
+                                            }).filter((v, i, a) => {
+                                                // Remove duplicates and empty strings
+                                                return v && v.trim() !== '' && a.indexOf(v) === i;
+                                            })
                                         } />
                                     </div>
                                 </>
