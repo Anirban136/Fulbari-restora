@@ -60,7 +60,7 @@ export function Hero() {
                         <Link href="/contact">
                             <Button size="lg" variant="outline"
                                 className="px-8 lg:px-10 text-sm lg:text-base">
-                                Book a Table
+                                Contact Us
                             </Button>
                         </Link>
                     </div>
@@ -131,7 +131,7 @@ export function Hero() {
                         </Link>
                         <Link href="/contact" className="flex-1">
                             <Button variant="outline" className="w-full text-[13px] font-bold">
-                                Book Table
+                                Contact Us
                             </Button>
                         </Link>
                     </div>
