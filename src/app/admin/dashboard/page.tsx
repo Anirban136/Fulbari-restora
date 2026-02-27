@@ -61,7 +61,6 @@ interface MenuItem {
     category: string;
     image: string;
     isVeg: boolean;
-    isBestseller?: boolean;
     available: boolean;
     menu_type: "RESTAURANT" | "CAFE";
     variant_prices?: Record<string, number>;
@@ -132,7 +131,7 @@ export default function AdminDashboard() {
         category: "Bengali",
         image: "",
         isVeg: false,
-        isBestseller: false,
+        available: true,
         menu_type: "RESTAURANT" as "RESTAURANT" | "CAFE",
         variant_prices: {} as Record<string, number>,
         price_options: [] as number[]
@@ -417,7 +416,7 @@ export default function AdminDashboard() {
             category: item.category,
             image: item.image,
             isVeg: item.isVeg,
-            isBestseller: item.isBestseller || false,
+            available: item.available,
             menu_type: item.menu_type || "RESTAURANT",
             variant_prices: item.variant_prices || {},
             price_options: item.price_options || []
@@ -471,7 +470,7 @@ export default function AdminDashboard() {
                     category: "Bengali",
                     image: "",
                     isVeg: false,
-                    isBestseller: false,
+                    available: true,
                     menu_type: "RESTAURANT",
                     variant_prices: {},
                     price_options: []
@@ -566,7 +565,7 @@ export default function AdminDashboard() {
                                         category: "Bengali",
                                         image: "",
                                         isVeg: false,
-                                        isBestseller: false,
+                                        available: true,
                                         menu_type: "RESTAURANT",
                                         variant_prices: {},
                                         price_options: []
@@ -882,15 +881,6 @@ export default function AdminDashboard() {
                                                 onChange={(e) => setNewItem({ ...newItem, isVeg: e.target.checked })}
                                             />
                                             <span className="text-sm font-medium group-hover:text-primary transition-colors">Vegetarian</span>
-                                        </label>
-                                        <label className="flex items-center gap-2 cursor-pointer group whitespace-nowrap">
-                                            <input
-                                                type="checkbox"
-                                                className="w-5 h-5 accent-yellow-500 rounded cursor-pointer"
-                                                checked={newItem.isBestseller}
-                                                onChange={(e) => setNewItem({ ...newItem, isBestseller: e.target.checked })}
-                                            />
-                                            <span className="text-sm font-medium group-hover:text-yellow-500 transition-colors">Bestseller</span>
                                         </label>
                                     </div>
                                     <Button

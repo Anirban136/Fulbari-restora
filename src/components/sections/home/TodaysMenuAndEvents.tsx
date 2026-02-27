@@ -17,7 +17,6 @@ interface MenuItem {
     category: string;
     image: string;
     isVeg: boolean;
-    isBestseller?: boolean;
     menu_type: "RESTAURANT" | "CAFE";
     variant_prices?: Record<string, number>;
     price_options?: number[];

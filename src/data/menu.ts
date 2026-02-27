@@ -8,7 +8,6 @@ export interface MenuItem {
     category: Category;
     image: string;
     isVeg: boolean;
-    isBestseller?: boolean;
     menu_type: "RESTAURANT" | "CAFE";
     variant_prices?: Record<string, number>;
     price_options?: number[];
@@ -25,7 +24,6 @@ export const menuItems: MenuItem[] = [
         category: "Bengali",
         image: "https://images.unsplash.com/photo-1626776876729-bab4369a5a5a?q=80&w=2074&auto=format&fit=crop",
         isVeg: false,
-        isBestseller: true,
         menu_type: "RESTAURANT",
     },
     {
@@ -36,7 +34,6 @@ export const menuItems: MenuItem[] = [
         category: "Bengali",
         image: "https://images.unsplash.com/photo-1545247181-516773cae754?q=80&w=2080&auto=format&fit=crop",
         isVeg: false,
-        isBestseller: true,
         menu_type: "RESTAURANT",
     },
     {
@@ -59,7 +56,6 @@ export const menuItems: MenuItem[] = [
         category: "Indian",
         image: "https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?q=80&w=2070&auto=format&fit=crop",
         isVeg: false,
-        isBestseller: true,
         menu_type: "RESTAURANT",
     },
     {
@@ -102,7 +98,6 @@ export const menuItems: MenuItem[] = [
         category: "Chinese",
         image: "https://images.unsplash.com/photo-1525755662778-989d966695cc?q=80&w=1974&auto=format&fit=crop",
         isVeg: false,
-        isBestseller: true,
         menu_type: "RESTAURANT",
     },
 
@@ -169,7 +164,6 @@ export const menuItems: MenuItem[] = [
         category: "Desserts",
         image: "https://images.unsplash.com/photo-1488477181946-6428a0291777?q=80&w=1974&auto=format&fit=crop",
         isVeg: true,
-        isBestseller: true,
         menu_type: "RESTAURANT",
     },
 ];

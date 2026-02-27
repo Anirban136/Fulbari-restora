@@ -309,11 +309,6 @@ export default function MenuPage() {
                                             {/* Labels Overlay */}
                                             <div className="absolute top-4 left-4 right-4 flex justify-between items-start z-20">
                                                 <div className="flex flex-col gap-2">
-                                                    {item.isBestseller && (
-                                                        <div className="bg-yellow-500 text-black text-[9px] font-black uppercase px-2 py-1 rounded shadow-lg backdrop-blur-sm tracking-widest">
-                                                            Bestseller
-                                                        </div>
-                                                    )}
                                                     <div className={cn(
                                                         "w-6 h-6 rounded-full border-2 flex items-center justify-center backdrop-blur-lg shadow-xl",
                                                         item.isVeg ? "bg-green-500/10 border-green-500" : "bg-red-500/10 border-red-500"
