@@ -278,22 +278,6 @@ export default function AdminDashboard() {
         setEventUploading(true);
         setEventUploads(u => u + 1);
         setShowToast({ show: true, message: "Uploading image...", type: 'success' });
-
-        // helper to try loading remote URL and clear preview when available
-        const tryRemote = (url: string, idx: number) => {
-            const testImg = document.createElement('img');
-            testImg.onload = () => {
-                setEventLocalPreviews(prev => {
-                    const copy = [...prev];
-                    copy[idx] = '';
-                    return copy;
-                });
-            };
-            testImg.onerror = () => {
-                console.warn('[ADMIN] remote image unavailable yet:', url);
-            };
-            testImg.src = sanitizeImageUrl(url);
-        };
         
         try {
             console.log(`[ADMIN] Starting upload for file: ${file.name}, Size: ${file.size}`);
@@ -327,11 +311,8 @@ export default function AdminDashboard() {
             if (res.ok && data.url) {
                 console.log(`[ADMIN] Upload successful: ${data.url}`);
                 setEventImages(prev => [...prev, data.url]);
-                setShowToast({ show: true, message: "Image uploaded successfully!", type: 'success' });
-
-                // attempt to load remote and clear the local preview once ready
-                const idx = eventLocalPreviews.length - 1;
-                tryRemote(data.url, idx);
+                setShowToast({ show: true, message: "Image uploaded successfully! Click 'Add Event' to finalize.", type: 'success' });
+                // keep local preview visible until event is saved - don't try to preemptively test remote
             } else {
                 console.error(`[ADMIN] Upload failed:`, data.error);
                 setShowToast({ show: true, message: `Upload failed: ${data.error || 'Unknown error'}`, type: 'error' });
@@ -502,11 +483,6 @@ export default function AdminDashboard() {
                 console.log(`[GALLERY] Upload successful: ${data.url}`);
                 setGalleryForm(prev => ({ ...prev, url: data.url }));
                 setShowToast({ show: true, message: "Image Uploaded Successfully!", type: 'success' });
-
-                const testImg = document.createElement('img');
-                testImg.onload = () => setGalleryLocalPreview('');
-                testImg.onerror = () => console.warn('[GALLERY] remote not ready yet');
-                testImg.src = sanitizeImageUrl(data.url);
             } else {
                 console.error(`[GALLERY] Upload failed:`, data.error);
                 setShowToast({ show: true, message: `Upload failed: ${data.error || 'Unknown error'}`, type: 'error' });
@@ -541,6 +517,7 @@ export default function AdminDashboard() {
             const data = await res.json();
             if (res.ok) {
                 setGalleryForm({ url: '', category: 'Food' });
+                setGalleryLocalPreview('');
                 fetchGallery();
                 setShowToast({ show: true, message: "Image Added to Gallery!", type: 'success' });
             } else {
@@ -730,11 +707,6 @@ export default function AdminDashboard() {
                 console.log(`[MENU] Upload successful: ${data.url}`);
                 setNewItem(prev => ({ ...prev, image: data.url }));
                 setShowToast({ show: true, message: "Image uploaded successfully!", type: 'success' });
-                // attempt to load remote and clear local preview
-                const testImg = document.createElement('img');
-                testImg.onload = () => setMenuLocalPreview('');
-                testImg.onerror = () => console.warn('[MENU] remote not ready yet');
-                testImg.src = sanitizeImageUrl(data.url);
             } else {
                 console.error(`[MENU] Upload failed:`, data.error);
                 setShowToast({ show: true, message: `Upload failed: ${data.error || 'Unknown error'}`, type: 'error' });
@@ -772,6 +744,7 @@ export default function AdminDashboard() {
                 setShowAddForm(false);
                 setIsEditing(false);
                 setEditingId(null);
+                setMenuLocalPreview('');
                 setNewItem({
                     name: "",
                     description: "",
