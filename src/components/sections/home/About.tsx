@@ -124,7 +124,7 @@ function VenueImageSlider({ images, label }: { images: string[], label: string }
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.95 }}
                     transition={{ duration: 0.8 }}
-                    className="aspect-[4/5] md:aspect-[3/2] lg:aspect-[4/3] w-full"
+                    className="aspect-video md:aspect-[3/2] lg:aspect-[4/3] w-full"
                 >
                     <Image
                         src={sanitizeImageUrl(images[currentIndex])}
@@ -174,7 +174,7 @@ export function About() {
     const IconComponent = current.icon;
 
     return (
-        <section className="relative py-24 md:py-32 overflow-hidden bg-background">
+        <section className="relative py-16 md:py-32 overflow-hidden bg-background">
             {/* Cinematic Ambient Background (matches active venue) */}
             <AnimatePresence mode="wait">
                 <motion.div
@@ -193,57 +193,62 @@ export function About() {
             </AnimatePresence>
 
             <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10">
-                {/* Section Header */}
-                <div className="grid lg:grid-cols-2 gap-12 items-end mb-20">
+                {/* Section Header - Condensed for Mobile */}
+                <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center lg:items-end mb-12 md:mb-20">
                     <motion.div
                         initial={{ opacity: 0, x: -30 }}
                         whileInView={{ opacity: 1, x: 0 }}
                         viewport={{ once: true }}
                     >
-                        <div className="flex items-center gap-3 mb-6">
-                            <span className="text-primary font-heading italic text-lg uppercase tracking-widest">About Us</span>
+                        <div className="flex items-center gap-3 mb-4 md:mb-6">
+                            <span className="text-primary font-heading italic text-sm md:text-lg uppercase tracking-widest">About Us</span>
                             <div className="h-px flex-1 bg-gradient-to-r from-primary/50 to-transparent" />
-                            <span className="font-bengali text-muted-foreground/60 text-sm">আমাদের সম্পর্কে</span>
+                            <span className="font-bengali text-muted-foreground/60 text-[10px] md:text-sm">আমাদের সম্পর্কে</span>
                         </div>
-                        <h2 className="text-4xl md:text-5xl lg:text-6xl font-black font-heading leading-[1.1] mb-8">
-                            A <span className="text-primary italic">Proshantir Neer</span><br />
-                            in the heart of Serampore
+                        <h2 className="text-3xl md:text-5xl lg:text-6xl font-black font-heading leading-[1.1]">
+                            A <span className="text-primary italic">Proshantir Neer</span><br className="hidden md:block" />
+                            <span className="md:hidden"> </span>in Serampore
                         </h2>
                     </motion.div>
 
                     <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        whileInView={{ opacity: 1, scale: 1 }}
                         viewport={{ once: true }}
-                        className="relative p-8 rounded-[2rem] bg-primary/5 border border-primary/10 backdrop-blur-sm"
+                        className="relative p-4 md:p-8 rounded-2xl md:rounded-[2rem] bg-primary/5 border border-primary/10 backdrop-blur-sm"
                     >
-                        <Sparkles className="absolute -top-4 -right-4 text-primary animate-pulse" size={32} />
-                        <p className="font-bengali italic text-lg leading-relaxed text-center font-semibold text-foreground/90">
+                        <Sparkles className="absolute -top-3 -right-3 text-primary animate-pulse" size={24} />
+                        <p className="font-bengali italic text-sm md:text-lg leading-relaxed text-center font-semibold text-foreground/90">
                             "ব্যস্ত জীবনের ক্লান্তি ভুলে যদি প্রকৃতির স্নিগ্ধ ছোঁয়ায় সুস্বাদু খাবারের স্বাদ নিতে চান, তবে ফুলবাড়ি রেস্তোরাঁ আপনার জন্য এক আদর্শ গন্তব্য।"
                         </p>
                     </motion.div>
                 </div>
 
-                {/* Venue Navigation - Staggered Selection */}
-                <div className="flex flex-wrap gap-3 mb-16 justify-center lg:justify-start">
-                    {(Object.keys(venues) as VenueKey[]).map((key) => (
-                        <button
-                            key={key}
-                            onClick={() => setActiveVenue(key)}
-                            className={cn(
-                                "group relative px-6 py-3 rounded-2xl transition-all duration-500 flex items-center gap-3 border overflow-hidden",
-                                activeVenue === key
-                                    ? "bg-primary text-primary-foreground border-primary shadow-2xl shadow-primary/30 scale-105"
-                                    : "bg-card/50 text-muted-foreground border-border/50 hover:border-primary/40 hover:text-foreground backdrop-blur-sm"
-                            )}
-                        >
-                            <IconComponent size={18} className={activeVenue === key ? "text-primary-foreground" : "text-primary group-hover:scale-110 transition-transform"} />
-                            <div className="flex flex-col items-start leading-none">
-                                <span className="text-sm font-bold tracking-tight">{venues[key].label}</span>
-                                <span className="text-[10px] opacity-60 font-bengali">{venues[key].bengaliLabel}</span>
-                            </div>
-                        </button>
-                    ))}
+                {/* Venue Navigation - Horizontal Scroll on Mobile */}
+                <div className="relative mb-12 md:mb-16">
+                    <div className="flex overflow-x-auto pb-4 gap-3 no-scrollbar scroll-smooth snap-x">
+                        {(Object.keys(venues) as VenueKey[]).map((key) => {
+                            const VIcon = venues[key].icon;
+                            return (
+                                <button
+                                    key={key}
+                                    onClick={() => setActiveVenue(key)}
+                                    className={cn(
+                                        "group relative px-5 py-2.5 rounded-xl transition-all duration-500 flex items-center gap-3 border shrink-0 snap-start",
+                                        activeVenue === key
+                                            ? "bg-primary text-primary-foreground border-primary shadow-xl shadow-primary/20 scale-105"
+                                            : "bg-card/50 text-muted-foreground border-border/50 hover:border-primary/40 hover:text-foreground backdrop-blur-sm"
+                                    )}
+                                >
+                                    <VIcon size={16} className={activeVenue === key ? "text-primary-foreground" : "text-primary group-hover:scale-110 transition-transform"} />
+                                    <div className="flex flex-col items-start leading-none">
+                                        <span className="text-xs md:text-sm font-bold tracking-tight">{venues[key].label}</span>
+                                        <span className="text-[9px] opacity-60 font-bengali">{venues[key].bengaliLabel}</span>
+                                    </div>
+                                </button>
+                            );
+                        })}
+                    </div>
                 </div>
 
                 {/* Staggered Content Grid */}
@@ -275,57 +280,57 @@ export function About() {
                         {/* Content Column */}
                         <div className="lg:col-span-5">
                             <motion.div
-                                initial={{ opacity: 0, x: 30 }}
+                                initial={{ opacity: 0, x: 20 }}
                                 animate={{ opacity: 1, x: 0 }}
-                                transition={{ delay: 0.3 }}
-                                className="space-y-8"
+                                transition={{ delay: 0.2 }}
+                                className="space-y-6 md:space-y-8"
                             >
-                                <div className="space-y-4">
-                                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20">
-                                        <IconComponent size={18} className="text-primary" />
-                                        <span className={cn("text-sm font-bold tracking-wide uppercase", current.taglineClassName)}>
+                                <div className="space-y-3 md:space-y-4 text-center lg:text-left">
+                                    <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20">
+                                        <IconComponent size={16} className="text-primary" />
+                                        <span className={cn("text-[10px] md:text-xs font-black tracking-widest uppercase", current.taglineClassName)}>
                                             {current.tagline}
                                         </span>
                                     </div>
-                                    <h3 className="text-4xl md:text-5xl font-black font-heading leading-tight">
+                                    <h3 className="text-3xl md:text-5xl font-black font-heading leading-tight">
                                         {current.label}
                                     </h3>
-                                    <p className={cn("text-lg leading-relaxed text-muted-foreground", current.descriptionClassName)}>
+                                    <p className={cn("text-sm md:text-lg leading-relaxed text-muted-foreground", current.descriptionClassName)}>
                                         {current.description}
                                     </p>
                                 </div>
 
-                                {/* Highlights in Cinema Style */}
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                {/* Highlights in Cinema Style - 2 cols even on small mobile */}
+                                <div className="grid grid-cols-2 gap-3">
                                     {current.highlights.map((h, i) => (
                                         <motion.div
                                             key={h}
                                             initial={{ opacity: 0, y: 10 }}
                                             animate={{ opacity: 1, y: 0 }}
-                                            transition={{ delay: 0.4 + (i * 0.1) }}
-                                            className="flex items-center gap-3 p-3 rounded-xl bg-card/40 border border-border/50 backdrop-blur-sm"
+                                            transition={{ delay: 0.3 + (i * 0.05) }}
+                                            className="flex items-center gap-2 p-2.5 rounded-lg bg-card/40 border border-border/50 backdrop-blur-sm"
                                         >
-                                            <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
-                                                <Star className="text-primary" size={14} fill="currentColor" />
+                                            <div className="w-6 h-6 shrink-0 rounded-md bg-primary/20 flex items-center justify-center">
+                                                <Star className="text-primary" size={10} fill="currentColor" />
                                             </div>
-                                            <span className="text-sm font-bold tracking-tight">{h}</span>
+                                            <span className="text-[10px] md:text-sm font-bold tracking-tight line-clamp-1">{h}</span>
                                         </motion.div>
                                     ))}
                                 </div>
 
-                                {/* Modern Stats Badges */}
-                                <div className="flex flex-wrap gap-4 pt-8 border-t border-border/50">
+                                {/* Modern Stats Badges - Side by side on mobile */}
+                                <div className="grid grid-cols-2 gap-6 pt-6 border-t border-border/50">
                                     {[
                                         { icon: Users, label: current.capacity, sub: "Capacity" },
                                         { icon: Clock, label: current.timing, sub: "Available" }
                                     ].map((stat, i) => (
-                                        <div key={i} className="flex items-center gap-4 group">
-                                            <div className="w-12 h-12 rounded-2xl bg-primary flex items-center justify-center text-primary-foreground shadow-lg shadow-primary/20 group-hover:scale-110 transition-transform">
-                                                <stat.icon size={20} />
+                                        <div key={i} className="flex items-center gap-3 group">
+                                            <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-primary flex items-center justify-center text-primary-foreground shadow-lg shadow-primary/20 group-hover:scale-105 transition-transform">
+                                                <stat.icon size={18} />
                                             </div>
-                                            <div>
-                                                <p className="text-base font-black leading-none mb-1 tracking-tight">{stat.label}</p>
-                                                <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">{stat.sub}</p>
+                                            <div className="min-w-0">
+                                                <p className="text-xs md:text-base font-black leading-none mb-1 tracking-tight truncate">{stat.label}</p>
+                                                <p className="text-[8px] md:text-[10px] text-muted-foreground uppercase font-bold tracking-widest">{stat.sub}</p>
                                             </div>
                                         </div>
                                     ))}
