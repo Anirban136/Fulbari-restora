@@ -291,82 +291,79 @@ export function PremiumEventGallery({ events }: { events: Event[] }) {
                 />
             </AnimatePresence>
 
-            {/* Main Stage */}
-            <div className="relative aspect-[4/5] md:aspect-video max-h-[700px] overflow-hidden">
+            {/* Main Stage (Preserve original aspects) */}
+            <div className="relative aspect-[4/5] md:aspect-[3/2] max-h-[700px] overflow-hidden flex items-center justify-center">
                 <AnimatePresence initial={false} custom={direction} mode="popLayout">
                     <motion.div
                         key={idx}
                         custom={direction}
-                        initial={{ opacity: 0, scale: 1.1, filter: 'blur(10px)' }}
+                        initial={{ opacity: 0, scale: 0.95, filter: 'blur(10px)' }}
                         animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
-                        exit={{ opacity: 0, scale: 0.9, filter: 'blur(10px)' }}
+                        exit={{ opacity: 0, scale: 1.05, filter: 'blur(10px)' }}
                         transition={{
-                            opacity: { duration: 0.8, ease: "easeInOut" },
-                            scale: { duration: 12, ease: "linear" }, // Long Ken Burns zoom
-                            filter: { duration: 0.8 }
+                            opacity: { duration: 0.6, ease: "easeInOut" },
+                            scale: { duration: 0.8, ease: "easeOut" },
+                            filter: { duration: 0.6 }
                         }}
-                        className="absolute inset-0 w-full h-full"
+                        className="relative w-full h-full flex items-center justify-center p-4 md:p-8"
                     >
-                        {/* Ken Burns Animation inner div */}
-                        <motion.div
-                            animate={{ scale: [1, 1.15] }}
-                            transition={{ duration: 12, ease: "linear", repeat: Infinity, repeatType: "mirror" }}
-                            className="w-full h-full"
-                        >
+                        {/* The Actual Full Image */}
+                        <div className="relative w-full h-full flex items-center justify-center">
                             <img
                                 src={sanitizeImageUrl(currentSlide.url)}
                                 alt={currentSlide.title}
-                                className="w-full h-full object-cover"
+                                className="max-w-full max-h-full w-auto h-auto object-contain rounded-2xl shadow-2xl ring-1 ring-white/20"
                                 onError={() => handleImageError(currentSlide.url)}
                             />
-                        </motion.div>
+                        </div>
 
-                        {/* Dramatic Vignette Overlay */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-black/10" />
-                        <div className="absolute inset-0 ring-1 ring-inset ring-white/10" />
+                        {/* Dramatic Vignette Overlay (Only on background) */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
                     </motion.div>
                 </AnimatePresence>
+            </div>
 
-                {/* Glassmorphism Info Card */}
-                <div className="absolute bottom-10 left-6 right-6 md:bottom-12 md:left-12 md:right-auto md:max-w-md z-30 pointer-events-none">
+            {/* Glassmorphism Info Card */}
+            <div className="absolute bottom-10 left-6 right-6 md:bottom-12 md:left-12 md:right-auto md:max-w-md z-30 pointer-events-none">
+                <motion.div
+                    key={`info-${idx}`}
+                    initial={{ opacity: 0, x: -30 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.4, duration: 0.8, type: "spring" }}
+                    className="bg-black/40 backdrop-blur-xl border border-white/10 p-6 md:p-8 rounded-[2rem] shadow-2xl"
+                >
+                    <div className="flex items-center gap-3 mb-3">
+                        <div className="w-8 h-[2px] bg-primary rounded-full" />
+                        <span className="text-primary font-heading font-medium text-xs tracking-[0.2em] uppercase">Featured Event</span>
+                    </div>
+                    <h3 className="text-2xl md:text-4xl font-bold font-heading text-white mb-2 leading-tight">
+                        {currentSlide.title}
+                    </h3>
+                    <div className="flex items-center gap-4 text-white/60 text-sm">
+                        <div className="flex items-center gap-2">
+                            <CalendarDays size={14} className="text-primary" />
+                            <span>{formatEventDate(currentSlide.date)}</span>
+                        </div>
+                    </div>
+                </motion.div>
+            </div>
+
+            {/* Progress Bar (Auto-play indicator) */}
+            <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-white/10 z-40 overflow-hidden">
+                {!isHovered && slides.length > 1 && (
                     <motion.div
-                        key={`info-${idx}`}
-                        initial={{ opacity: 0, x: -30 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.4, duration: 0.8, type: "spring" }}
-                        className="bg-black/40 backdrop-blur-xl border border-white/10 p-6 md:p-8 rounded-[2rem] shadow-2xl"
-                    >
-                        <div className="flex items-center gap-3 mb-3">
-                            <div className="w-8 h-[2px] bg-primary rounded-full" />
-                            <span className="text-primary font-heading font-medium text-xs tracking-[0.2em] uppercase">Featured Event</span>
-                        </div>
-                        <h3 className="text-2xl md:text-4xl font-bold font-heading text-white mb-2 leading-tight">
-                            {currentSlide.title}
-                        </h3>
-                        <div className="flex items-center gap-4 text-white/60 text-sm">
-                            <div className="flex items-center gap-2">
-                                <CalendarDays size={14} className="text-primary" />
-                                <span>{formatEventDate(currentSlide.date)}</span>
-                            </div>
-                        </div>
-                    </motion.div>
-                </div>
+                        key={`progress-${idx}`}
+                        initial={{ width: "0%" }}
+                        animate={{ width: "100%" }}
+                        transition={{ duration: 6, ease: "linear" }}
+                        className="h-full bg-gradient-to-r from-primary/40 via-primary to-primary shadow-[0_0_10px_rgba(var(--primary),0.8)]"
+                    />
+                )}
+            </div>
 
-                {/* Progress Bar (Auto-play indicator) */}
-                <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-white/10 z-40 overflow-hidden">
-                    {!isHovered && slides.length > 1 && (
-                        <motion.div
-                            key={`progress-${idx}`}
-                            initial={{ width: "0%" }}
-                            animate={{ width: "100%" }}
-                            transition={{ duration: 6, ease: "linear" }}
-                            className="h-full bg-gradient-to-r from-primary/40 via-primary to-primary shadow-[0_0_10px_rgba(var(--primary),0.8)]"
-                        />
-                    )}
-                </div>
-
-                {/* Premium Navigation Controls */}
-                {slides.length > 1 && (
+            {/* Premium Navigation Controls */}
+            {
+                slides.length > 1 && (
                     <>
                         <div className="absolute right-6 bottom-10 md:right-12 md:bottom-12 flex gap-3 z-40">
                             <button
@@ -397,8 +394,8 @@ export function PremiumEventGallery({ events }: { events: Event[] }) {
                             ))}
                         </div>
                     </>
-                )}
-            </div>
+                )
+            }
         </div>
     );
 }
