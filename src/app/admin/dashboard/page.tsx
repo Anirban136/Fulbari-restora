@@ -107,6 +107,7 @@ export default function AdminDashboard() {
     const [eventsLoading, setEventsLoading] = useState(false);
     const [eventForm, setEventForm] = useState({ title: '', description: '', event_date: '' });
     const [eventImages, setEventImages] = useState<string[]>([]);
+    const [eventLocalPreviews, setEventLocalPreviews] = useState<string[]>([]); // object URLs while uploading/remote not ready
     const [eventUploading, setEventUploading] = useState(false);
     const [eventUploads, setEventUploads] = useState(0); // active uploads counter
     const [eventSaving, setEventSaving] = useState(false);
@@ -117,8 +118,12 @@ export default function AdminDashboard() {
     const [galleryItems, setGalleryItems] = useState<GalleryItem[]>([]);
     const [galleryLoading, setGalleryLoading] = useState(false);
     const [galleryForm, setGalleryForm] = useState({ url: '', category: 'Food' as GalleryItem['category'] });
+    const [galleryLocalPreview, setGalleryLocalPreview] = useState<string>('');
     const [galleryUploading, setGalleryUploading] = useState(false);
     const [gallerySaving, setGallerySaving] = useState(false);
+
+    // ── Menu image preview ──
+    const [menuLocalPreview, setMenuLocalPreview] = useState<string>('');
 
     const [newItem, setNewItem] = useState({
         name: "",
@@ -223,6 +228,12 @@ export default function AdminDashboard() {
         const file = e.target.files?.[0];
         if (!file) return;
 
+        // create local preview first so user sees something immediately
+        const localUrl = URL.createObjectURL(file);
+        setEventLocalPreviews(prev => [...prev, localUrl]);
+
+        // clean-up preview when user removes image or form resets
+
         if (eventImages.length >= 10) {
             setShowToast({ show: true, message: "Maximum 10 images allowed per event.", type: 'error' });
             setTimeout(() => setShowToast(p => ({ ...p, show: false })), 3000);
@@ -267,6 +278,22 @@ export default function AdminDashboard() {
         setEventUploading(true);
         setEventUploads(u => u + 1);
         setShowToast({ show: true, message: "Uploading image...", type: 'success' });
+
+        // helper to try loading remote URL and clear preview when available
+        const tryRemote = (url: string, idx: number) => {
+            const testImg = document.createElement('img');
+            testImg.onload = () => {
+                setEventLocalPreviews(prev => {
+                    const copy = [...prev];
+                    copy[idx] = '';
+                    return copy;
+                });
+            };
+            testImg.onerror = () => {
+                console.warn('[ADMIN] remote image unavailable yet:', url);
+            };
+            testImg.src = sanitizeImageUrl(url);
+        };
         
         try {
             console.log(`[ADMIN] Starting upload for file: ${file.name}, Size: ${file.size}`);
@@ -301,9 +328,15 @@ export default function AdminDashboard() {
                 console.log(`[ADMIN] Upload successful: ${data.url}`);
                 setEventImages(prev => [...prev, data.url]);
                 setShowToast({ show: true, message: "Image uploaded successfully!", type: 'success' });
+
+                // attempt to load remote and clear the local preview once ready
+                const idx = eventLocalPreviews.length - 1;
+                tryRemote(data.url, idx);
             } else {
                 console.error(`[ADMIN] Upload failed:`, data.error);
                 setShowToast({ show: true, message: `Upload failed: ${data.error || 'Unknown error'}`, type: 'error' });
+                // remove the corresponding local preview since upload did not succeed
+                setEventLocalPreviews(prev => prev.slice(0, -1));
             }
         } catch (err: any) {
             console.error(`[ADMIN] Upload exception:`, err);
@@ -318,6 +351,12 @@ export default function AdminDashboard() {
 
     const removeEventImage = (idx: number) => {
         setEventImages(prev => prev.filter((_, i) => i !== idx));
+        setEventLocalPreviews(prev => {
+            const copy = [...prev];
+            const removed = copy.splice(idx, 1);
+            if (removed[0]) URL.revokeObjectURL(removed[0]);
+            return copy;
+        });
     };
 
     const handleSaveEvent = async (e: React.FormEvent) => {
@@ -339,7 +378,8 @@ export default function AdminDashboard() {
             });
             if (res.ok) {
                 setEventForm({ title: '', description: '', event_date: '' });
-                setEventImages([]);
+                    setEventImages([]);
+                setEventLocalPreviews([]);
                 setEventUploads(0);
                 setIsEditingEvent(false);
                 setEditingEventId(null);
@@ -389,11 +429,16 @@ export default function AdminDashboard() {
         const file = e.target.files?.[0];
         if (!file) return;
 
+        // local preview immediately
+        const localUrl = URL.createObjectURL(file);
+        setGalleryLocalPreview(localUrl);
+
         // reject unsupported formats early
         if (/\.heic$/i.test(file.name) || /\.heif$/i.test(file.name) || file.type === 'image/heic' || file.type === 'image/heif') {
             setShowToast({ show: true, message: "HEIC/HEIF images are not supported. Please convert to JPG/PNG or use a link.", type: 'error' });
             setTimeout(() => setShowToast(p => ({ ...p, show: false })), 5000);
             e.target.value = '';
+            setGalleryLocalPreview('');
             return;
         }
 
@@ -457,9 +502,15 @@ export default function AdminDashboard() {
                 console.log(`[GALLERY] Upload successful: ${data.url}`);
                 setGalleryForm(prev => ({ ...prev, url: data.url }));
                 setShowToast({ show: true, message: "Image Uploaded Successfully!", type: 'success' });
+
+                const testImg = document.createElement('img');
+                testImg.onload = () => setGalleryLocalPreview('');
+                testImg.onerror = () => console.warn('[GALLERY] remote not ready yet');
+                testImg.src = sanitizeImageUrl(data.url);
             } else {
                 console.error(`[GALLERY] Upload failed:`, data.error);
                 setShowToast({ show: true, message: `Upload failed: ${data.error || 'Unknown error'}`, type: 'error' });
+                setGalleryLocalPreview('');
             }
         } catch (err: any) {
             console.error("[GALLERY] Upload exception:", err);
@@ -609,11 +660,16 @@ export default function AdminDashboard() {
         const file = e.target.files?.[0];
         if (!file) return;
 
+        // show local preview immediately
+        const localUrl = URL.createObjectURL(file);
+        setMenuLocalPreview(localUrl);
+
         // reject unsupported formats early
         if (/\.heic$/i.test(file.name) || /\.heif$/i.test(file.name) || file.type === 'image/heic' || file.type === 'image/heif') {
             setShowToast({ show: true, message: "HEIC/HEIF images are not supported. Please convert to JPG/PNG or use a link.", type: 'error' });
             setTimeout(() => setShowToast(p => ({ ...p, show: false })), 5000);
             e.target.value = '';
+            setMenuLocalPreview('');
             return;
         }
 
@@ -674,9 +730,15 @@ export default function AdminDashboard() {
                 console.log(`[MENU] Upload successful: ${data.url}`);
                 setNewItem(prev => ({ ...prev, image: data.url }));
                 setShowToast({ show: true, message: "Image uploaded successfully!", type: 'success' });
+                // attempt to load remote and clear local preview
+                const testImg = document.createElement('img');
+                testImg.onload = () => setMenuLocalPreview('');
+                testImg.onerror = () => console.warn('[MENU] remote not ready yet');
+                testImg.src = sanitizeImageUrl(data.url);
             } else {
                 console.error(`[MENU] Upload failed:`, data.error);
                 setShowToast({ show: true, message: `Upload failed: ${data.error || 'Unknown error'}`, type: 'error' });
+                setMenuLocalPreview('');
             }
         } catch (err: any) {
             console.error("[MENU] Upload exception:", err);
@@ -1027,10 +1089,14 @@ export default function AdminDashboard() {
                                                         <Loader2 className="w-8 h-8 text-primary animate-spin" />
                                                         <span className="text-xs font-bold text-primary animate-pulse uppercase tracking-widest">Uploading...</span>
                                                     </div>
-                                                ) : newItem.image ? (
+                                                ) : (menuLocalPreview || newItem.image) ? (
                                                     <div className="absolute inset-0 w-full h-full">
                                                         <img
-                                                            src={sanitizeImageUrl(fixUnsplashUrl(newItem.image))}
+                                                            src={
+                                                                menuLocalPreview
+                                                                    ? menuLocalPreview
+                                                                    : sanitizeImageUrl(fixUnsplashUrl(newItem.image))
+                                                            }
                                                             alt="Preview"
                                                             className="w-full h-full object-cover transition-transform duration-500 group-hover/upload:scale-105"
                                                             onError={(e) => {
@@ -1293,10 +1359,14 @@ export default function AdminDashboard() {
                                                     <Loader2 className="w-8 h-8 text-primary animate-spin" />
                                                     <span className="text-xs font-bold text-primary animate-pulse uppercase tracking-widest">Uploading...</span>
                                                 </div>
-                                            ) : eventImages.length > 0 ? (
+                                            ) : eventImages.length > 0 || eventLocalPreviews.length > 0 ? (
                                                 <div className="absolute inset-0 w-full h-full">
                                                     <img
-                                                        src={sanitizeImageUrl(eventImages[0])}
+                                                        src={
+                                                            eventLocalPreviews[0]
+                                                                ? eventLocalPreviews[0]
+                                                                : sanitizeImageUrl(eventImages[0])
+                                                        }
                                                         alt="Event cover"
                                                         className="w-full h-full object-cover"
                                                         onError={(e) => {
@@ -1338,26 +1408,36 @@ export default function AdminDashboard() {
                                         >Add</button>
                                     </div>
                                     {/* thumbnails strip */}
-                                    {eventImages.length > 0 && (
+                                    {(eventImages.length > 0 || eventLocalPreviews.length > 0) && (
                                         <div className="flex gap-2 flex-wrap mt-2">
-                                            {eventImages.map((url, i) => (
-                                                <div key={i} className="relative w-20 h-14 rounded-xl overflow-hidden border border-border group">
-                                                    <img
-                                                        src={sanitizeImageUrl(url)}
-                                                        alt={`img ${i + 1}`}
-                                                        className="w-full h-full object-cover"
-                                                        onError={(e) => {
-                                                            const target = e.target as HTMLImageElement;
-                                                            console.error(`Admin event thumbnail failed: ${target.src}`);
-                                                        }}
-                                                    />
-                                                    <button type="button" onClick={() => removeEventImage(i)}
-                                                        className="absolute top-0.5 right-0.5 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                                                        <X size={9} />
-                                                    </button>
-                                                    {i === 0 && <span className="absolute bottom-0.5 left-0.5 text-[8px] bg-primary text-primary-foreground px-1 rounded">Cover</span>}
-                                                </div>
-                                            ))}
+                                            {Array.from({ length: Math.max(eventImages.length, eventLocalPreviews.length) }).map((_, i) => {
+                                                const url = eventImages[i];
+                                                const local = eventLocalPreviews[i];
+                                                return (
+                                                    <div key={i} className="relative w-20 h-14 rounded-xl overflow-hidden border border-border group">
+                                                        <img
+                                                            src={
+                                                                local
+                                                                    ? local
+                                                                    : url
+                                                                    ? sanitizeImageUrl(url)
+                                                                    : ''
+                                                            }
+                                                            alt={`img ${i + 1}`}
+                                                            className="w-full h-full object-cover"
+                                                            onError={(e) => {
+                                                                const target = e.target as HTMLImageElement;
+                                                                console.error(`Admin event thumbnail failed: ${target.src}`);
+                                                            }}
+                                                        />
+                                                        <button type="button" onClick={() => removeEventImage(i)}
+                                                            className="absolute top-0.5 right-0.5 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                                                            <X size={9} />
+                                                        </button>
+                                                        {i === 0 && <span className="absolute bottom-0.5 left-0.5 text-[8px] bg-primary text-primary-foreground px-1 rounded">Cover</span>}
+                                                    </div>
+                                                );
+                                            })}
                                         </div>
                                     )}
                                 </div>

@@ -230,7 +230,7 @@ export async function compressImageForUpload(file: File): Promise<File> {
         // helper to verify a File can be decoded by the browser
         function verifyImage(testFile: File): Promise<boolean> {
             return new Promise((res) => {
-                const img2 = new Image();
+                const img2 = document.createElement('img');
                 const tmpUrl = URL.createObjectURL(testFile);
                 let settled = false;
                 img2.onload = () => { if (!settled) { settled = true; URL.revokeObjectURL(tmpUrl); res(true); } };
