@@ -79,15 +79,31 @@ const galleryData: GalleryItem[] = [
     { id: "other-10", url: "/gallery-images/other-10.jpg", category: "Other", created_at: "2024-01-01T00:00:00Z" }
 ];
 
+import { supabase } from "@/lib/supabase";
+
 export default function GalleryPage() {
     const [activeFilter, setActiveFilter] = useState("All");
     const [galleryItems, setGalleryItems] = useState<GalleryItem[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // Load the static data
-        setGalleryItems(galleryData);
-        setLoading(false);
+        async function fetchGallery() {
+            try {
+                const { data, error } = await supabase
+                    .from('gallery_items')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+                if (data) setGalleryItems(data);
+            } catch (err) {
+                console.error("Error fetching gallery items:", err);
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        fetchGallery();
     }, []);
 
     const filteredImages = activeFilter === "All"
