@@ -1,25 +1,38 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { Utensils, Coffee, Building2, PartyPopper, Users, Clock, MapPin, Star, ChevronLeft, ChevronRight } from "lucide-react";
-import { sanitizeImageUrl } from "@/lib/utils";
+import { Utensils, Coffee, Building2, PartyPopper, Users, Clock, MapPin, Star, ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
+import { sanitizeImageUrl, cn } from "@/lib/utils";
 
 type VenueKey = "restaurant" | "cafe" | "community" | "banquet";
 
-const venues = {
+interface VenueData {
+    icon: any;
+    label: string;
+    bengaliLabel: string;
+    tagline: string;
+    description: string;
+    highlights: string[];
+    capacity: string;
+    timing: string;
+    images: string[];
+    taglineClassName?: string;
+    descriptionClassName?: string;
+}
+
+const venues: Record<VenueKey, VenueData> = {
     cafe: {
         icon: Coffee,
         label: "Café",
+        bengaliLabel: "ক্যাফে",
         tagline: "Brews & Bites",
         description:
             "Unwind with freshly brewed coffee, artisan teas, and light bites in our cozy café corner. Perfect for casual meetups, work sessions, or a quiet afternoon escape.",
         highlights: ["Specialty Coffee", "Fresh Pastries", "Free Wi-Fi", "Cozy Ambience"],
         capacity: "40+ Guests",
         timing: "8:00 AM - 9:00 PM",
-        taglineClassName: "text-primary font-medium",
-        descriptionClassName: "text-muted-foreground",
         images: [
             "/cafe/cafe1.jpeg",
             "/cafe/cafe2.jpeg",
@@ -30,6 +43,7 @@ const venues = {
     restaurant: {
         icon: Utensils,
         label: "Restaurant",
+        bengaliLabel: "রেস্তোরাঁ",
         tagline: "প্রকৃতির সান্নিধ্যে এক অনন্য স্বাদের ঠিকানা",
         taglineClassName: "font-bengali-logo text-base md:text-lg text-primary font-bold tracking-wide",
         description:
@@ -49,14 +63,13 @@ const venues = {
     community: {
         icon: Building2,
         label: "Community Hall",
+        bengaliLabel: "কমিউনিটি হল",
         tagline: "Celebrate Together",
         description:
             "Our spacious community hall is ideal for cultural events, meetings, seminars, and social gatherings. Equipped with modern amenities and flexible seating arrangements.",
         highlights: ["Projector & Sound", "Flexible Layout", "AC Hall", "Stage Available"],
         capacity: "300+ Guests",
         timing: "Contact for Inquiry",
-        taglineClassName: "text-primary font-medium",
-        descriptionClassName: "text-muted-foreground",
         images: [
             "/community/community4.jpeg",
             "/community/community2.jpeg",
@@ -68,14 +81,13 @@ const venues = {
     banquet: {
         icon: PartyPopper,
         label: "Food & Events",
+        bengaliLabel: "ফুড ও ইভেন্টস",
         tagline: "Weddings & Grand Occasions",
         description:
             "From grand weddings to birthday celebrations, our food provide an elegant setting with premium catering, décor support, and dedicated event coordination.",
         highlights: ["Wedding Packages", "Custom Décor", "Premium Catering", "Event Manager"],
         capacity: "500+ Guests",
         timing: "Contact for Inquiry",
-        taglineClassName: "text-primary font-medium",
-        descriptionClassName: "text-muted-foreground",
         images: [
             "/food/food3.jpeg",
             "/food/food2.jpeg",
@@ -90,89 +102,67 @@ function VenueImageSlider({ images, label }: { images: string[], label: string }
     const [currentIndex, setCurrentIndex] = useState(0);
     const [isPaused, setIsPaused] = useState(false);
 
-    const nextSlide = () => {
-        setCurrentIndex((prev) => (prev + 1) % images.length);
-    };
-
-    const prevSlide = () => {
-        setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
-    };
+    const nextSlide = () => setCurrentIndex((prev) => (prev + 1) % images.length);
+    const prevSlide = () => setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
 
     useEffect(() => {
         if (isPaused) return;
         const interval = setInterval(nextSlide, 5000);
         return () => clearInterval(interval);
-    }, [isPaused, currentIndex, images.length]); // Added currentIndex to dep array for reliability
-
-    const handleMouseEnter = () => {
-        // Only pause on hover for devices that actually support hovering (desktops)
-        if (window.matchMedia('(hover: hover)').matches) {
-            setIsPaused(true);
-        }
-    };
+    }, [isPaused, currentIndex, images.length]);
 
     return (
         <div
-            className="relative group overflow-hidden rounded-2xl shadow-2xl h-[280px] md:h-[460px] lg:h-[540px] xl:h-[620px] touch-pan-y"
-            onMouseEnter={handleMouseEnter}
+            className="relative group rounded-[2.5rem] overflow-hidden shadow-[0_32px_64px_-16px_rgba(0,0,0,0.3)] bg-black"
+            onMouseEnter={() => setIsPaused(true)}
             onMouseLeave={() => setIsPaused(false)}
         >
             <AnimatePresence mode="wait">
                 <motion.div
                     key={currentIndex}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.5 }}
-                    className="relative w-full h-full"
+                    initial={{ opacity: 0, scale: 1.1 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    transition={{ duration: 0.8 }}
+                    className="aspect-[4/5] md:aspect-[3/2] lg:aspect-[4/3] w-full"
                 >
-                    <img
+                    <Image
                         src={sanitizeImageUrl(images[currentIndex])}
-                        alt={`${label} photo ${currentIndex + 1}`}
-                        className="absolute inset-0 w-full h-full object-cover"
-                        loading="eager"
-                        onError={(e) => {
-                            (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=800&auto=format&fit=crop';
-                        }}
+                        alt={`${label} ${currentIndex + 1}`}
+                        fill
+                        className="object-cover"
+                        unoptimized
                     />
-                    <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black/80 to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
                 </motion.div>
             </AnimatePresence>
 
-            {/* Navigation Arrows - High Visibility */}
-            <div className="absolute inset-0 flex items-center justify-between p-3 md:p-6 pointer-events-none">
-                <button
-                    onClick={(e) => { e.stopPropagation(); prevSlide(); }}
-                    className="p-3 md:p-4 rounded-full bg-black/60 backdrop-blur-md text-white border border-white/30 hover:bg-primary transition-all active:scale-90 pointer-events-auto z-30 shadow-xl"
-                    aria-label="Previous slide"
-                >
-                    <ChevronLeft size={28} className="md:w-8 md:h-8" />
-                </button>
-                <button
-                    onClick={(e) => { e.stopPropagation(); nextSlide(); }}
-                    className="p-3 md:p-4 rounded-full bg-black/60 backdrop-blur-md text-white border border-white/30 hover:bg-primary transition-all active:scale-90 pointer-events-auto z-30 shadow-xl"
-                    aria-label="Next slide"
-                >
-                    <ChevronRight size={28} className="md:w-8 md:h-8" />
-                </button>
+            {/* Glass Navigation */}
+            <div className="absolute inset-x-6 bottom-8 flex items-center justify-between z-20">
+                <div className="flex gap-2">
+                    {images.map((_, i) => (
+                        <button
+                            key={i}
+                            onClick={() => setCurrentIndex(i)}
+                            className={cn(
+                                "h-1.5 rounded-full transition-all duration-500",
+                                i === currentIndex ? "w-8 bg-primary" : "w-1.5 bg-white/30"
+                            )}
+                        />
+                    ))}
+                </div>
+                <div className="flex gap-2">
+                    <button onClick={prevSlide} className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white hover:bg-primary transition-colors">
+                        <ChevronLeft size={18} />
+                    </button>
+                    <button onClick={nextSlide} className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white hover:bg-primary transition-colors">
+                        <ChevronRight size={18} />
+                    </button>
+                </div>
             </div>
 
-            {/* Slide Indicators */}
-            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-2.5 z-30">
-                {images.map((_, idx) => (
-                    <button
-                        key={idx}
-                        onClick={(e) => { e.stopPropagation(); setCurrentIndex(idx); }}
-                        className={`w-2.5 h-2.5 rounded-full transition-all shadow-sm ${idx === currentIndex ? "bg-primary w-8" : "bg-white/50 hover:bg-white/80"
-                            }`}
-                        aria-label={`Go to slide ${idx + 1}`}
-                    />
-                ))}
-            </div>
-
-            {/* Image Counter Badge */}
-            <div className="absolute top-6 right-6 bg-black/60 backdrop-blur-md text-white px-4 py-1.5 rounded-full text-[11px] md:text-xs font-bold border border-white/20 z-30 shadow-lg tracking-wider">
-                {currentIndex + 1} / {images.length}
+            <div className="absolute top-6 left-6 px-4 py-1.5 bg-black/40 backdrop-blur-md border border-white/10 rounded-full text-[10px] font-bold text-white/80 uppercase tracking-widest z-10">
+                Visual Tour
             </div>
         </div>
     );
@@ -184,130 +174,168 @@ export function About() {
     const IconComponent = current.icon;
 
     return (
-        <section className="pt-8 md:pt-12 lg:pt-16 pb-12 md:pb-20 lg:pb-24 xl:pb-32 bg-background relative overflow-hidden">
-            {/* Decorative glows */}
-            <div className="absolute top-20 left-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
-            <div className="absolute bottom-20 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
-
-            <div className="max-w-7xl mx-auto px-4 md:px-8 lg:px-12 relative z-10">
-                {/* Section Header */}
+        <section className="relative py-24 md:py-32 overflow-hidden bg-background">
+            {/* Cinematic Ambient Background (matches active venue) */}
+            <AnimatePresence mode="wait">
                 <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    className="text-center mb-12 md:mb-16"
-                >
-                    <span className="text-primary font-heading italic text-base md:text-lg mb-2 block">
-                        About Us
-                    </span>
-                    <h2 className="text-2xl md:text-3xl xl:text-4xl font-bold font-heading mb-3 leading-tight">
-                        A <span className="text-primary">Proshantir Neer</span> in Serampore
-                    </h2>
-                    <p className="text-muted-foreground text-sm md:text-base max-w-2xl mx-auto mb-8">
-                        Fulbari is a complete destination — dine, sip, celebrate, and connect under one roof
-                        in the heart of Serampore.
-                    </p>
-                    <div className="relative max-w-4xl mx-auto p-6 md:p-8 rounded-2xl bg-primary/5 border border-primary/10 backdrop-blur-sm">
-                        <div className="absolute -top-3 left-6 px-3 py-1 bg-background border border-primary/20 rounded-full text-[10px] md:text-xs font-bold text-primary uppercase tracking-widest">
-                            Our Atmosphere
-                        </div>
-                        <p className="text-foreground font-bengali italic text-sm md:text-base leading-relaxed md:leading-loose text-center font-semibold">
-                            ব্যস্ত জীবনের ক্লান্তি ভুলে যদি প্রকৃতির স্নিগ্ধ ছোঁয়ায় সুস্বাদু খাবারের স্বাদ নিতে চান, তবে ফুলবাড়ি রেস্তোরাঁ আপনার জন্য এক আদর্শ গন্তব্য। শ্রীবামপুর ওল্ড দিল্লি রোডের ওপর রাজ্যাধরপুরে অবস্থিত আমাদের এই রেস্তোরাঁটি কেবল খাবারের জায়গাই নয়, বরং এটি এক প্রশান্তির নীড়।
-                        </p>
-                    </div>
-                </motion.div>
+                    key={`about-bg-${activeVenue}`}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 0.05 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 1.5 }}
+                    className="absolute inset-0 scale-110 blur-[150px] pointer-events-none"
+                    style={{
+                        backgroundImage: `url(${sanitizeImageUrl(current.images[0])})`,
+                        backgroundPosition: 'center',
+                        backgroundSize: 'cover'
+                    }}
+                />
+            </AnimatePresence>
 
-                {/* Venue Tabs */}
-                <div className="flex justify-center mb-10 md:mb-14">
-                    <div className="flex gap-2 md:gap-3 overflow-x-auto pb-2 no-scrollbar">
-                        {(Object.keys(venues) as VenueKey[]).map((key) => {
-                            const venue = venues[key];
-                            const VIcon = venue.icon;
-                            const isActive = activeVenue === key;
-                            return (
-                                <button
-                                    key={key}
-                                    onClick={() => setActiveVenue(key)}
-                                    className={`flex items-center gap-2 px-4 md:px-6 py-3 rounded-full whitespace-nowrap transition-all text-sm md:text-base font-medium border ${isActive
-                                        ? "bg-primary text-primary-foreground border-primary shadow-lg shadow-primary/20"
-                                        : "bg-card text-muted-foreground border-border hover:border-primary/40 hover:text-foreground"
-                                        }`}
-                                >
-                                    <VIcon size={18} />
-                                    {venue.label}
-                                </button>
-                            );
-                        })}
-                    </div>
+            <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10">
+                {/* Section Header */}
+                <div className="grid lg:grid-cols-2 gap-12 items-end mb-20">
+                    <motion.div
+                        initial={{ opacity: 0, x: -30 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        viewport={{ once: true }}
+                    >
+                        <div className="flex items-center gap-3 mb-6">
+                            <span className="text-primary font-heading italic text-lg uppercase tracking-widest">About Us</span>
+                            <div className="h-px flex-1 bg-gradient-to-r from-primary/50 to-transparent" />
+                            <span className="font-bengali text-muted-foreground/60 text-sm">আমাদের সম্পর্কে</span>
+                        </div>
+                        <h2 className="text-4xl md:text-5xl lg:text-6xl font-black font-heading leading-[1.1] mb-8">
+                            A <span className="text-primary italic">Proshantir Neer</span><br />
+                            in the heart of Serampore
+                        </h2>
+                    </motion.div>
+
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        className="relative p-8 rounded-[2rem] bg-primary/5 border border-primary/10 backdrop-blur-sm"
+                    >
+                        <Sparkles className="absolute -top-4 -right-4 text-primary animate-pulse" size={32} />
+                        <p className="font-bengali italic text-lg leading-relaxed text-center font-semibold text-foreground/90">
+                            "ব্যস্ত জীবনের ক্লান্তি ভুলে যদি প্রকৃতির স্নিগ্ধ ছোঁয়ায় সুস্বাদু খাবারের স্বাদ নিতে চান, তবে ফুলবাড়ি রেস্তোরাঁ আপনার জন্য এক আদর্শ গন্তব্য।"
+                        </p>
+                    </motion.div>
                 </div>
 
-                {/* Active Venue Content - Standardized with Slider */}
+                {/* Venue Navigation - Staggered Selection */}
+                <div className="flex flex-wrap gap-3 mb-16 justify-center lg:justify-start">
+                    {(Object.keys(venues) as VenueKey[]).map((key) => (
+                        <button
+                            key={key}
+                            onClick={() => setActiveVenue(key)}
+                            className={cn(
+                                "group relative px-6 py-3 rounded-2xl transition-all duration-500 flex items-center gap-3 border overflow-hidden",
+                                activeVenue === key
+                                    ? "bg-primary text-primary-foreground border-primary shadow-2xl shadow-primary/30 scale-105"
+                                    : "bg-card/50 text-muted-foreground border-border/50 hover:border-primary/40 hover:text-foreground backdrop-blur-sm"
+                            )}
+                        >
+                            <IconComponent size={18} className={activeVenue === key ? "text-primary-foreground" : "text-primary group-hover:scale-110 transition-transform"} />
+                            <div className="flex flex-col items-start leading-none">
+                                <span className="text-sm font-bold tracking-tight">{venues[key].label}</span>
+                                <span className="text-[10px] opacity-60 font-bengali">{venues[key].bengaliLabel}</span>
+                            </div>
+                        </button>
+                    ))}
+                </div>
+
+                {/* Staggered Content Grid */}
                 <AnimatePresence mode="wait">
                     <motion.div
                         key={activeVenue}
-                        initial={{ opacity: 0, y: 20 }}
+                        initial={{ opacity: 0, y: 40 }}
                         animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -10 }}
-                        transition={{ duration: 0.4 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        transition={{ duration: 0.6, ease: "easeOut" }}
+                        className="grid lg:grid-cols-12 gap-8 lg:gap-16 items-center"
                     >
-                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12 items-center">
-                            {/* Interactive Slider - Left Column */}
-                            <div className="lg:col-span-7">
+                        {/* Visuals Column */}
+                        <div className="lg:col-span-7 relative">
+                            <motion.div
+                                initial={{ scale: 0.95, opacity: 0 }}
+                                animate={{ scale: 1, opacity: 1 }}
+                                transition={{ delay: 0.2 }}
+                                className="relative z-10"
+                            >
                                 <VenueImageSlider images={current.images} label={current.label} />
-                            </div>
+                            </motion.div>
 
-                            {/* Venue Info - Right Column */}
-                            <div className="lg:col-span-5 flex flex-col justify-center">
-                                <div className="mb-4 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20">
-                                    <IconComponent size={16} className="text-primary" />
-                                    <span className={`text-sm md:text-base font-bold ${current.taglineClassName || ''}`}>
-                                        {current.tagline}
-                                    </span>
+                            {/* Decorative Elements */}
+                            <div className="absolute -top-6 -left-6 w-32 h-32 bg-primary/20 rounded-full blur-3xl" />
+                            <div className="absolute -bottom-10 -right-10 w-64 h-64 bg-primary/10 rounded-full blur-3xl" />
+                        </div>
+
+                        {/* Content Column */}
+                        <div className="lg:col-span-5">
+                            <motion.div
+                                initial={{ opacity: 0, x: 30 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: 0.3 }}
+                                className="space-y-8"
+                            >
+                                <div className="space-y-4">
+                                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20">
+                                        <IconComponent size={18} className="text-primary" />
+                                        <span className={cn("text-sm font-bold tracking-wide uppercase", current.taglineClassName)}>
+                                            {current.tagline}
+                                        </span>
+                                    </div>
+                                    <h3 className="text-4xl md:text-5xl font-black font-heading leading-tight">
+                                        {current.label}
+                                    </h3>
+                                    <p className={cn("text-lg leading-relaxed text-muted-foreground", current.descriptionClassName)}>
+                                        {current.description}
+                                    </p>
                                 </div>
 
-                                <h3 className="text-xl md:text-3xl xl:text-4xl font-bold font-heading mb-4 leading-tight">
-                                    {current.label}
-                                </h3>
-                                <p className={`text-sm md:text-base mb-8 leading-relaxed ${current.descriptionClassName || 'text-muted-foreground'}`}>
-                                    {current.description}
-                                </p>
-
-                                {/* Highlights Grid */}
-                                <div className="grid grid-cols-2 gap-4 mb-8">
-                                    {current.highlights.map((item) => (
-                                        <div
-                                            key={item}
-                                            className="flex items-center gap-2.5"
+                                {/* Highlights in Cinema Style */}
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    {current.highlights.map((h, i) => (
+                                        <motion.div
+                                            key={h}
+                                            initial={{ opacity: 0, y: 10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            transition={{ delay: 0.4 + (i * 0.1) }}
+                                            className="flex items-center gap-3 p-3 rounded-xl bg-card/40 border border-border/50 backdrop-blur-sm"
                                         >
-                                            <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                                                <Star className="text-primary" size={12} fill="currentColor" />
+                                            <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
+                                                <Star className="text-primary" size={14} fill="currentColor" />
                                             </div>
-                                            <span className="text-foreground text-sm md:text-base font-medium leading-tight">{item}</span>
-                                        </div>
+                                            <span className="text-sm font-bold tracking-tight">{h}</span>
+                                        </motion.div>
                                     ))}
                                 </div>
 
-                                {/* Quick Info Badges */}
-                                <div className="flex flex-wrap gap-3 pt-6 border-t border-border/50">
-                                    <div className="flex items-center gap-2 bg-card px-4 py-2.5 rounded-xl border border-border/60 shadow-sm">
-                                        <Users className="text-primary" size={16} />
-                                        <span className="text-xs md:text-sm font-bold tracking-tight">{current.capacity}</span>
-                                    </div>
-                                    <div className="flex items-center gap-2 bg-card px-4 py-2.5 rounded-xl border border-border/60 shadow-sm">
-                                        <Clock className="text-primary" size={16} />
-                                        <span className="text-xs md:text-sm font-bold tracking-tight">{current.timing}</span>
-                                    </div>
-                                    <div className="flex items-center gap-2 bg-card px-4 py-2.5 rounded-xl border border-border/60 shadow-sm">
-                                        <MapPin className="text-primary" size={16} />
-                                        <span className="text-xs md:text-sm font-bold tracking-tight uppercase">Serampore</span>
-                                    </div>
+                                {/* Modern Stats Badges */}
+                                <div className="flex flex-wrap gap-4 pt-8 border-t border-border/50">
+                                    {[
+                                        { icon: Users, label: current.capacity, sub: "Capacity" },
+                                        { icon: Clock, label: current.timing, sub: "Available" }
+                                    ].map((stat, i) => (
+                                        <div key={i} className="flex items-center gap-4 group">
+                                            <div className="w-12 h-12 rounded-2xl bg-primary flex items-center justify-center text-primary-foreground shadow-lg shadow-primary/20 group-hover:scale-110 transition-transform">
+                                                <stat.icon size={20} />
+                                            </div>
+                                            <div>
+                                                <p className="text-base font-black leading-none mb-1 tracking-tight">{stat.label}</p>
+                                                <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">{stat.sub}</p>
+                                            </div>
+                                        </div>
+                                    ))}
                                 </div>
-                            </div>
+                            </motion.div>
                         </div>
                     </motion.div>
                 </AnimatePresence>
-
             </div>
         </section>
     );
 }
+
