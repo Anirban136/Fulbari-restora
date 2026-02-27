@@ -195,63 +195,130 @@ function EventImageCarousel({ images }: { images: string[] }) {
     );
 }
 
-// Modern reliable gallery using <img> tags (works on ALL browsers including iOS Safari, Mobile Chrome)
 export function ModernEventGallery({ images }: { images: string[] }) {
+    const [idx, setIdx] = useState(0);
+    const [direction, setDirection] = useState(0);
+    const [isHovered, setIsHovered] = useState(false);
     const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
-    
-    // Filter out failed images
+
     const validImages = images.filter(img => !failedImages.has(img));
+
+    useEffect(() => {
+        if (validImages.length <= 1 || isHovered) return;
+        const t = setInterval(() => {
+            setDirection(1);
+            setIdx(i => (i + 1) % validImages.length);
+        }, 4000);
+        return () => clearInterval(t);
+    }, [validImages.length, isHovered]);
 
     const handleImageError = (failedUrl: string) => {
         console.error(`Event gallery image failed to load: ${failedUrl}`);
         setFailedImages(prev => new Set([...prev, failedUrl]));
+        if (validImages.length > 0) {
+            setIdx(i => (i + 1) % validImages.length);
+        }
+    };
+
+    const paginate = (newDirection: number) => {
+        setDirection(newDirection);
+        setIdx(i => (i + newDirection + validImages.length) % validImages.length);
+    };
+
+    const variants = {
+        enter: (direction: number) => ({
+            x: direction > 0 ? '100%' : '-100%',
+            opacity: 0,
+            scale: 1.05
+        }),
+        center: {
+            zIndex: 1,
+            x: 0,
+            opacity: 1,
+            scale: 1,
+            transition: {
+                x: { type: "spring" as const, stiffness: 300, damping: 30 },
+                opacity: { duration: 0.4 }
+            }
+        },
+        exit: (direction: number) => ({
+            zIndex: 0,
+            x: direction < 0 ? '100%' : '-100%',
+            opacity: 0,
+            scale: 0.95,
+            transition: {
+                x: { type: "spring" as const, stiffness: 300, damping: 30 },
+                opacity: { duration: 0.4 }
+            }
+        })
     };
 
     if (validImages.length === 0) {
         return (
-            <div className="flex justify-center items-center h-48 border border-dashed border-border/50 rounded-2xl mx-4">
+            <div className="flex justify-center items-center h-48 md:h-80 border border-dashed border-border/50 rounded-3xl mx-4">
                 <div className="text-center">
                     <p className="text-muted-foreground text-sm">No event images available yet.</p>
-                    <p className="text-muted-foreground text-xs mt-1">Admin: Upload images in the dashboard to see them here.</p>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="relative w-full overflow-hidden px-4 md:px-8 pb-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {validImages.map((img, i) => (
-                    <div
-                        key={`grid-${i}`}
-                        className="relative w-full aspect-[4/3] rounded-2xl overflow-hidden shadow-xl border border-border/50 group bg-card"
+        <div
+            className="relative w-full max-w-5xl mx-auto aspect-[4/5] md:aspect-[16/9] lg:aspect-[21/9] max-h-[600px] overflow-hidden rounded-3xl shadow-2xl group border border-border/50 select-none bg-card"
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+        >
+            <AnimatePresence initial={false} custom={direction}>
+                <motion.div
+                    key={idx}
+                    custom={direction}
+                    variants={variants}
+                    initial="enter"
+                    animate="center"
+                    exit="exit"
+                    className="absolute inset-0"
+                >
+                    <img
+                        src={sanitizeImageUrl(validImages[idx])}
+                        alt={`Fulbari event image ${idx + 1}`}
+                        className="absolute inset-0 w-full h-full object-cover"
+                        onError={() => handleImageError(validImages[idx])}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+                </motion.div>
+            </AnimatePresence>
+
+            {/* Prev / Next arrows */}
+            {validImages.length > 1 && (
+                <>
+                    <button
+                        onClick={(e) => { e.stopPropagation(); paginate(-1); }}
+                        className="absolute left-3 md:left-6 top-1/2 -translate-y-1/2 w-10 h-10 md:w-14 md:h-14 bg-black/40 backdrop-blur-md rounded-full flex items-center justify-center text-white hover:bg-primary hover:text-primary-foreground transition-all z-20 shadow-lg border border-white/20 opacity-100 md:opacity-0 md:group-hover:opacity-100 md:translate-x-4 md:group-hover:translate-x-0"
                     >
-                        {/* Skeleton shimmer shown while image loads */}
-                        <div className="absolute inset-0 bg-gradient-to-br from-card to-accent/30 animate-pulse" />
-                        {/* Use <img> — reliable on ALL browsers (not CSS background-image) */}
-                        <img
-                            src={sanitizeImageUrl(img)}
-                            alt={`Fulbari event image ${i + 1}`}
-                            loading={i < 3 ? "eager" : "lazy"}
-                            decoding="async"
-                            className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                            onLoad={(e) => {
-                                // Hide the skeleton once image loads
-                                const prev = (e.target as HTMLImageElement).previousElementSibling as HTMLElement;
-                                if (prev) prev.style.display = 'none';
-                            }}
-                            onError={(e) => {
-                                const target = e.target as HTMLImageElement;
-                                handleImageError(img);
-                                // Show a fallback placeholder
-                                target.style.display = 'none';
-                            }}
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity" />
-                        <div className="absolute inset-0 ring-1 ring-inset ring-white/20 group-hover:ring-primary/40 transition-all rounded-2xl" />
+                        <ChevronLeft size={24} className="md:group-hover:-translate-x-0.5 transition-transform" />
+                    </button>
+                    <button
+                        onClick={(e) => { e.stopPropagation(); paginate(1); }}
+                        className="absolute right-3 md:right-6 top-1/2 -translate-y-1/2 w-10 h-10 md:w-14 md:h-14 bg-black/40 backdrop-blur-md rounded-full flex items-center justify-center text-white hover:bg-primary hover:text-primary-foreground transition-all z-20 shadow-lg border border-white/20 opacity-100 md:opacity-0 md:group-hover:opacity-100 md:-translate-x-4 md:group-hover:translate-x-0"
+                    >
+                        <ChevronRight size={24} className="md:group-hover:translate-x-0.5 transition-transform" />
+                    </button>
+                    {/* Dots */}
+                    <div className="absolute bottom-5 md:bottom-8 left-0 right-0 flex justify-center gap-2 md:gap-3 z-20">
+                        {validImages.map((_, i) => (
+                            <button
+                                key={i}
+                                onClick={(e) => { e.stopPropagation(); setDirection(i > idx ? 1 : -1); setIdx(i); }}
+                                className={cn(
+                                    "h-1.5 md:h-2 rounded-full transition-all duration-300",
+                                    i === idx ? "bg-primary w-6 md:w-10 shadow-[0_0_10px_rgba(var(--primary),0.8)]" : "bg-white/50 w-1.5 md:w-2 hover:bg-white/90"
+                                )}
+                            />
+                        ))}
                     </div>
-                ))}
-            </div>
+                </>
+            )}
         </div>
     );
 }
@@ -269,7 +336,7 @@ export function TodaysMenuAndEvents() {
     useEffect(() => {
         const ts = Date.now();
         // Add cache buster to prevent stale responses
-        fetch(`/api/daily-specials?t=${ts}`, { 
+        fetch(`/api/daily-specials?t=${ts}`, {
             cache: 'no-store',
             headers: {
                 'Cache-Control': 'no-store, no-cache, must-revalidate',
@@ -281,7 +348,7 @@ export function TodaysMenuAndEvents() {
             .catch(() => setSpecials([]))
             .finally(() => setLoadingMenu(false));
 
-        fetch(`/api/events?t=${ts}`, { 
+        fetch(`/api/events?t=${ts}`, {
             cache: 'no-store',
             headers: {
                 'Cache-Control': 'no-store, no-cache, must-revalidate',
@@ -293,7 +360,7 @@ export function TodaysMenuAndEvents() {
                 // Ensure image_urls is valid and filter empty URLs
                 const cleanedEvents = (Array.isArray(data) ? data : []).map((ev: Event) => ({
                     ...ev,
-                    image_urls: Array.isArray(ev.image_urls) 
+                    image_urls: Array.isArray(ev.image_urls)
                         ? ev.image_urls.filter((url: string) => url && url.trim() !== "")
                         : []
                 }));
@@ -372,7 +439,7 @@ export function TodaysMenuAndEvents() {
                                             events.flatMap(ev => {
                                                 // Collect all valid image URLs from each event
                                                 const urls: string[] = [];
-                                                
+
                                                 // Add image_urls if they exist and are valid
                                                 if (Array.isArray(ev.image_urls) && ev.image_urls.length > 0) {
                                                     ev.image_urls.forEach((url: string) => {
@@ -381,12 +448,12 @@ export function TodaysMenuAndEvents() {
                                                         }
                                                     });
                                                 }
-                                                
+
                                                 // Fallback to poster_url if no image_urls
                                                 if (urls.length === 0 && ev.poster_url && typeof ev.poster_url === 'string' && ev.poster_url.trim() !== '') {
                                                     urls.push(ev.poster_url);
                                                 }
-                                                
+
                                                 return urls;
                                             }).filter((v, i, a) => {
                                                 // Remove duplicates and empty strings
