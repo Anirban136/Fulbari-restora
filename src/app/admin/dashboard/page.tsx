@@ -8,7 +8,7 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { cn, sanitizeImageUrl, fixUnsplashUrl } from "@/lib/utils";
-import { compressImageForUpload } from "@/lib/supabase-browser";
+import { UploadButton, UploadDropzone } from "@/utils/uploadthing";
 import { motion, AnimatePresence } from "framer-motion";
 import {
     Plus,
@@ -224,111 +224,7 @@ export default function AdminDashboard() {
         finally { setTogglingSpecial(null); }
     };
 
-    const handleEventPosterUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
 
-        // create local preview first so user sees something immediately
-        const localUrl = URL.createObjectURL(file);
-        setEventLocalPreviews(prev => [...prev, localUrl]);
-
-        // clean-up preview when user removes image or form resets
-
-        if (eventImages.length >= 10) {
-            setShowToast({ show: true, message: "Maximum 10 images allowed per event.", type: 'error' });
-            setTimeout(() => setShowToast(p => ({ ...p, show: false })), 3000);
-            return;
-        }
-
-        // reject unsupported formats early (e.g. HEIC/HEIF)
-        if (/\.heic$/i.test(file.name) || /\.heif$/i.test(file.name) || file.type === 'image/heic' || file.type === 'image/heif') {
-            setShowToast({ show: true, message: "HEIC/HEIF images are not supported. Please convert to JPG/PNG or use a link.", type: 'error' });
-            setTimeout(() => setShowToast(p => ({ ...p, show: false })), 5000);
-            e.target.value = '';
-            return;
-        }
-
-        // Pre-validation: Check file can be read
-        try {
-            const testBuffer = await file.arrayBuffer();
-            if (testBuffer.byteLength === 0) {
-                setShowToast({ show: true, message: "ERROR: File appears empty or corrupted. Try selecting a different image.", type: 'error' });
-                setTimeout(() => setShowToast(p => ({ ...p, show: false })), 5000);
-                e.target.value = '';
-                return;
-            }
-            console.log(`[ADMIN] File validation OK: ${file.name}, ${testBuffer.byteLength} bytes`);
-
-            // verify file can be rendered by browser (catches HEIC and other unsupported/corrupt files)
-            const canShow = await canDisplayFile(file);
-            if (!canShow) {
-                setShowToast({ show: true, message: "Selected image cannot be displayed by your browser. Please use a JPG/PNG or a link.", type: 'error' });
-                setTimeout(() => setShowToast(p => ({ ...p, show: false })), 5000);
-                e.target.value = '';
-                return;
-            }
-        } catch (err: any) {
-            console.error(`[ADMIN] File read failed:`, err);
-            setShowToast({ show: true, message: `Cannot read file: ${err.message}`, type: 'error' });
-            setTimeout(() => setShowToast(p => ({ ...p, show: false })), 5000);
-            e.target.value = '';
-            return;
-        }
-
-        setEventUploading(true);
-        setEventUploads(u => u + 1);
-        setShowToast({ show: true, message: "Uploading image...", type: 'success' });
-
-        try {
-            console.log(`[ADMIN] Starting upload for file: ${file.name}, Size: ${file.size}`);
-
-            // Compress client-side first (keeps it under Vercel's 4.5MB limit)
-            const compressed = await compressImageForUpload(file);
-            console.log(`[ADMIN] Compression complete: ${compressed.name}, Size: ${compressed.size}, Type: ${compressed.type}`);
-
-            // if conversion failed and we still have HEIC/HEIF, bail out
-            if (compressed.type === 'image/heic' || compressed.type === 'image/heif') {
-                console.error(`[ADMIN] ERROR: Unsupported image format after compression: ${compressed.type}`);
-                setShowToast({ show: true, message: "Unsupported image type (HEIC). Please convert to JPG/PNG and try again.", type: 'error' });
-                setTimeout(() => setShowToast(p => ({ ...p, show: false })), 5000);
-                return;
-            }
-
-            if (compressed.size === 0) {
-                console.error(`[ADMIN] ERROR: Compressed file is empty!`);
-                setShowToast({ show: true, message: "ERROR: Compression failed - file became empty. Try a different image or refresh and retry.", type: 'error' });
-                setTimeout(() => setShowToast(p => ({ ...p, show: false })), 5000);
-                return;
-            }
-
-            const fd = new FormData();
-            fd.append('file', compressed);
-            fd.append('bucket', 'events');
-
-            const res = await fetch('/api/upload', { method: 'POST', body: fd });
-            const data = await res.json();
-
-            if (res.ok && data.url) {
-                console.log(`[ADMIN] Upload successful: ${data.url}`);
-                setEventImages(prev => [...prev, data.url]);
-                setShowToast({ show: true, message: "Image uploaded successfully! Click 'Add Event' to finalize.", type: 'success' });
-                // keep local preview visible until event is saved - don't try to preemptively test remote
-            } else {
-                console.error(`[ADMIN] Upload failed:`, data.error);
-                setShowToast({ show: true, message: `Upload failed: ${data.error || 'Unknown error'}`, type: 'error' });
-                // remove the corresponding local preview since upload did not succeed
-                setEventLocalPreviews(prev => prev.slice(0, -1));
-            }
-        } catch (err: any) {
-            console.error(`[ADMIN] Upload exception:`, err);
-            setShowToast({ show: true, message: `Upload error: ${err.message}`, type: 'error' });
-        } finally {
-            setEventUploading(false);
-            setEventUploads(u => Math.max(0, u - 1));
-            e.target.value = '';
-            setTimeout(() => setShowToast(p => ({ ...p, show: false })), 5000);
-        }
-    };
 
     const removeEventImage = (idx: number) => {
         setEventImages(prev => prev.filter((_, i) => i !== idx));
@@ -406,97 +302,7 @@ export default function AdminDashboard() {
     };
 
     // ── Gallery Actions ──
-    const handleGalleryImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
 
-        // local preview immediately
-        const localUrl = URL.createObjectURL(file);
-        setGalleryLocalPreview(localUrl);
-
-        // reject unsupported formats early
-        if (/\.heic$/i.test(file.name) || /\.heif$/i.test(file.name) || file.type === 'image/heic' || file.type === 'image/heif') {
-            setShowToast({ show: true, message: "HEIC/HEIF images are not supported. Please convert to JPG/PNG or use a link.", type: 'error' });
-            setTimeout(() => setShowToast(p => ({ ...p, show: false })), 5000);
-            e.target.value = '';
-            setGalleryLocalPreview('');
-            return;
-        }
-
-        // Pre-validation: Check file can be read
-        try {
-            const testBuffer = await file.arrayBuffer();
-            if (testBuffer.byteLength === 0) {
-                setShowToast({ show: true, message: "ERROR: File appears empty or corrupted. Try selecting a different image.", type: 'error' });
-                setTimeout(() => setShowToast(p => ({ ...p, show: false })), 5000);
-                e.target.value = '';
-                return;
-            }
-            console.log(`[GALLERY] File validation OK: ${file.name}, ${testBuffer.byteLength} bytes`);
-
-            const canShow = await canDisplayFile(file);
-            if (!canShow) {
-                setShowToast({ show: true, message: "Selected image cannot be displayed by your browser. Please use a JPG/PNG or a link.", type: 'error' });
-                setTimeout(() => setShowToast(p => ({ ...p, show: false })), 5000);
-                e.target.value = '';
-                return;
-            }
-        } catch (err: any) {
-            console.error(`[GALLERY] File read failed:`, err);
-            setShowToast({ show: true, message: `Cannot read file: ${err.message}`, type: 'error' });
-            setTimeout(() => setShowToast(p => ({ ...p, show: false })), 5000);
-            e.target.value = '';
-            return;
-        }
-
-        setGalleryUploading(true);
-        setShowToast({ show: true, message: "Uploading image...", type: 'success' });
-
-        try {
-            console.log(`[GALLERY] Starting upload for file: ${file.name}, Size: ${file.size}`);
-
-            // Compress client-side first (keeps it under Vercel's 4.5MB limit)
-            const compressed = await compressImageForUpload(file);
-            console.log(`[GALLERY] Compression complete: ${compressed.name}, Size: ${compressed.size}, Type: ${compressed.type}`);
-
-            if (compressed.type === 'image/heic' || compressed.type === 'image/heif') {
-                console.error(`[GALLERY] ERROR: Unsupported image type after compression: ${compressed.type}`);
-                setShowToast({ show: true, message: "Unsupported image type (HEIC). Please convert to JPG/PNG and try again.", type: 'error' });
-                setTimeout(() => setShowToast(p => ({ ...p, show: false })), 5000);
-                return;
-            }
-
-            if (compressed.size === 0) {
-                console.error(`[GALLERY] ERROR: Compressed file is empty!`);
-                setShowToast({ show: true, message: "ERROR: Compression failed - file became empty. Try a different image or refresh and retry.", type: 'error' });
-                setTimeout(() => setShowToast(p => ({ ...p, show: false })), 5000);
-                return;
-            }
-
-            const fd = new FormData();
-            fd.append('file', compressed);
-            fd.append('bucket', 'gallery');
-            const res = await fetch('/api/upload', { method: 'POST', body: fd });
-            const data = await res.json();
-
-            if (res.ok && data.url) {
-                console.log(`[GALLERY] Upload successful: ${data.url}`);
-                setGalleryForm(prev => ({ ...prev, url: data.url }));
-                setShowToast({ show: true, message: "Image Uploaded Successfully!", type: 'success' });
-            } else {
-                console.error(`[GALLERY] Upload failed:`, data.error);
-                setShowToast({ show: true, message: `Upload failed: ${data.error || 'Unknown error'}`, type: 'error' });
-                setGalleryLocalPreview('');
-            }
-        } catch (err: any) {
-            console.error("[GALLERY] Upload exception:", err);
-            setShowToast({ show: true, message: `Upload error: ${err.message}`, type: 'error' });
-        } finally {
-            setGalleryUploading(false);
-            e.target.value = '';
-            setTimeout(() => setShowToast(p => ({ ...p, show: false })), 5000);
-        }
-    };
 
     const handleSaveGalleryItem = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -633,94 +439,7 @@ export default function AdminDashboard() {
         }, 100);
     };
 
-    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
 
-        // show local preview immediately
-        const localUrl = URL.createObjectURL(file);
-        setMenuLocalPreview(localUrl);
-
-        // reject unsupported formats early
-        if (/\.heic$/i.test(file.name) || /\.heif$/i.test(file.name) || file.type === 'image/heic' || file.type === 'image/heif') {
-            setShowToast({ show: true, message: "HEIC/HEIF images are not supported. Please convert to JPG/PNG or use a link.", type: 'error' });
-            setTimeout(() => setShowToast(p => ({ ...p, show: false })), 5000);
-            e.target.value = '';
-            setMenuLocalPreview('');
-            return;
-        }
-
-        // Pre-validation: Check file can be read
-        try {
-            const testBuffer = await file.arrayBuffer();
-            if (testBuffer.byteLength === 0) {
-                setShowToast({ show: true, message: "ERROR: File appears empty or corrupted. Try selecting a different image.", type: 'error' });
-                setTimeout(() => setShowToast(p => ({ ...p, show: false })), 5000);
-                e.target.value = '';
-                return;
-            }
-            console.log(`[MENU] File validation OK: ${file.name}, ${testBuffer.byteLength} bytes`);
-
-            const canShow = await canDisplayFile(file);
-            if (!canShow) {
-                setShowToast({ show: true, message: "Selected image cannot be displayed by your browser. Please use a JPG/PNG or a link.", type: 'error' });
-                setTimeout(() => setShowToast(p => ({ ...p, show: false })), 5000);
-                e.target.value = '';
-                return;
-            }
-        } catch (err: any) {
-            console.error(`[MENU] File read failed:`, err);
-            setShowToast({ show: true, message: `Cannot read file: ${err.message}`, type: 'error' });
-            setTimeout(() => setShowToast(p => ({ ...p, show: false })), 5000);
-            e.target.value = '';
-            return;
-        }
-
-        setIsUploading(true);
-        try {
-            console.log(`[MENU] Starting upload for file: ${file.name}, Size: ${file.size}`);
-
-            // Compress client-side first (keeps it under Vercel's 4.5MB limit)
-            const compressed = await compressImageForUpload(file);
-            console.log(`[MENU] Compression complete: ${compressed.name}, Size: ${compressed.size}, Type: ${compressed.type}`);
-
-            if (compressed.type === 'image/heic' || compressed.type === 'image/heif') {
-                console.error(`[MENU] ERROR: Unsupported image type after compression: ${compressed.type}`);
-                setShowToast({ show: true, message: "Unsupported image type (HEIC). Please convert to JPG/PNG and try again.", type: 'error' });
-                setTimeout(() => setShowToast(p => ({ ...p, show: false })), 5000);
-                return;
-            }
-
-            if (compressed.size === 0) {
-                console.error(`[MENU] ERROR: Compressed file is empty!`);
-                setShowToast({ show: true, message: "ERROR: Compression failed - file became empty. Try a different image or refresh and retry.", type: 'error' });
-                setTimeout(() => setShowToast(p => ({ ...p, show: false })), 5000);
-                return;
-            }
-
-            const fd = new FormData();
-            fd.append('file', compressed);
-            const res = await fetch('/api/upload', { method: 'POST', body: fd });
-            const data = await res.json();
-
-            if (res.ok && data.url) {
-                console.log(`[MENU] Upload successful: ${data.url}`);
-                setNewItem(prev => ({ ...prev, image: data.url }));
-                setShowToast({ show: true, message: "Image uploaded successfully!", type: 'success' });
-            } else {
-                console.error(`[MENU] Upload failed:`, data.error);
-                setShowToast({ show: true, message: `Upload failed: ${data.error || 'Unknown error'}`, type: 'error' });
-                setMenuLocalPreview('');
-            }
-        } catch (err: any) {
-            console.error("[MENU] Upload exception:", err);
-            setShowToast({ show: true, message: `Upload error: ${err.message}`, type: 'error' });
-        } finally {
-            setIsUploading(false);
-            e.target.value = '';
-            setTimeout(() => setShowToast(p => ({ ...p, show: false })), 5000);
-        }
-    };
 
 
     const handleAddItem = async (e: React.FormEvent) => {
@@ -1040,59 +759,48 @@ export default function AdminDashboard() {
                                     {/* Premium Dual UI: Upload or Paste */}
                                     <div className="space-y-3">
                                         {/* 1. Upload Area */}
-                                        <div className="relative group/upload">
-                                            <input
-                                                type="file"
-                                                accept="image/*"
-                                                onChange={handleImageUpload}
-                                                className="hidden"
-                                                id="image-upload"
-                                            />
-                                            <label
-                                                htmlFor="image-upload"
-                                                className={cn(
-                                                    "flex flex-col items-center justify-center w-full min-h-[140px] rounded-2xl border-2 border-dashed transition-all cursor-pointer relative overflow-hidden",
-                                                    newItem.image
-                                                        ? "border-primary/50 bg-primary/5"
-                                                        : "border-border hover:border-primary/50 bg-accent/30"
-                                                )}
-                                            >
-                                                {isUploading ? (
-                                                    <div className="flex flex-col items-center gap-2">
-                                                        <Loader2 className="w-8 h-8 text-primary animate-spin" />
-                                                        <span className="text-xs font-bold text-primary animate-pulse uppercase tracking-widest">Uploading...</span>
-                                                    </div>
-                                                ) : (menuLocalPreview || newItem.image) ? (
-                                                    <div className="absolute inset-0 w-full h-full">
-                                                        <img
-                                                            src={
-                                                                menuLocalPreview
-                                                                    ? menuLocalPreview
-                                                                    : sanitizeImageUrl(fixUnsplashUrl(newItem.image))
-                                                            }
-                                                            alt="Preview"
-                                                            className="w-full h-full object-cover transition-transform duration-500 group-hover/upload:scale-105"
-                                                            onError={(e) => {
-                                                                const target = e.target as HTMLImageElement;
-                                                                console.error(`Admin menu item preview failed: ${target.src}`);
+                                        <div className="border-2 border-dashed border-border rounded-2xl overflow-hidden bg-accent/30 p-2">
+                                            {newItem.image || menuLocalPreview ? (
+                                                <div className="relative w-full h-32 rounded-xl overflow-hidden group/upload">
+                                                    <img
+                                                        src={menuLocalPreview || sanitizeImageUrl(fixUnsplashUrl(newItem.image))}
+                                                        alt="Preview"
+                                                        className="w-full h-full object-cover"
+                                                    />
+                                                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover/upload:opacity-100 transition-opacity">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => {
+                                                                setNewItem({ ...newItem, image: "" });
+                                                                setMenuLocalPreview("");
                                                             }}
-                                                        />
-                                                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover/upload:opacity-100 transition-opacity">
-                                                            <div className="flex flex-col items-center gap-1">
-                                                                <Upload size={20} className="text-white" />
-                                                                <span className="text-[10px] text-white font-bold uppercase tracking-widest">Change Image</span>
-                                                            </div>
-                                                        </div>
+                                                            className="flex flex-col items-center gap-1"
+                                                        >
+                                                            <Trash2 size={20} className="text-white" />
+                                                            <span className="text-[10px] text-white font-bold uppercase tracking-widest">Remove Image</span>
+                                                        </button>
                                                     </div>
-                                                ) : (
-                                                    <div className="flex flex-col items-center gap-2 text-muted-foreground group-hover/upload:text-primary transition-colors py-6">
-                                                        <div className="w-12 h-12 rounded-full bg-background flex items-center justify-center shadow-inner">
-                                                            <ImagePlus size={24} strokeWidth={1.5} />
-                                                        </div>
-                                                        <span className="text-[10px] font-bold uppercase tracking-widest">Upload local photo</span>
-                                                    </div>
-                                                )}
-                                            </label>
+                                                </div>
+                                            ) : (
+                                                <UploadDropzone
+                                                    endpoint="menuImage"
+                                                    config={{ mode: "auto" }}
+                                                    onClientUploadComplete={(res) => {
+                                                        if (res && res.length > 0) {
+                                                            setNewItem({ ...newItem, image: res[0].url });
+                                                            setMenuLocalPreview(res[0].url);
+                                                            setShowToast({ show: true, message: "Image uploaded successfully!", type: 'success' });
+                                                        }
+                                                    }}
+                                                    onUploadError={(error: Error) => {
+                                                        setShowToast({ show: true, message: `Upload failed: ${error.message}`, type: 'error' });
+                                                    }}
+                                                    appearance={{
+                                                        label: "text-primary hover:text-primary/80 text-xs",
+                                                        button: "bg-primary text-white text-xs px-4 py-2",
+                                                    }}
+                                                />
+                                            )}
                                         </div>
 
                                         {/* 2. URL Fallback */}
@@ -1308,53 +1016,29 @@ export default function AdminDashboard() {
                                         <span>Event Images <span className="text-xs text-muted-foreground/60">(max 10)</span></span>
                                         <span className="text-[10px] font-bold text-primary">{eventImages.length}/10</span>
                                     </label>
-                                    {/* Dropzone styled like menu item upload */}
-                                    <div className="relative group/upload">
-                                        <input
-                                            type="file"
-                                            accept="image/*"
-                                            onChange={handleEventPosterUpload}
-                                            className="hidden"
-                                            id="event-upload"
-                                            disabled={eventImages.length >= 10}
+                                    {/* UploadThing Dropzone */}
+                                    <div className="border-2 border-dashed border-border rounded-2xl overflow-hidden bg-accent/30 p-2 relative group/upload">
+                                        <UploadDropzone
+                                            endpoint="eventImage"
+                                            config={{ mode: "auto" }}
+                                            onClientUploadComplete={(res) => {
+                                                if (res && res.length > 0) {
+                                                    const newUrls = res.map(r => r.url);
+                                                    setEventImages(prev => {
+                                                        const updated = [...prev, ...newUrls].slice(0, 10);
+                                                        return updated;
+                                                    });
+                                                    setShowToast({ show: true, message: "Images uploaded successfully!", type: 'success' });
+                                                }
+                                            }}
+                                            onUploadError={(error: Error) => {
+                                                setShowToast({ show: true, message: `Upload failed: ${error.message}`, type: 'error' });
+                                            }}
+                                            appearance={{
+                                                label: "text-primary hover:text-primary/80 text-xs",
+                                                button: "bg-primary text-white text-xs px-4 py-2",
+                                            }}
                                         />
-                                        <label
-                                            htmlFor="event-upload"
-                                            className={cn(
-                                                "flex flex-col items-center justify-center w-full min-h-[140px] rounded-2xl border-2 border-dashed transition-all cursor-pointer relative overflow-hidden",
-                                                eventImages.length > 0
-                                                    ? "border-primary/50 bg-primary/5"
-                                                    : "border-border hover:border-primary/50 bg-accent/30"
-                                            )}
-                                        >
-                                            {eventUploading ? (
-                                                <div className="flex flex-col items-center gap-2">
-                                                    <Loader2 className="w-8 h-8 text-primary animate-spin" />
-                                                    <span className="text-xs font-bold text-primary animate-pulse uppercase tracking-widest">Uploading...</span>
-                                                </div>
-                                            ) : eventImages.length > 0 || eventLocalPreviews.length > 0 ? (
-                                                <div className="absolute inset-0 w-full h-full">
-                                                    <img
-                                                        src={
-                                                            eventLocalPreviews[0]
-                                                                ? eventLocalPreviews[0]
-                                                                : sanitizeImageUrl(eventImages[0])
-                                                        }
-                                                        alt="Event cover"
-                                                        className="w-full h-full object-cover"
-                                                        onError={(e) => {
-                                                            const target = e.target as HTMLImageElement;
-                                                            console.error(`Event cover preview failed: ${target.src}`);
-                                                        }}
-                                                    />
-                                                </div>
-                                            ) : (
-                                                <div className="flex flex-col items-center gap-1 text-center text-muted-foreground px-4">
-                                                    <Upload size={24} />
-                                                    <span className="text-xs">Click to upload or drag file here</span>
-                                                </div>
-                                            )}
-                                        </label>
                                     </div>
                                     {/* paste URL input */}
                                     <div className="flex-1 flex gap-2 pt-2">
