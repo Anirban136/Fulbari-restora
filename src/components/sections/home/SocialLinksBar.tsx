@@ -49,14 +49,14 @@ export function SocialLinksBar() {
     };
 
     return (
-        <section className="relative z-20 -mt-10 md:-mt-16 px-4 mb-8 md:mb-12">
+        <section className="relative z-20 mt-4 md:mt-8 px-4 mb-8 md:mb-12">
             <div className="max-w-5xl mx-auto">
                 <motion.div
                     variants={container}
                     initial="hidden"
                     whileInView="show"
                     viewport={{ once: true }}
-                    className="flex flex-col md:flex-row items-center justify-between gap-4 p-4 md:p-6 rounded-[2rem] md:rounded-full bg-card/40 backdrop-blur-2xl border border-primary/10 shadow-[0_20px_50px_rgba(0,0,0,0.2)]"
+                    className="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-12 p-4 md:p-6 rounded-[2rem] md:rounded-full bg-card/40 backdrop-blur-2xl border border-primary/10 shadow-[0_20px_50px_rgba(0,0,0,0.2)]"
                 >
                     {/* Brand Tagline */}
                     <motion.div variants={item} className="flex items-center gap-4 px-4 hidden lg:flex">
