@@ -20,6 +20,10 @@ const Specialties = dynamic(() => import("@/components/sections/home/Specialties
   loading: () => <div className="h-96 w-full animate-pulse bg-card/10 rounded-3xl my-8" />
 });
 
+const SocialLinksBar = dynamic(() => import("@/components/sections/home/SocialLinksBar").then(mod => mod.SocialLinksBar), {
+  ssr: false
+});
+
 const GoogleReviews = dynamic(() => import("@/components/sections/home/GoogleReviews").then(mod => mod.GoogleReviews), {
   ssr: false
 });
@@ -34,6 +38,7 @@ export default function Home() {
       <Navbar />
       <main className="flex-grow">
         <Hero />
+        <SocialLinksBar />
         <About />
         <TodaysMenuAndEvents />
         <Specialties />
