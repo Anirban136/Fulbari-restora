@@ -53,11 +53,11 @@ const venues: Record<VenueKey, VenueData> = {
         capacity: "120+ Guests",
         timing: "11:00 AM - 10:30 PM",
         images: [
-            "/restaurant/r1.jpg",
-            "/restaurant/r2.jpg",
-            "/restaurant/r3.jpg",
-            "/restaurant/r4.jpg",
-            "/restaurant/r5.jpg",
+            "/restaurant/r1.jpeg",
+            "/restaurant/r2.jpeg",
+            "/restaurant/r3.jpeg",
+            "/restaurant/r4.jpeg",
+            "/restaurant/r5.jpeg",
         ],
     },
     community: {
