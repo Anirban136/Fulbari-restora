@@ -203,7 +203,7 @@ export default function AdminDashboard() {
     const fetchEvents = async () => {
         setEventsLoading(true);
         try {
-            const res = await fetch('/api/events');
+            const res = await fetch('/api/events?all=true');
             const data = await res.json();
             setEvents(Array.isArray(data) ? data : []);
         } catch { }
@@ -278,14 +278,14 @@ export default function AdminDashboard() {
         setEventUploading(true);
         setEventUploads(u => u + 1);
         setShowToast({ show: true, message: "Uploading image...", type: 'success' });
-        
+
         try {
             console.log(`[ADMIN] Starting upload for file: ${file.name}, Size: ${file.size}`);
-            
+
             // Compress client-side first (keeps it under Vercel's 4.5MB limit)
             const compressed = await compressImageForUpload(file);
             console.log(`[ADMIN] Compression complete: ${compressed.name}, Size: ${compressed.size}, Type: ${compressed.type}`);
-            
+
             // if conversion failed and we still have HEIC/HEIF, bail out
             if (compressed.type === 'image/heic' || compressed.type === 'image/heif') {
                 console.error(`[ADMIN] ERROR: Unsupported image format after compression: ${compressed.type}`);
@@ -300,14 +300,14 @@ export default function AdminDashboard() {
                 setTimeout(() => setShowToast(p => ({ ...p, show: false })), 5000);
                 return;
             }
-            
+
             const fd = new FormData();
             fd.append('file', compressed);
             fd.append('bucket', 'events');
-            
+
             const res = await fetch('/api/upload', { method: 'POST', body: fd });
             const data = await res.json();
-            
+
             if (res.ok && data.url) {
                 console.log(`[ADMIN] Upload successful: ${data.url}`);
                 setEventImages(prev => [...prev, data.url]);
@@ -359,7 +359,7 @@ export default function AdminDashboard() {
             });
             if (res.ok) {
                 setEventForm({ title: '', description: '', event_date: '' });
-                    setEventImages([]);
+                setEventImages([]);
                 setEventLocalPreviews([]);
                 setEventUploads(0);
                 setIsEditingEvent(false);
@@ -451,14 +451,14 @@ export default function AdminDashboard() {
 
         setGalleryUploading(true);
         setShowToast({ show: true, message: "Uploading image...", type: 'success' });
-        
+
         try {
             console.log(`[GALLERY] Starting upload for file: ${file.name}, Size: ${file.size}`);
-            
+
             // Compress client-side first (keeps it under Vercel's 4.5MB limit)
             const compressed = await compressImageForUpload(file);
             console.log(`[GALLERY] Compression complete: ${compressed.name}, Size: ${compressed.size}, Type: ${compressed.type}`);
-            
+
             if (compressed.type === 'image/heic' || compressed.type === 'image/heif') {
                 console.error(`[GALLERY] ERROR: Unsupported image type after compression: ${compressed.type}`);
                 setShowToast({ show: true, message: "Unsupported image type (HEIC). Please convert to JPG/PNG and try again.", type: 'error' });
@@ -472,13 +472,13 @@ export default function AdminDashboard() {
                 setTimeout(() => setShowToast(p => ({ ...p, show: false })), 5000);
                 return;
             }
-            
+
             const fd = new FormData();
             fd.append('file', compressed);
             fd.append('bucket', 'gallery');
             const res = await fetch('/api/upload', { method: 'POST', body: fd });
             const data = await res.json();
-            
+
             if (res.ok && data.url) {
                 console.log(`[GALLERY] Upload successful: ${data.url}`);
                 setGalleryForm(prev => ({ ...prev, url: data.url }));
@@ -679,11 +679,11 @@ export default function AdminDashboard() {
         setIsUploading(true);
         try {
             console.log(`[MENU] Starting upload for file: ${file.name}, Size: ${file.size}`);
-            
+
             // Compress client-side first (keeps it under Vercel's 4.5MB limit)
             const compressed = await compressImageForUpload(file);
             console.log(`[MENU] Compression complete: ${compressed.name}, Size: ${compressed.size}, Type: ${compressed.type}`);
-            
+
             if (compressed.type === 'image/heic' || compressed.type === 'image/heif') {
                 console.error(`[MENU] ERROR: Unsupported image type after compression: ${compressed.type}`);
                 setShowToast({ show: true, message: "Unsupported image type (HEIC). Please convert to JPG/PNG and try again.", type: 'error' });
@@ -697,12 +697,12 @@ export default function AdminDashboard() {
                 setTimeout(() => setShowToast(p => ({ ...p, show: false })), 5000);
                 return;
             }
-            
+
             const fd = new FormData();
             fd.append('file', compressed);
             const res = await fetch('/api/upload', { method: 'POST', body: fd });
             const data = await res.json();
-            
+
             if (res.ok && data.url) {
                 console.log(`[MENU] Upload successful: ${data.url}`);
                 setNewItem(prev => ({ ...prev, image: data.url }));
@@ -1393,8 +1393,8 @@ export default function AdminDashboard() {
                                                                 local
                                                                     ? local
                                                                     : url
-                                                                    ? sanitizeImageUrl(url)
-                                                                    : ''
+                                                                        ? sanitizeImageUrl(url)
+                                                                        : ''
                                                             }
                                                             alt={`img ${i + 1}`}
                                                             className="w-full h-full object-cover"
@@ -1444,19 +1444,22 @@ export default function AdminDashboard() {
                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                                     {events.map(ev => (
                                         <div key={ev.id} className={`rounded-2xl border overflow-hidden transition-all ${ev.is_active ? 'border-border' : 'border-border/30 opacity-60'}`}>
-                                            {ev.poster_url && (
-                                                <div className="relative w-full h-36 bg-accent/30 flex items-center justify-center">
+                                            <div className="relative w-full h-36 bg-accent/30 flex items-center justify-center">
+                                                {(ev.poster_url || (ev.image_urls && ev.image_urls.length > 0)) ? (
                                                     <img
-                                                        src={sanitizeImageUrl(ev.poster_url)}
+                                                        src={sanitizeImageUrl(ev.poster_url || ev.image_urls[0])}
                                                         alt={ev.title}
                                                         className="w-full h-full object-cover"
                                                         onError={(e) => {
                                                             const target = e.target as HTMLImageElement;
                                                             console.error(`Admin event list image failed: ${target.src}`);
+                                                            target.style.display = 'none';
                                                         }}
                                                     />
-                                                </div>
-                                            )}
+                                                ) : (
+                                                    <CalendarDays size={32} className="text-muted-foreground/40" />
+                                                )}
+                                            </div>
                                             <div className="p-4">
                                                 <div className="flex items-start justify-between gap-2 mb-1">
                                                     <h3 className="font-bold text-sm leading-tight">{ev.title}</h3>

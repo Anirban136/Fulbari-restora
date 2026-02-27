@@ -17,16 +17,18 @@ export function sanitizeImageUrl(url: string | undefined | null) {
         s = s.replace("http://", "https://");
     }
 
-    // 2. Handle Supabase storage URLs - add cache busting (don’t add unsplash-specific params)
+    // 2. Handle Supabase storage URLs
     if (s.includes("supabase.co")) {
         // Ensure HTTPS
         if (!s.startsWith("https://")) {
             s = "https://" + s.replace(/^https?:\/\//, "");
         }
-        // Add cache buster to prevent stale images
-        const finalSep = s.includes("?") ? "&" : "?";
+        // Use a stable cache key (changes every 5 min) to avoid constant re-fetching
+        // while still allowing occasional cache refresh
         if (!s.includes("t=")) {
-            s = `${s}${finalSep}t=${Date.now()}`;
+            const stableKey = Math.floor(Date.now() / 300000); // changes every 5 min
+            const sep = s.includes("?") ? "&" : "?";
+            s = `${s}${sep}t=${stableKey}`;
         }
         return s.replace(/ /g, "%20").replace(/\(/g, "%28").replace(/\)/g, "%29");
     }

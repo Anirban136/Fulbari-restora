@@ -10,24 +10,33 @@ const CACHE_HEADERS = {
     "Expires": "0",
 };
 
-export async function GET() {
+export async function GET(request: Request) {
     try {
-        const { data, error } = await supabase
+        const { searchParams } = new URL(request.url);
+        const showAll = searchParams.get('all') === 'true';
+
+        let query = supabase
             .from("events")
             .select("*")
-            .eq("is_active", true)
             .order("event_date", { ascending: true });
 
+        // Admin dashboard needs all events; public pages only need active ones
+        if (!showAll) {
+            query = query.eq("is_active", true);
+        }
+
+        const { data, error } = await query;
+
         if (error) throw error;
-        
+
         // Filter out any events with empty image arrays and ensure image URLs are valid
         const cleanedData = (data ?? []).map(event => ({
             ...event,
-            image_urls: Array.isArray(event.image_urls) 
+            image_urls: Array.isArray(event.image_urls)
                 ? event.image_urls.filter((url: string) => url && url.trim() !== "")
                 : []
         }));
-        
+
         return NextResponse.json(cleanedData, {
             headers: CACHE_HEADERS,
         });
@@ -47,7 +56,7 @@ export async function POST(request: Request) {
 
         if (action === "ADD") {
             // Clean up image URLs - remove empty strings and ensure they're strings
-            const cleanImageUrls = (Array.isArray(event.image_urls) 
+            const cleanImageUrls = (Array.isArray(event.image_urls)
                 ? event.image_urls.filter((url: any) => url && typeof url === 'string' && url.trim() !== "")
                 : []) as string[];
 
@@ -89,7 +98,7 @@ export async function POST(request: Request) {
 
         if (action === "UPDATE") {
             // Clean up image URLs - remove empty strings and ensure they're strings
-            const cleanImageUrls = (Array.isArray(event.image_urls) 
+            const cleanImageUrls = (Array.isArray(event.image_urls)
                 ? event.image_urls.filter((url: any) => url && typeof url === 'string' && url.trim() !== "")
                 : []) as string[];
 

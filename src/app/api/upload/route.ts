@@ -31,12 +31,12 @@ export async function POST(request: Request) {
 
         const fileExtension = file.name.split(".").pop();
         const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExtension}`;
-        
+
         let arrayBuffer: ArrayBuffer;
         try {
             arrayBuffer = await file.arrayBuffer();
             console.log(`[UPLOAD] ArrayBuffer created: ${arrayBuffer.byteLength} bytes`);
-            
+
             if (arrayBuffer.byteLength === 0) {
                 console.error("[UPLOAD ERROR] ArrayBuffer is empty!");
                 return NextResponse.json({
@@ -55,7 +55,7 @@ export async function POST(request: Request) {
         const { data, error } = await supabase.storage
             .from(bucket)
             .upload(fileName, arrayBuffer, {
-                cacheControl: "0, max-age=0",
+                cacheControl: "3600",
                 upsert: false,
                 contentType: file.type || 'image/jpeg'
             });
