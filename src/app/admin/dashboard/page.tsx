@@ -70,6 +70,19 @@ interface MenuItem {
 
 export default function AdminDashboard() {
     const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
+
+    // helper to quickly verify a File can be decoded/displayed by the browser
+    const canDisplayFile = (file: File): Promise<boolean> => {
+        return new Promise((res) => {
+            const img = document.createElement('img');
+            const url = URL.createObjectURL(file);
+            let settled = false;
+            img.onload = () => { if (!settled) { settled = true; URL.revokeObjectURL(url); res(true); } };
+            img.onerror = () => { if (!settled) { settled = true; URL.revokeObjectURL(url); res(false); } };
+            img.src = url;
+            setTimeout(() => { if (!settled) { settled = true; URL.revokeObjectURL(url); res(false); } }, 5000);
+        });
+    };
     const [loading, setLoading] = useState(true);
     const [showAddForm, setShowAddForm] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
@@ -216,6 +229,41 @@ export default function AdminDashboard() {
             return;
         }
 
+        // reject unsupported formats early (e.g. HEIC/HEIF)
+        if (/\.heic$/i.test(file.name) || /\.heif$/i.test(file.name) || file.type === 'image/heic' || file.type === 'image/heif') {
+            setShowToast({ show: true, message: "HEIC/HEIF images are not supported. Please convert to JPG/PNG or use a link.", type: 'error' });
+            setTimeout(() => setShowToast(p => ({ ...p, show: false })), 5000);
+            e.target.value = '';
+            return;
+        }
+
+        // Pre-validation: Check file can be read
+        try {
+            const testBuffer = await file.arrayBuffer();
+            if (testBuffer.byteLength === 0) {
+                setShowToast({ show: true, message: "ERROR: File appears empty or corrupted. Try selecting a different image.", type: 'error' });
+                setTimeout(() => setShowToast(p => ({ ...p, show: false })), 5000);
+                e.target.value = '';
+                return;
+            }
+            console.log(`[ADMIN] File validation OK: ${file.name}, ${testBuffer.byteLength} bytes`);
+
+            // verify file can be rendered by browser (catches HEIC and other unsupported/corrupt files)
+            const canShow = await canDisplayFile(file);
+            if (!canShow) {
+                setShowToast({ show: true, message: "Selected image cannot be displayed by your browser. Please use a JPG/PNG or a link.", type: 'error' });
+                setTimeout(() => setShowToast(p => ({ ...p, show: false })), 5000);
+                e.target.value = '';
+                return;
+            }
+        } catch (err: any) {
+            console.error(`[ADMIN] File read failed:`, err);
+            setShowToast({ show: true, message: `Cannot read file: ${err.message}`, type: 'error' });
+            setTimeout(() => setShowToast(p => ({ ...p, show: false })), 5000);
+            e.target.value = '';
+            return;
+        }
+
         setEventUploading(true);
         setEventUploads(u => u + 1);
         setShowToast({ show: true, message: "Uploading image...", type: 'success' });
@@ -225,7 +273,22 @@ export default function AdminDashboard() {
             
             // Compress client-side first (keeps it under Vercel's 4.5MB limit)
             const compressed = await compressImageForUpload(file);
-            console.log(`[ADMIN] Compression complete: ${compressed.name}, Size: ${compressed.size}`);
+            console.log(`[ADMIN] Compression complete: ${compressed.name}, Size: ${compressed.size}, Type: ${compressed.type}`);
+            
+            // if conversion failed and we still have HEIC/HEIF, bail out
+            if (compressed.type === 'image/heic' || compressed.type === 'image/heif') {
+                console.error(`[ADMIN] ERROR: Unsupported image format after compression: ${compressed.type}`);
+                setShowToast({ show: true, message: "Unsupported image type (HEIC). Please convert to JPG/PNG and try again.", type: 'error' });
+                setTimeout(() => setShowToast(p => ({ ...p, show: false })), 5000);
+                return;
+            }
+
+            if (compressed.size === 0) {
+                console.error(`[ADMIN] ERROR: Compressed file is empty!`);
+                setShowToast({ show: true, message: "ERROR: Compression failed - file became empty. Try a different image or refresh and retry.", type: 'error' });
+                setTimeout(() => setShowToast(p => ({ ...p, show: false })), 5000);
+                return;
+            }
             
             const fd = new FormData();
             fd.append('file', compressed);
@@ -249,7 +312,7 @@ export default function AdminDashboard() {
             setEventUploading(false);
             setEventUploads(u => Math.max(0, u - 1));
             e.target.value = '';
-            setTimeout(() => setShowToast(p => ({ ...p, show: false })), 3000);
+            setTimeout(() => setShowToast(p => ({ ...p, show: false })), 5000);
         }
     };
 
@@ -326,6 +389,40 @@ export default function AdminDashboard() {
         const file = e.target.files?.[0];
         if (!file) return;
 
+        // reject unsupported formats early
+        if (/\.heic$/i.test(file.name) || /\.heif$/i.test(file.name) || file.type === 'image/heic' || file.type === 'image/heif') {
+            setShowToast({ show: true, message: "HEIC/HEIF images are not supported. Please convert to JPG/PNG or use a link.", type: 'error' });
+            setTimeout(() => setShowToast(p => ({ ...p, show: false })), 5000);
+            e.target.value = '';
+            return;
+        }
+
+        // Pre-validation: Check file can be read
+        try {
+            const testBuffer = await file.arrayBuffer();
+            if (testBuffer.byteLength === 0) {
+                setShowToast({ show: true, message: "ERROR: File appears empty or corrupted. Try selecting a different image.", type: 'error' });
+                setTimeout(() => setShowToast(p => ({ ...p, show: false })), 5000);
+                e.target.value = '';
+                return;
+            }
+            console.log(`[GALLERY] File validation OK: ${file.name}, ${testBuffer.byteLength} bytes`);
+
+            const canShow = await canDisplayFile(file);
+            if (!canShow) {
+                setShowToast({ show: true, message: "Selected image cannot be displayed by your browser. Please use a JPG/PNG or a link.", type: 'error' });
+                setTimeout(() => setShowToast(p => ({ ...p, show: false })), 5000);
+                e.target.value = '';
+                return;
+            }
+        } catch (err: any) {
+            console.error(`[GALLERY] File read failed:`, err);
+            setShowToast({ show: true, message: `Cannot read file: ${err.message}`, type: 'error' });
+            setTimeout(() => setShowToast(p => ({ ...p, show: false })), 5000);
+            e.target.value = '';
+            return;
+        }
+
         setGalleryUploading(true);
         setShowToast({ show: true, message: "Uploading image...", type: 'success' });
         
@@ -334,7 +431,21 @@ export default function AdminDashboard() {
             
             // Compress client-side first (keeps it under Vercel's 4.5MB limit)
             const compressed = await compressImageForUpload(file);
-            console.log(`[GALLERY] Compression complete: ${compressed.name}, Size: ${compressed.size}`);
+            console.log(`[GALLERY] Compression complete: ${compressed.name}, Size: ${compressed.size}, Type: ${compressed.type}`);
+            
+            if (compressed.type === 'image/heic' || compressed.type === 'image/heif') {
+                console.error(`[GALLERY] ERROR: Unsupported image type after compression: ${compressed.type}`);
+                setShowToast({ show: true, message: "Unsupported image type (HEIC). Please convert to JPG/PNG and try again.", type: 'error' });
+                setTimeout(() => setShowToast(p => ({ ...p, show: false })), 5000);
+                return;
+            }
+
+            if (compressed.size === 0) {
+                console.error(`[GALLERY] ERROR: Compressed file is empty!`);
+                setShowToast({ show: true, message: "ERROR: Compression failed - file became empty. Try a different image or refresh and retry.", type: 'error' });
+                setTimeout(() => setShowToast(p => ({ ...p, show: false })), 5000);
+                return;
+            }
             
             const fd = new FormData();
             fd.append('file', compressed);
@@ -356,7 +467,7 @@ export default function AdminDashboard() {
         } finally {
             setGalleryUploading(false);
             e.target.value = '';
-            setTimeout(() => setShowToast(p => ({ ...p, show: false })), 3000);
+            setTimeout(() => setShowToast(p => ({ ...p, show: false })), 5000);
         }
     };
 
@@ -498,13 +609,61 @@ export default function AdminDashboard() {
         const file = e.target.files?.[0];
         if (!file) return;
 
+        // reject unsupported formats early
+        if (/\.heic$/i.test(file.name) || /\.heif$/i.test(file.name) || file.type === 'image/heic' || file.type === 'image/heif') {
+            setShowToast({ show: true, message: "HEIC/HEIF images are not supported. Please convert to JPG/PNG or use a link.", type: 'error' });
+            setTimeout(() => setShowToast(p => ({ ...p, show: false })), 5000);
+            e.target.value = '';
+            return;
+        }
+
+        // Pre-validation: Check file can be read
+        try {
+            const testBuffer = await file.arrayBuffer();
+            if (testBuffer.byteLength === 0) {
+                setShowToast({ show: true, message: "ERROR: File appears empty or corrupted. Try selecting a different image.", type: 'error' });
+                setTimeout(() => setShowToast(p => ({ ...p, show: false })), 5000);
+                e.target.value = '';
+                return;
+            }
+            console.log(`[MENU] File validation OK: ${file.name}, ${testBuffer.byteLength} bytes`);
+
+            const canShow = await canDisplayFile(file);
+            if (!canShow) {
+                setShowToast({ show: true, message: "Selected image cannot be displayed by your browser. Please use a JPG/PNG or a link.", type: 'error' });
+                setTimeout(() => setShowToast(p => ({ ...p, show: false })), 5000);
+                e.target.value = '';
+                return;
+            }
+        } catch (err: any) {
+            console.error(`[MENU] File read failed:`, err);
+            setShowToast({ show: true, message: `Cannot read file: ${err.message}`, type: 'error' });
+            setTimeout(() => setShowToast(p => ({ ...p, show: false })), 5000);
+            e.target.value = '';
+            return;
+        }
+
         setIsUploading(true);
         try {
             console.log(`[MENU] Starting upload for file: ${file.name}, Size: ${file.size}`);
             
             // Compress client-side first (keeps it under Vercel's 4.5MB limit)
             const compressed = await compressImageForUpload(file);
-            console.log(`[MENU] Compression complete: ${compressed.name}, Size: ${compressed.size}`);
+            console.log(`[MENU] Compression complete: ${compressed.name}, Size: ${compressed.size}, Type: ${compressed.type}`);
+            
+            if (compressed.type === 'image/heic' || compressed.type === 'image/heif') {
+                console.error(`[MENU] ERROR: Unsupported image type after compression: ${compressed.type}`);
+                setShowToast({ show: true, message: "Unsupported image type (HEIC). Please convert to JPG/PNG and try again.", type: 'error' });
+                setTimeout(() => setShowToast(p => ({ ...p, show: false })), 5000);
+                return;
+            }
+
+            if (compressed.size === 0) {
+                console.error(`[MENU] ERROR: Compressed file is empty!`);
+                setShowToast({ show: true, message: "ERROR: Compression failed - file became empty. Try a different image or refresh and retry.", type: 'error' });
+                setTimeout(() => setShowToast(p => ({ ...p, show: false })), 5000);
+                return;
+            }
             
             const fd = new FormData();
             fd.append('file', compressed);
@@ -525,7 +684,7 @@ export default function AdminDashboard() {
         } finally {
             setIsUploading(false);
             e.target.value = '';
-            setTimeout(() => setShowToast(p => ({ ...p, show: false })), 3000);
+            setTimeout(() => setShowToast(p => ({ ...p, show: false })), 5000);
         }
     };
 
