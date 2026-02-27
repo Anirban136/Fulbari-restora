@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Playfair_Display, Poppins, Hind_Siliguri } from "next/font/google";
 import FloatingContact from "@/components/common/FloatingContact";
+import { SmoothScrolling } from "@/components/common/SmoothScrolling";
 import "./globals.css";
 
 const playfair = Playfair_Display({
@@ -36,8 +37,10 @@ export default function RootLayout({
       <body
         className={`${playfair.variable} ${poppins.variable} ${hindSiliguri.variable} antialiased bg-background text-foreground font-body`}
       >
-        {children}
-        <FloatingContact />
+        <SmoothScrolling>
+          {children}
+          <FloatingContact />
+        </SmoothScrolling>
       </body>
     </html>
   );
