@@ -265,7 +265,7 @@ export function ModernEventGallery({ images }: { images: string[] }) {
 
     return (
         <div
-            className="relative w-full max-w-6xl mx-auto aspect-[4/5] md:aspect-video lg:aspect-[16/10] max-h-[700px] overflow-hidden rounded-3xl shadow-2xl group border border-border/50 select-none bg-card"
+            className="relative w-full max-w-4xl mx-auto aspect-[4/5] md:aspect-video max-h-[450px] md:max-h-[500px] overflow-hidden rounded-3xl shadow-xl group border border-border/50 select-none bg-card"
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
         >
@@ -285,7 +285,7 @@ export function ModernEventGallery({ images }: { images: string[] }) {
                         className="absolute inset-0 w-full h-full object-cover"
                         onError={() => handleImageError(validImages[idx])}
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-40" />
                 </motion.div>
             </AnimatePresence>
 
@@ -294,15 +294,15 @@ export function ModernEventGallery({ images }: { images: string[] }) {
                 <>
                     <button
                         onClick={(e) => { e.stopPropagation(); paginate(-1); }}
-                        className="absolute left-3 md:left-6 top-1/2 -translate-y-1/2 w-10 h-10 md:w-14 md:h-14 bg-black/40 backdrop-blur-md rounded-full flex items-center justify-center text-white hover:bg-primary hover:text-primary-foreground transition-all z-20 shadow-lg border border-white/20 opacity-100 md:opacity-0 md:group-hover:opacity-100 md:translate-x-4 md:group-hover:translate-x-0"
+                        className="absolute left-3 md:left-4 top-1/2 -translate-y-1/2 w-10 h-10 md:w-12 md:h-12 bg-black/40 backdrop-blur-md rounded-full flex items-center justify-center text-white hover:bg-primary hover:text-primary-foreground transition-all z-20 shadow-lg border border-white/20"
                     >
-                        <ChevronLeft size={24} className="md:group-hover:-translate-x-0.5 transition-transform" />
+                        <ChevronLeft size={20} className="md:group-hover:-translate-x-0.5 transition-transform" />
                     </button>
                     <button
                         onClick={(e) => { e.stopPropagation(); paginate(1); }}
-                        className="absolute right-3 md:right-6 top-1/2 -translate-y-1/2 w-10 h-10 md:w-14 md:h-14 bg-black/40 backdrop-blur-md rounded-full flex items-center justify-center text-white hover:bg-primary hover:text-primary-foreground transition-all z-20 shadow-lg border border-white/20 opacity-100 md:opacity-0 md:group-hover:opacity-100 md:-translate-x-4 md:group-hover:translate-x-0"
+                        className="absolute right-3 md:right-4 top-1/2 -translate-y-1/2 w-10 h-10 md:w-12 md:h-12 bg-black/40 backdrop-blur-md rounded-full flex items-center justify-center text-white hover:bg-primary hover:text-primary-foreground transition-all z-20 shadow-lg border border-white/20"
                     >
-                        <ChevronRight size={24} className="md:group-hover:translate-x-0.5 transition-transform" />
+                        <ChevronRight size={20} className="md:group-hover:translate-x-0.5 transition-transform" />
                     </button>
                     {/* Dots */}
                     <div className="absolute bottom-5 md:bottom-8 left-0 right-0 flex justify-center gap-2 md:gap-3 z-20">
