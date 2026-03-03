@@ -39,8 +39,8 @@ export default function Home() {
       <main className="flex-grow">
         <Hero />
         <SocialLinksBar />
-        <About />
         <TodaysMenuAndEvents />
+        <About />
         <Specialties />
         <GoogleReviews />
       </main>
