@@ -14,6 +14,7 @@ interface VenueData {
     bengaliLabel: string;
     tagline: string;
     description: string;
+    bengaliDescription?: string;
     highlights: string[];
     capacity: string;
     timing: string;
@@ -30,7 +31,8 @@ const venues: Record<VenueKey, VenueData> = {
         tagline: "Brews & Bites",
         description:
             "Unwind with freshly brewed coffee, artisan teas, and light bites in our cozy café corner. Perfect for casual meetups, work sessions, or a quiet afternoon escape.",
-        highlights: ["Specialty Coffee", "Fresh Pastries", "Free Wi-Fi", "Cozy Ambience"],
+        bengaliDescription: "🎵 লাইভ মিউজিকের ম্যাজিক: আপনার ডিনারকে আরও ছন্দময় করতে আমাদের এখানে মাঝেমধ্যেই আয়োজন করা হয় লাইভ ব্যান্ড (যেমন: 'Nostalgic') পারফরম্যান্স। সুরের মূর্ছনায় আপনার সন্ধ্যাটি হয়ে উঠবে মায়াবী।\n\n🕯️ রোমান্টিক ও পারিবারিক সময়: আপনি সঙ্গীর সাথে ক্যান্ডেল লাইট ডিনার করতে চান বা পুরো পরিবারের সাথে হাসি-ঠাট্টায় মেতে উঠতে চান—আমাদের ওপেন-এয়ার অ্যাম্বিয়েন্স সবার জন্যই পারফেক্ট।",
+        highlights: ["Specialty Coffee", "Live Music", "Romantic Ambience", "Cozy Ambience"],
         capacity: "40+ Guests",
         timing: "8:00 AM - 9:00 PM",
         images: [
@@ -298,6 +300,15 @@ export function About() {
                                     <p className={cn("text-sm md:text-lg leading-relaxed text-muted-foreground", current.descriptionClassName)}>
                                         {current.description}
                                     </p>
+                                    {current.bengaliDescription && (
+                                        <div className="mt-4 space-y-3 text-center lg:text-left">
+                                            {current.bengaliDescription.split('\n\n').map((para, i) => (
+                                                <p key={i} className="font-bengali text-sm md:text-base leading-relaxed font-semibold text-foreground/80 bg-primary/5 border border-primary/10 rounded-xl px-4 py-3">
+                                                    {para}
+                                                </p>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
 
                                 {/* Highlights in Cinema Style - 2 cols even on small mobile */}
