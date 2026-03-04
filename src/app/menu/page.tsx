@@ -202,15 +202,15 @@ export default function MenuPage() {
                         ) : (
                             <>
                                 {/* Legacy Controls for Cafe (if still needed) */}
-                                <div className="flex flex-col md:flex-row gap-4 justify-between items-center mb-12 bg-card/30 p-4 rounded-2xl border border-border/50">
-                                    <div className="flex gap-2 overflow-x-auto pb-2 md:pb-0 w-full md:w-auto no-scrollbar">
+                                <div className="flex flex-col md:flex-row gap-4 justify-between items-center mb-12 bg-card/30 p-4 rounded-2xl border border-border/50 shadow-sm backdrop-blur-sm sticky top-24 z-30">
+                                    <div className="flex gap-2 overflow-x-auto pb-2 md:pb-0 w-full md:w-auto no-scrollbar snap-x">
                                         {categories.map((cat) => (
                                             <button
                                                 key={cat}
                                                 onClick={() => setActiveCategory(cat)}
-                                                className={`px-4 py-2 rounded-full whitespace-nowrap transition-all text-sm font-medium ${activeCategory === cat
-                                                    ? "bg-primary text-primary-foreground"
-                                                    : "bg-accent text-muted-foreground hover:bg-accent/80"
+                                                className={`snap-start px-5 py-2.5 rounded-full whitespace-nowrap transition-all text-sm font-bold shadow-sm ${activeCategory === cat
+                                                    ? "bg-primary text-primary-foreground scale-105"
+                                                    : "bg-accent text-muted-foreground hover:bg-card hover:text-foreground border border-border/50"
                                                     }`}
                                             >
                                                 {cat}
