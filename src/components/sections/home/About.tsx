@@ -62,6 +62,25 @@ const venues: Record<VenueKey, VenueData> = {
             "/restaurant/r5.jpeg",
         ],
     },
+    banquet: {
+        icon: PartyPopper,
+        label: "Food & Events",
+        bengaliLabel: "ফুড ও ইভেন্টস",
+        tagline: "Weddings & Grand Occasions",
+        description:
+            "From grand weddings to birthday celebrations, our food provide an elegant setting with premium catering, décor support, and dedicated event coordination.",
+        bengaliDescription: "ব্যস্ত জীবনের ক্লান্তি ভুলে যদি প্রকৃতির স্নিগ্ধ ছোঁয়ায় সুস্বাদু খাবারের স্বাদ নিতে চান, তবে ফুলবাড়ি রেস্তোরাঁ আপনার জন্য এক আদর্শ গন্তব্য। শ্রীবামপুর ওল্ড দিল্লি রোডের ওপর রাজ্যাধরপুরে অবস্থিত আমাদের এই রেস্তোরাঁটি কেবল খাবারের জায়গাই নয়, বরং এটি এক প্রশান্তির নীড়।\n\nমাঝে মাঝেই আমাদের এখানে আয়োজন করা হয় লাইভ ব্যান্ড (যেমন: 'Nostalgic') পারফরম্যান্স, যা আপনার ডিনারকে করে তুলবে আরও ছন্দময়।",
+        highlights: ["Wedding Packages", "Custom Décor", "Premium Catering", "Event Manager"],
+        capacity: "500+ Guests",
+        timing: "Contact for Inquiry",
+        images: [
+            "/food/food3.jpeg",
+            "/food/food2.jpeg",
+            "/food/food1.jpeg",
+            "/food/food4.jpeg",
+            "/food/food5.jpeg",
+        ],
+    },
     community: {
         icon: Building2,
         label: "Community Hall",
@@ -78,24 +97,6 @@ const venues: Record<VenueKey, VenueData> = {
             "/community/community3.jpeg",
             "/community/community1.jpeg",
             "/community/community5.jpeg",
-        ],
-    },
-    banquet: {
-        icon: PartyPopper,
-        label: "Food & Events",
-        bengaliLabel: "ফুড ও ইভেন্টস",
-        tagline: "Weddings & Grand Occasions",
-        description:
-            "From grand weddings to birthday celebrations, our food provide an elegant setting with premium catering, décor support, and dedicated event coordination.",
-        highlights: ["Wedding Packages", "Custom Décor", "Premium Catering", "Event Manager"],
-        capacity: "500+ Guests",
-        timing: "Contact for Inquiry",
-        images: [
-            "/food/food3.jpeg",
-            "/food/food2.jpeg",
-            "/food/food1.jpeg",
-            "/food/food4.jpeg",
-            "/food/food5.jpeg",
         ],
     },
 };
