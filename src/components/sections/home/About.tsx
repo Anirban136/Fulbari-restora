@@ -88,6 +88,7 @@ const venues: Record<VenueKey, VenueData> = {
         tagline: "Celebrate Together",
         description:
             "Our spacious community hall is ideal for cultural events, meetings, seminars, and social gatherings. Equipped with modern amenities and flexible seating arrangements.",
+        bengaliDescription: "আমাদের প্রশস্ত কমিউনিটি হলটি সাংস্কৃতিক অনুষ্ঠান, সভা, সেমিনার ও বিভিন্ন সামাজিক আয়োজনের জন্য উপযুক্ত একটি স্থান। আধুনিক সুযোগ-সুবিধা ও আরামদায়ক পরিবেশে এটি আপনার যেকোনো অনুষ্ঠানকে করে তুলবে সফল ও স্মরণীয়।\n\nনমনীয় আসন বিন্যাসের সুবিধায় ছোট থেকে বড় যেকোনো আয়োজন সহজেই করা যায়। নিরাপদ ও সুশৃঙ্খল ব্যবস্থাপনায় আমরা নিশ্চিত করি সবার জন্য একটি আনন্দময় অভিজ্ঞতা।",
         highlights: ["Projector & Sound", "Flexible Layout", "AC Hall", "Stage Available"],
         capacity: "300+ Guests",
         timing: "Contact for Inquiry",
