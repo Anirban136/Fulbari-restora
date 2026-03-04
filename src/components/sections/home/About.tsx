@@ -49,6 +49,8 @@ const venues: Record<VenueKey, VenueData> = {
         tagline: "প্রকৃতির সান্নিধ্যে এক অনন্য স্বাদের ঠিকানা",
         taglineClassName: "font-bengali-logo text-base md:text-lg text-primary font-bold tracking-wide",
         description:
+            "Our lush green open-air garden dining offers a truly exceptional experience. Under the open sky, surrounded by sparkling lights, every moment spent with your loved ones becomes genuinely memorable and magical.",
+        bengaliDescription:
             "আমাদের সবুজ ঘেরা ওপেন-এয়ার গার্ডেন ডাইনিং আপনাকে দেবে এক অসাধারণ অভিজ্ঞতা। খোলা আকাশের নিচে ঝকঝকে আলোকসজ্জার মাঝে প্রিয়জনের সাথে কাটানো সময় হবে সত্যিই স্মরণীয়।",
         descriptionClassName: "font-bengali text-sm md:text-base leading-relaxed font-semibold text-muted-foreground",
         highlights: ["Open-Air Garden Dining", "Live Band ('Nostalgic')", "Signature Reshmi Butter Masala", "Traditional Bengali Thalis"],
