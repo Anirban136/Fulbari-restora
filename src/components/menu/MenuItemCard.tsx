@@ -1,121 +1,103 @@
 import React, { useMemo } from 'react';
-import Image from 'next/image';
+import { Leaf } from 'lucide-react';
+import { motion } from 'framer-motion';
 
-interface MenuItemCardProps {
-    item: any;
-    filter: 'All' | 'Veg' | 'Non-Veg';
-}
+const MenuItemCard = ({ item }: { item: any }) => {
+    // Determine image based on keywords dynamically
+    const getFoodImage = (name: string) => {
+        const lower = name.toLowerCase();
+        if (lower.includes('soup')) return 'https://images.unsplash.com/photo-1547592166-23ac45744acd?q=80&w=800&auto=format&fit=crop';
+        if (lower.includes('chicken')) return 'https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?q=80&w=800&auto=format&fit=crop';
+        if (lower.includes('mutton')) return 'https://images.unsplash.com/photo-1545247181-516773cae754?q=80&w=800&auto=format&fit=crop';
+        if (lower.includes('paneer')) return 'https://images.unsplash.com/photo-1567188040759-fb8a883dc6d8?q=80&w=800&auto=format&fit=crop';
+        if (lower.includes('rice') || lower.includes('biryani') || lower.includes('pulao')) return 'https://images.unsplash.com/photo-1516684732162-798a0062be99?q=80&w=800&auto=format&fit=crop';
+        if (lower.includes('noodle') || lower.includes('mein') || lower.includes('chop suey')) return 'https://images.unsplash.com/photo-1585032226651-759b368d7246?q=80&w=800&auto=format&fit=crop';
+        if (lower.includes('fish') || lower.includes('prawn')) return 'https://images.unsplash.com/photo-1626776876729-bab4369a5a5a?q=80&w=800&auto=format&fit=crop';
+        if (lower.includes('ice cream')) return 'https://images.unsplash.com/photo-1501443762994-82bd5dabb892?q=80&w=800&auto=format&fit=crop';
+        if (lower.includes('shake') || lower.includes('drink') || lower.includes('mojito') || lower.includes('soda') || lower.includes('lassi') || lower.includes('cold coffee')) return 'https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?q=80&w=800&auto=format&fit=crop';
+        if (lower.includes('salad')) return 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?q=80&w=800&auto=format&fit=crop';
+        if (lower.includes('raita') || lower.includes('curd')) return 'https://images.unsplash.com/photo-1588674917454-e6995cd7b973?q=80&w=800&auto=format&fit=crop';
+        if (lower.includes('roti') || lower.includes('naan') || lower.includes('kulcha')) return 'https://images.unsplash.com/photo-1606850244622-c24097f48baf?q=80&w=800&auto=format&fit=crop';
+        if (lower.includes('fry') || lower.includes('potato') || lower.includes('corn')) return 'https://images.unsplash.com/photo-1606923829579-0cb981a83e2e?q=80&w=800&auto=format&fit=crop';
 
-const MenuItemCard: React.FC<MenuItemCardProps> = ({ item, filter }) => {
-    // Extract variants (keys that aren't name or descriptions)
-    const variants = useMemo(() => {
-        if (item.displayedVariants) {
-            return Object.entries(item.displayedVariants).map(([key, value]) => ({
-                label: key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase()),
-                price: value as number,
-                type: (['egg', 'eggChicken', 'mixed', 'basa', 'bhetki'].includes(key) ? 'nonVeg' : 'all')
-            }));
-        }
-
-        const skipKeys = ['name', 'description', 'category', 'isVeg', 'available', 'menu_type', 'price', 'img', 'displayedPrice', 'forcedType', 'displayedVariants'];
-        return Object.entries(item)
-            .filter(([key]) => !skipKeys.includes(key))
-            .map(([key, value]) => ({
-                label: key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase()),
-                price: value as number,
-                type: (key === 'veg' ? 'veg' : (['nonVeg', 'egg', 'eggChicken', 'mixed', 'basa', 'bhetki'].includes(key) ? 'nonVeg' : 'all'))
-            }));
-    }, [item]);
-
-    // Use forced display price if available
-    const displayPrice = item.displayedPrice || item.price;
-
-    const filteredVariants = useMemo(() => {
-        if (filter === 'All') return variants;
-        if (filter === 'Veg') return variants.filter(v => v.type === 'veg' || v.type === 'all');
-        return variants.filter(v => v.type === 'nonVeg' || v.type === 'all');
-    }, [variants, filter]);
-
-    // Optimized image sourcing
-    const imageUrl = useMemo(() => {
-        const searchTerms = [item.name, 'food', 'restaurant'].join(' ');
-        // Using a stable placeholder or a mapping would be better, but let's use a themed Unsplash search logic
-        // For a real production app, we'd have a fixed mapping.
-        const query = encodeURIComponent(item.name.split(' (')[0]);
-        return `https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=800&auto=format&fit=crop`; // Fallback base
-        // In a dynamic implementation, we'd use a search API or pre-defined IDs.
-        // I'll provide a mapping utility in the next step.
-    }, [item.name]);
-
-    // Helper for dynamic image mapping based on name keywords
-    const getDynamicImage = (name: string) => {
-        const n = name.toLowerCase();
-        if (n.includes('soup')) return 'https://images.unsplash.com/photo-1547592166-23ac45744acd?q=80&w=800';
-        if (n.includes('biryani')) return 'https://images.unsplash.com/photo-1563379091339-03b21bc4a4f8?q=80&w=800';
-        if (n.includes('paneer')) return 'https://images.unsplash.com/photo-1567188040759-fb8a883dc6d8?q=80&w=800';
-        if (n.includes('chicken')) return 'https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?q=80&w=800';
-        if (n.includes('noodle')) return 'https://images.unsplash.com/photo-1585032226651-759b368d7246?q=80&w=800';
-        if (n.includes('shake') || n.includes('drink') || n.includes('mojito')) return 'https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?q=80&w=800';
-        if (n.includes('rice')) return 'https://images.unsplash.com/photo-1516684732162-798a0062be99?q=80&w=800';
-        if (n.includes('mutton')) return 'https://images.unsplash.com/photo-1545247181-516773cae754?q=80&w=800';
-        if (n.includes('fish') || n.includes('prawn')) return 'https://images.unsplash.com/photo-1626776876729-bab4369a5a5a?q=80&w=800';
-        if (n.includes('ice cream')) return 'https://images.unsplash.com/photo-1501443762994-82bd5dabb892?q=80&w=800';
-        return 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=800';
+        return 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=800&auto=format&fit=crop';
     };
 
-    const currentImage = getDynamicImage(item.name);
+    // Subtly detect veg vs non-veg from string names or properties if not explicitly labeled
+    const isVeg = useMemo(() => {
+        const n = item.name.toLowerCase();
+        if (n.includes('chicken') || n.includes('mutton') || n.includes('fish') || n.includes('prawn') || n.includes('egg') || item.nonVeg || item.egg || item.eggChicken || item.basa || item.bhetki) return false;
+        return true;
+    }, [item]);
+
+    // Check if there are exact prices or variant prices
+    const hasMultiplePrices = item.veg !== undefined || item.nonVeg !== undefined || item.egg !== undefined || item.eggChicken !== undefined || item.mixed !== undefined || item.basa !== undefined || item.bhetki !== undefined;
+
+    const priceEntries = useMemo(() => {
+        if (!hasMultiplePrices) return [];
+        return Object.entries(item).filter(([k]) => k !== 'name' && k !== 'price');
+    }, [item, hasMultiplePrices]);
 
     return (
-        <div className="group bg-zinc-900/40 backdrop-blur-sm rounded-2xl overflow-hidden border border-zinc-800 transition-all duration-500 hover:border-amber-500/50 hover:shadow-[0_0_30px_rgba(245,158,11,0.1)] flex h-32 sm:h-40">
-            {/* Image Side */}
-            <div className="relative w-32 sm:w-40 h-full overflow-hidden shrink-0">
+        <motion.div
+            layout
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ duration: 0.3 }}
+            whileHover={{ y: -6 }}
+            className="group bg-card rounded-2xl overflow-hidden shadow-lg border border-border/50 hover:border-primary/50 transition-all flex flex-col h-full"
+        >
+            <div className="relative h-48 overflow-hidden bg-zinc-900 shrink-0">
                 <img
-                    src={currentImage}
+                    src={getFoodImage(item.name)}
                     alt={item.name}
                     loading="lazy"
-                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                 />
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent to-zinc-900/80"></div>
-            </div>
-
-            {/* Content Side */}
-            <div className="flex-1 p-4 flex flex-col justify-center min-w-0">
-                <div className="flex justify-between items-start mb-1">
-                    <h3 className="text-sm sm:text-base font-semibold text-zinc-100 truncate pr-2 group-hover:text-amber-400 transition-colors">
-                        {item.name}
-                    </h3>
-                    {displayPrice && (
-                        <span className="text-amber-500 font-bold whitespace-nowrap text-sm sm:text-base">
-                            ₹{displayPrice}
-                        </span>
-                    )}
-                </div>
-
-                {/* Variants */}
-                {filteredVariants.length > 0 && !displayPrice && (
-                    <div className="space-y-1 mt-1">
-                        {filteredVariants.map((variant, idx) => (
-                            <div key={idx} className="flex justify-between items-center text-xs sm:text-sm">
-                                <span className="text-zinc-400 font-medium">{variant.label}</span>
-                                <span className="text-amber-500/90 font-semibold ml-2">₹{variant.price as any}</span>
-                            </div>
-                        ))}
+                {!hasMultiplePrices && item.price !== undefined && (
+                    <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-sm text-white text-sm font-bold px-3 py-1 rounded-full border border-white/20">
+                        ₹{item.price}
                     </div>
                 )}
+            </div>
 
-                <div className="mt-auto flex items-center space-x-2">
-                    {/* Subtle veg/non-veg indicator based on item forced type or name */}
-                    {item.forcedType === 'Non-Veg' || item.name.toLowerCase().includes('chicken') || item.name.toLowerCase().includes('mutton') || item.name.toLowerCase().includes('fish') || item.name.toLowerCase().includes('non-veg') ? (
-                        <span className="w-2 h-2 rounded-full bg-red-500 shadow-[0_0_5px_rgba(239,68,68,0.5)]"></span>
+            <div className="p-4 flex-grow flex flex-col bg-card relative z-10">
+                <div className="flex justify-between items-start gap-3 mb-2">
+                    <h3 className="font-heading font-bold text-lg text-foreground group-hover:text-primary transition-colors leading-tight">
+                        {item.name}
+                    </h3>
+                    <div className="shrink-0 mt-1">
+                        {isVeg ? (
+                            <Leaf size={16} className="text-green-500 drop-shadow-[0_0_5px_rgba(34,197,94,0.3)]" />
+                        ) : (
+                            <div className="w-4 h-4 flex items-center justify-center border border-red-500 rounded-sm">
+                                <div className="w-2 h-2 bg-red-500 rounded-full" />
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                <div className="mt-auto pt-4 border-t border-border/40">
+                    {hasMultiplePrices ? (
+                        <div className="space-y-1">
+                            {priceEntries.map(([variant, price]: any) => (
+                                <div key={variant} className="flex justify-between items-center text-sm">
+                                    <span className="text-muted-foreground font-bold uppercase tracking-wider text-[10px]">
+                                        {variant.replace(/([A-Z])/g, ' $1').trim()}
+                                    </span>
+                                    <span className="font-black text-primary">₹{price}</span>
+                                </div>
+                            ))}
+                        </div>
                     ) : (
-                        <span className="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_5px_rgba(34,197,94,0.5)]"></span>
+                        <div className="flex justify-end items-center">
+                            <span className="font-black text-xl text-primary">₹{item.price}</span>
+                        </div>
                     )}
-                    <span className="text-[10px] text-zinc-500 uppercase tracking-widest font-bold">
-                        Fulbari Taste
-                    </span>
                 </div>
             </div>
-        </div>
+        </motion.div>
     );
 };
 

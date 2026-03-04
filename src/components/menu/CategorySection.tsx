@@ -1,34 +1,29 @@
 import React from 'react';
 import MenuItemCard from './MenuItemCard';
+import { motion } from 'framer-motion';
 
-interface CategorySectionProps {
-    category: string;
-    vegItems: any[];
-    nonVegItems: any[];
-    filter: 'All' | 'Veg' | 'Non-Veg';
-}
-
-const CategorySection: React.FC<CategorySectionProps> = ({ category, vegItems, nonVegItems }) => {
-    const allItems = [...vegItems, ...nonVegItems];
-
-    if (allItems.length === 0) return null;
+const CategorySection = ({ category }: { category: any }) => {
+    if (!category.items || category.items.length === 0) return null;
 
     return (
-        <section className="mb-20">
-            <div className="flex items-center space-x-4 mb-10">
-                <h2 className="text-3xl sm:text-4xl font-black text-zinc-100 tracking-tight">
-                    {category}
+        <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-16 last:mb-0"
+        >
+            <div className="flex items-center gap-4 mb-8">
+                <h2 className="text-2xl sm:text-3xl font-heading font-black text-foreground whitespace-nowrap">
+                    {category.category}
                 </h2>
-                <div className="h-[2px] flex-1 bg-gradient-to-r from-amber-500/50 to-transparent"></div>
+                <div className="h-[1px] flex-grow bg-gradient-to-r from-primary/50 to-transparent" />
             </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-6">
-                {allItems.map((item, idx) => (
-                    <MenuItemCard key={`${category}-${item.name}-${idx}`} item={item} filter="All" />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {category.items.map((item: any, idx: number) => (
+                    <MenuItemCard key={`${item.name}-${idx}`} item={item} />
                 ))}
             </div>
-        </section>
+        </motion.div>
     );
 };
 
-export default CategorySection;
+export default React.memo(CategorySection);

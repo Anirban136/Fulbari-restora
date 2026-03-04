@@ -1,170 +1,82 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Leaf, Loader2, Search } from 'lucide-react';
-import { sanitizeImageUrl } from '@/lib/utils';
+import React, { useState, useMemo } from 'react';
+import { Search } from 'lucide-react';
+import restaurantData from '@/data/restaurant_new_menu.json';
+import CategorySection from './CategorySection';
 
 const MenuSection = () => {
-    const [menuItems, setMenuItems] = useState<any[]>([]);
-    const [loading, setLoading] = useState(true);
     const [activeCategory, setActiveCategory] = useState('All');
     const [searchQuery, setSearchQuery] = useState('');
 
-    useEffect(() => {
-        fetch('/api/menu')
-            .then(res => res.json())
-            .then(data => {
-                // Filter only RESTAURANT type items that are available
-                const restaurantItems = Array.isArray(data)
-                    ? data.filter((item: any) => item.menu_type === 'RESTAURANT' && item.available !== false)
-                    : [];
-                setMenuItems(restaurantItems);
-                setLoading(false);
-            })
-            .catch(() => setLoading(false));
+    const categories = useMemo(() => {
+        return ['All', ...restaurantData.menu.map(c => c.category)];
     }, []);
 
-    const categories = useMemo(() => {
-        const cats = new Set<string>();
-        menuItems.forEach(item => {
-            const suffix = item.isVeg ? '(Veg)' : '(Non-Veg)';
-            cats.add(`${item.category} ${suffix}`);
-        });
-        return ['All', ...Array.from(cats).sort()];
-    }, [menuItems]);
-
-    const filteredItems = useMemo(() => {
-        return menuItems.filter(item => {
-            const itemCategoryLabel = `${item.category} ${item.isVeg ? '(Veg)' : '(Non-Veg)'}`;
-            const matchesCategory = activeCategory === 'All' || itemCategoryLabel === activeCategory;
-            const matchesSearch =
-                item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                (item.description || '').toLowerCase().includes(searchQuery.toLowerCase());
-            return matchesCategory && matchesSearch;
-        });
-    }, [menuItems, activeCategory, searchQuery]);
-
-    if (loading) {
-        return (
-            <div className="flex flex-col items-center justify-center py-20">
-                <Loader2 className="w-12 h-12 text-primary animate-spin mb-4" />
-                <p className="text-muted-foreground animate-pulse">Loading our restaurant menu...</p>
-            </div>
-        );
-    }
+    const filteredMenu = useMemo(() => {
+        return restaurantData.menu
+            .map(category => {
+                // Filter items by search query inside this category
+                const filteredItems = category.items.filter(item =>
+                    item.name.toLowerCase().includes(searchQuery.toLowerCase())
+                );
+                return { ...category, items: filteredItems };
+            })
+            // Filter categories based on selection and if they have items left
+            .filter(category => {
+                const matchesTab = activeCategory === 'All' || category.category === activeCategory;
+                const hasItems = category.items.length > 0;
+                return matchesTab && hasItems;
+            });
+    }, [activeCategory, searchQuery]);
 
     return (
-        <div className="container mx-auto px-4">
-            {/* Controls */}
-            <div className="flex flex-col md:flex-row gap-4 justify-between items-center mb-10 bg-card/30 p-4 rounded-2xl border border-border/50">
-                <div className="flex gap-2 overflow-x-auto pb-2 md:pb-0 w-full md:w-auto no-scrollbar">
+        <div className="container mx-auto px-4 py-8">
+            <div className="flex flex-col md:flex-row gap-4 justify-between items-center mb-12 bg-card/30 p-4 rounded-2xl border border-border/50 shadow-sm backdrop-blur-sm sticky top-24 z-30">
+                <div className="flex gap-2 overflow-x-auto pb-2 md:pb-0 w-full md:w-auto no-scrollbar snap-x">
                     {categories.map((cat) => (
                         <button
                             key={cat}
                             onClick={() => setActiveCategory(cat)}
-                            className={`px-4 py-2 rounded-full whitespace-nowrap transition-all text-sm font-medium ${activeCategory === cat
-                                ? 'bg-primary text-primary-foreground'
-                                : 'bg-accent text-muted-foreground hover:bg-accent/80'
+                            className={`snap-start px-5 py-2.5 rounded-full whitespace-nowrap transition-all text-sm font-bold shadow-sm ${activeCategory === cat
+                                    ? 'bg-primary text-primary-foreground scale-105'
+                                    : 'bg-accent text-muted-foreground hover:bg-card hover:text-foreground border border-border/50'
                                 }`}
                         >
                             {cat}
                         </button>
                     ))}
                 </div>
-                <div className="relative w-full md:w-64">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
+                <div className="relative w-full md:w-72 shrink-0">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
                     <input
                         type="text"
-                        placeholder="Search restaurant items..."
+                        placeholder="Search our fine dining menu..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2 rounded-full bg-accent border-transparent outline-none"
+                        className="w-full pl-11 pr-4 py-2.5 rounded-full bg-accent border-transparent focus:bg-card focus:border-primary/50 outline-none transition-all shadow-sm font-medium"
                     />
                 </div>
             </div>
 
-            {/* Menu Grid */}
-            {filteredItems.length === 0 ? (
-                <div className="text-center py-20">
-                    <p className="text-muted-foreground text-xl">No dishes found matching your search.</p>
-                    <button
-                        onClick={() => { setActiveCategory('All'); setSearchQuery(''); }}
-                        className="mt-4 text-primary hover:underline transition-all"
-                    >
-                        Clear Filters
-                    </button>
-                </div>
-            ) : (
-                <motion.div
-                    layout
-                    className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
-                >
-                    <AnimatePresence mode="popLayout">
-                        {filteredItems.map((item) => (
-                            <motion.div
-                                key={item.id}
-                                layout
-                                initial={{ opacity: 0, scale: 0.9 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                exit={{ opacity: 0, scale: 0.9 }}
-                                transition={{ duration: 0.3 }}
-                                whileHover={{ y: -6 }}
-                                className="group bg-card rounded-2xl overflow-hidden shadow-lg border border-border/50 hover:border-primary/50 transition-all flex flex-col"
-                            >
-                                {/* Image */}
-                                <div className="relative h-48 overflow-hidden">
-                                    <img
-                                        src={sanitizeImageUrl(item.image)}
-                                        alt={item.name}
-                                        className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                                        onError={(e) => {
-                                            (e.target as HTMLImageElement).src =
-                                                'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=800&auto=format&fit=crop';
-                                        }}
-                                    />
-                                    {/* Price badge */}
-                                    {!item.variant_prices && (
-                                        <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-sm text-white text-sm font-bold px-3 py-1 rounded-full border border-white/20">
-                                            ₹{item.price}
-                                        </div>
-                                    )}
-                                </div>
-
-                                {/* Content */}
-                                <div className="p-4 flex-grow flex flex-col">
-                                    <div className="flex justify-between items-start mb-2">
-                                        <h3 className="font-heading font-bold text-lg text-foreground group-hover:text-primary transition-colors pr-2">
-                                            {item.name}
-                                        </h3>
-                                        {item.isVeg ? (
-                                            <Leaf size={16} className="text-green-500 mt-1 shrink-0" />
-                                        ) : (
-                                            <div className="w-4 h-4 border border-red-500 flex items-center justify-center shrink-0 mt-1">
-                                                <div className="w-2 h-2 rounded-full bg-red-500" />
-                                            </div>
-                                        )}
-                                    </div>
-                                    <p className="text-muted-foreground text-xs line-clamp-2 mb-4">
-                                        {item.description || 'A delicious dish crafted with care.'}
-                                    </p>
-                                    <div className="mt-auto pt-4 border-t border-border/40">
-                                        {item.variant_prices && Object.entries(item.variant_prices).map(([k, v]: any) => (
-                                            <div key={k} className="flex justify-between text-sm mb-1">
-                                                <span className="text-muted-foreground uppercase text-[10px] font-bold">{k}</span>
-                                                <span className="font-black text-primary">₹{v}</span>
-                                            </div>
-                                        ))}
-                                        {!item.variant_prices && (
-                                            <div className="text-right font-black text-xl text-primary">₹{item.price}</div>
-                                        )}
-                                    </div>
-                                </div>
-                            </motion.div>
-                        ))}
-                    </AnimatePresence>
-                </motion.div>
-            )}
+            <div className="space-y-4 min-h-[50vh]">
+                {filteredMenu.length > 0 ? (
+                    filteredMenu.map((category) => (
+                        <CategorySection key={category.category} category={category} />
+                    ))
+                ) : (
+                    <div className="flex flex-col items-center justify-center py-32 text-center bg-card/20 rounded-3xl border border-dashed border-border p-8">
+                        <Search size={48} className="text-muted-foreground/30 mb-4" />
+                        <p className="text-muted-foreground text-xl font-medium mb-4">No culinary delights found matching your search.</p>
+                        <button
+                            onClick={() => { setActiveCategory('All'); setSearchQuery(''); }}
+                            className="text-primary hover:text-primary/80 font-bold underline transition-colors"
+                        >
+                            Explore Full Menu
+                        </button>
+                    </div>
+                )}
+            </div>
         </div>
     );
 };
