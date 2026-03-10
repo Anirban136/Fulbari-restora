@@ -2,33 +2,36 @@
 
 import React, { useState, useMemo } from 'react';
 import { Search } from 'lucide-react';
-import restaurantData from '@/data/restaurant_new_menu.json';
 import CategorySection from './CategorySection';
 
-const MenuSection = () => {
+const MenuSection = ({ items }: { items: any[] }) => {
     const [activeCategory, setActiveCategory] = useState('All');
     const [searchQuery, setSearchQuery] = useState('');
 
     const categories = useMemo(() => {
-        return ['All', ...restaurantData.menu.map(c => c.category)];
-    }, []);
+        const uniqueCategories = Array.from(new Set(items.map(item => item.category))).filter(Boolean);
+        return ['All', ...uniqueCategories].sort();
+    }, [items]);
 
     const filteredMenu = useMemo(() => {
-        return restaurantData.menu
-            .map(category => {
-                // Filter items by search query inside this category
-                const filteredItems = category.items.filter(item =>
-                    item.name.toLowerCase().includes(searchQuery.toLowerCase())
-                );
-                return { ...category, items: filteredItems };
-            })
-            // Filter categories based on selection and if they have items left
-            .filter(category => {
-                const matchesTab = activeCategory === 'All' || category.category === activeCategory;
-                const hasItems = category.items.length > 0;
-                return matchesTab && hasItems;
-            });
-    }, [activeCategory, searchQuery]);
+        // Find all unique active categories
+        const activeCats = categories.filter(c => c !== 'All');
+        
+        return activeCats.map(categoryName => {
+            // Get all items for this category matching the search
+            const categoryItems = items.filter(item => 
+                item.category === categoryName &&
+                (item.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                 item.description?.toLowerCase().includes(searchQuery.toLowerCase()))
+            );
+            return { category: categoryName, items: categoryItems };
+        }).filter(category => {
+            // Keep category if it matches the tab filter and has items
+            const matchesTab = activeCategory === 'All' || category.category === activeCategory;
+            const hasItems = category.items.length > 0;
+            return matchesTab && hasItems;
+        });
+    }, [items, activeCategory, searchQuery, categories]);
 
     return (
         <div className="container mx-auto px-4 py-8">

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export async function GET() {
     try {
@@ -11,7 +12,14 @@ export async function GET() {
             .order('name');
 
         if (error) throw error;
-        return NextResponse.json(data);
+        
+        return NextResponse.json(data, {
+            headers: {
+                'Cache-Control': 'no-store, max-age=0, must-revalidate',
+                'Pragma': 'no-cache',
+                'Expires': '0',
+            }
+        });
     } catch (error) {
         console.error("Supabase Load Error:", error);
         return NextResponse.json({ error: "Failed to load menu" }, { status: 500 });

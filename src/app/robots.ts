@@ -9,6 +9,6 @@ export default function robots(): MetadataRoute.Robots {
                 disallow: ["/admin/", "/api/"],
             },
         ],
-        sitemap: "https://fulbari-restraunt.vercel.app/sitemap.xml",
+        sitemap: "https://fulbarirestora.com/sitemap.xml",
     };
 }

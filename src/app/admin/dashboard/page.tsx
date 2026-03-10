@@ -365,9 +365,17 @@ export default function AdminDashboard() {
 
     const fetchMenu = async () => {
         try {
-            const res = await fetch("/api/menu");
+            const ts = Date.now();
+            const res = await fetch(`/api/menu?v=${ts}`, {
+                cache: 'no-store',
+                headers: {
+                    'Cache-Control': 'no-store, no-cache, must-revalidate',
+                    'Pragma': 'no-cache',
+                    'Expires': '0',
+                }
+            });
             const data = await res.json();
-            setMenuItems(Array.isArray(data) ? data : []);
+            setMenuItems(data);
         } catch (error) {
             console.error("Failed to fetch menu");
             setMenuItems([]);

@@ -59,7 +59,16 @@ export default function MenuPage() {
     }, []);
 
     useEffect(() => {
-        fetch("/api/menu")
+        // Prevent aggressive cPanel/Cloudflare caching
+        const ts = Date.now();
+        fetch(`/api/menu?v=${ts}`, { 
+            cache: 'no-store',
+            headers: {
+                'Cache-Control': 'no-store, no-cache, must-revalidate',
+                'Pragma': 'no-cache',
+                'Expires': '0',
+            }
+        })
             .then(res => res.json())
             .then(data => {
                 setMenuItems(data);
@@ -184,7 +193,14 @@ export default function MenuPage() {
             {/* New Dynamic Menu Section */}
             <section className="flex-grow bg-zinc-950/20 py-8">
                 {activeMenuTab === "RESTAURANT" ? (
-                    <MenuSection />
+                    loading ? (
+                        <div className="flex flex-col items-center justify-center py-20">
+                            <Loader2 className="w-12 h-12 text-primary animate-spin mb-4" />
+                            <p className="text-muted-foreground animate-pulse">Loading fine dining menu...</p>
+                        </div>
+                    ) : (
+                        <MenuSection items={filteredByMenuType} />
+                    )
                 ) : (
                     <div className="container mx-auto px-4">
                         {loading ? (

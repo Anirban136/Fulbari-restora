@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 const CACHE_HEADERS = {
-    "Cache-Control": "public, max-age=0, must-revalidate",
+    "Cache-Control": "no-store, max-age=0, must-revalidate",
     "Pragma": "no-cache",
     "Expires": "0",
 };

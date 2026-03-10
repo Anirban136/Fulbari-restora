@@ -66,14 +66,14 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_IN",
-    url: "https://fulbari-restraunt.vercel.app",
+    url: "https://fulbarirestora.com",
     siteName: "Fulbari Restaurant",
     title: "Fulbari Restaurant | Best Restaurant & Dhaba Near Serampore, Hooghly, Kolkata",
     description:
       "Visit Fulbari Restaurant — the best restaurant and dhaba near Serampore, Hooghly and Kolkata. Authentic Bengali, Indian & Chinese cuisine with a premium dining experience.",
     images: [
       {
-        url: "https://fulbari-restraunt.vercel.app/og-image.jpg",
+        url: "https://fulbarirestora.com/og-image.jpg",
         width: 1200,
         height: 630,
         alt: "Fulbari Restaurant — Best Restaurant near Serampore, Hooghly, Kolkata",
@@ -87,9 +87,14 @@ export const metadata: Metadata = {
       "Authentic Bengali, Indian & Chinese cuisine. The best restaurant and dhaba near Kolkata, Hooghly & Serampore.",
   },
   alternates: {
-    canonical: "https://fulbari-restraunt.vercel.app",
+    canonical: "https://fulbarirestora.com",
   },
   category: "restaurant",
+  icons: {
+    icon: "/icon.jpeg",
+    shortcut: "/icon.jpeg",
+    apple: "/icon.jpeg",
+  },
 };
 
 export default function RootLayout({
@@ -110,7 +115,7 @@ export default function RootLayout({
               name: "Fulbari Restaurant",
               description:
                 "The best restaurant and dhaba near Serampore, Hooghly, and Kolkata. Serving authentic Bengali, Indian, and Chinese cuisine.",
-              url: "https://fulbari-restraunt.vercel.app",
+              url: "https://fulbarirestora.com",
               telephone: "+91-XXXXXXXXXX",
               address: {
                 "@type": "PostalAddress",

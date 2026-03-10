@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { Leaf } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { sanitizeImageUrl } from '@/lib/utils';
 
 const MenuItemCard = ({ item }: { item: any }) => {
     // Determine image based on keywords dynamically
@@ -50,7 +51,7 @@ const MenuItemCard = ({ item }: { item: any }) => {
         >
             <div className="relative h-48 overflow-hidden bg-zinc-900 shrink-0">
                 <img
-                    src={getFoodImage(item.name)}
+                    src={item.image ? sanitizeImageUrl(item.image) : getFoodImage(item.name)}
                     alt={item.name}
                     loading="lazy"
                     className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
