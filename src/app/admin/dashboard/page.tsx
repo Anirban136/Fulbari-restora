@@ -1506,16 +1506,30 @@ export default function AdminDashboard() {
                                                 </div>
                                                 <p className="text-xs text-muted-foreground line-clamp-2 mb-4">{item.description}</p>
 
-                                                <div className="flex items-center gap-3 mt-auto">
-                                                    <span className="text-sm font-bold text-foreground">₹</span>
-                                                    <input
-                                                        type="number"
-                                                        defaultValue={item.price}
-                                                        onBlur={(e) => updatePrice(item.id, Number(e.target.value))}
-                                                        className="w-20 bg-background border-border border rounded-lg px-2 py-1 text-sm font-bold focus:ring-1 focus:ring-primary outline-none"
-                                                    />
-                                                    <div className={`ml-auto w-3 h-3 rounded-full ${item.available ? "bg-green-500 animate-pulse" : "bg-red-500"}`} />
-                                                </div>
+                                                {item.variant_prices && Object.keys(item.variant_prices).length > 0 ? (
+                                                    <div className="flex flex-col mt-auto w-full bg-accent/40 rounded-lg p-2 gap-1.5 border border-border">
+                                                        {Object.entries(item.variant_prices).map(([variant, price]) => price !== null && price !== undefined ? (
+                                                            <div key={variant} className="flex justify-between items-center">
+                                                                <span className="text-muted-foreground font-bold uppercase tracking-widest text-[9px]">
+                                                                    {variant.replace(/([A-Z])/g, ' $1').trim()}
+                                                                </span>
+                                                                <span className="font-bold text-xs text-primary">₹{price as number}</span>
+                                                            </div>
+                                                        ) : null)}
+                                                        <div className={`mt-1 ml-auto w-2.5 h-2.5 rounded-full shadow-sm ${item.available ? "bg-green-500 animate-pulse" : "bg-red-500"}`} />
+                                                    </div>
+                                                ) : (
+                                                    <div className="flex items-center gap-3 mt-auto">
+                                                        <span className="text-sm font-bold text-foreground">₹</span>
+                                                        <input
+                                                            type="number"
+                                                            defaultValue={item.price}
+                                                            onBlur={(e) => updatePrice(item.id, Number(e.target.value))}
+                                                            className="w-20 bg-background border-border border rounded-lg px-2 py-1 text-sm font-bold focus:ring-1 focus:ring-primary outline-none"
+                                                        />
+                                                        <div className={`ml-auto w-3 h-3 rounded-full ${item.available ? "bg-green-500 animate-pulse" : "bg-red-500"}`} />
+                                                    </div>
+                                                )}
                                             </div>
                                         </motion.div>
                                     ))}
