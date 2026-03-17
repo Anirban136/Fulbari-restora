@@ -9,6 +9,7 @@ export default function FloatingContact() {
     const [isOpen, setIsOpen] = useState(false);
     const [mounted, setMounted] = useState(false);
     const phoneNumber = "+919432750140";
+    const secondaryPhoneNumber = "+918420680650";
     const whatsappLink = `https://wa.me/${phoneNumber.replace("+", "")}`;
 
     useEffect(() => {
@@ -50,14 +51,26 @@ export default function FloatingContact() {
                                 <MessageCircle size={24} />
                             </a>
 
-                            {/* Call Button */}
+                            {/* Call Button Primary */}
                             <a
                                 href={`tel:${phoneNumber}`}
                                 className="group flex items-center gap-3 bg-[#EFB11D] text-black px-4 py-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
                                 style={{ display: 'flex', alignItems: 'center' }}
                             >
                                 <span className="text-xs font-bold whitespace-nowrap bg-black/40 text-white px-2 py-1 rounded">
-                                    Call Now
+                                    Call Primary
+                                </span>
+                                <Phone size={24} />
+                            </a>
+
+                            {/* Call Button Secondary */}
+                            <a
+                                href={`tel:${secondaryPhoneNumber}`}
+                                className="group flex items-center gap-3 bg-[#EFB11D] text-black px-4 py-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+                                style={{ display: 'flex', alignItems: 'center' }}
+                            >
+                                <span className="text-xs font-bold whitespace-nowrap bg-black/40 text-white px-2 py-1 rounded">
+                                    Call Secondary
                                 </span>
                                 <Phone size={24} />
                             </a>
