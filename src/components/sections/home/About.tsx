@@ -34,7 +34,7 @@ const venues: Record<VenueKey, VenueData> = {
         bengaliDescription: "🎵 লাইভ মিউজিকের ম্যাজিক: আপনার ডিনারকে আরও ছন্দময় করতে আমাদের এখানে মাঝেমধ্যেই আয়োজন করা হয় লাইভ ব্যান্ড (যেমন: 'Nostalgic') পারফরম্যান্স। সুরের মূর্ছনায় আপনার সন্ধ্যাটি হয়ে উঠবে মায়াবী।\n\n🕯️ রোমান্টিক ও পারিবারিক সময়: আপনি সঙ্গীর সাথে ক্যান্ডেল লাইট ডিনার করতে চান বা পুরো পরিবারের সাথে হাসি-ঠাট্টায় মেতে উঠতে চান—আমাদের ওপেন-এয়ার অ্যাম্বিয়েন্স সবার জন্যই পারফেক্ট।",
         highlights: ["Specialty Coffee", "Live Music", "Romantic Ambience", "Cozy Ambience"],
         capacity: "40+ Guests",
-        timing: "8:00 AM - 9:00 PM",
+        timing: "5:00 PM - 11:00 PM",
         images: [
             "/cafe/cafe1.jpeg",
             "/cafe/cafe2.jpeg",
@@ -55,7 +55,7 @@ const venues: Record<VenueKey, VenueData> = {
         descriptionClassName: "font-bengali text-sm md:text-base leading-relaxed font-semibold text-muted-foreground",
         highlights: ["Open-Air Garden Dining", "Live Band ('Nostalgic')", "Signature Reshmi Butter Masala", "Traditional Bengali Thalis"],
         capacity: "120+ Guests",
-        timing: "11:00 AM - 10:30 PM",
+        timing: "12:00 PM - 10:30 PM",
         images: [
             "/restaurant/r1.jpeg",
             "/restaurant/r2.jpeg",

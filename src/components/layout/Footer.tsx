@@ -66,10 +66,10 @@ export function Footer() {
                             <li className="flex flex-col gap-3 text-muted-foreground">
                                 <div className="flex items-center gap-3">
                                     <Phone className="shrink-0 text-primary" size={18} />
-                                    <span className="text-sm">+91 84206 80650</span>
+                                    <span className="text-sm">+91 94327 50140</span>
                                 </div>
                                 <div className="ml-7 p-2.5 rounded-lg bg-primary/5 border border-primary/10">
-                                    <span className="text-primary/90 font-bengali font-bold italic text-[11px] tracking-wide">টেবিল বুকিংয়ের জন্য কল করুন: +91 84206 80650</span>
+                                    <span className="text-primary/90 font-bengali font-bold italic text-[11px] tracking-wide">টেবিল বুকিংয়ের জন্য কল করুন: +91 94327 50140</span>
                                 </div>
                             </li>
                             <li className="flex items-center gap-3 text-muted-foreground">
@@ -85,11 +85,11 @@ export function Footer() {
                         <ul className="space-y-3">
                             <li className="flex justify-between items-center text-muted-foreground">
                                 <span className="flex items-center gap-2"><Clock size={16} className="text-primary" /> Mon - Fri</span>
-                                <span>11:00 AM - 10:00 PM</span>
+                                <span>12:00 PM - 10:30 PM</span>
                             </li>
                             <li className="flex justify-between items-center text-muted-foreground">
                                 <span className="flex items-center gap-2"><Clock size={16} className="text-primary" /> Sat - Sun</span>
-                                <span>10:00 AM - 11:00 PM</span>
+                                <span>12:00 PM - 10:30 PM</span>
                             </li>
                         </ul>
                     </div>

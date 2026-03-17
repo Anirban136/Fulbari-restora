@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 export default function FloatingContact() {
     const [isOpen, setIsOpen] = useState(false);
     const [mounted, setMounted] = useState(false);
-    const phoneNumber = "+918420680650";
+    const phoneNumber = "+919432750140";
     const whatsappLink = `https://wa.me/${phoneNumber.replace("+", "")}`;
 
     useEffect(() => {

@@ -95,7 +95,7 @@ export function Navbar() {
 
                         <div className="flex flex-col items-center gap-2 mt-4 text-muted-foreground text-sm">
                             <div className="flex items-center gap-2">
-                                <Phone size={14} /> <span>+91 84206 80650</span>
+                                <Phone size={14} /> <span>+91 94327 50140</span>
                             </div>
                             <div className="flex items-center gap-2">
                                 <MapPin size={14} /> <span>Rajyadharpur, Serampore</span>

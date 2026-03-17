@@ -9,10 +9,10 @@ import { MapPin, Phone, Mail, Clock, Send, ArrowRight } from "lucide-react";
 
 export default function ContactPage() {
     const contactInfo = [
-        { icon: Phone, title: "Phone", content: "+91 84206 80650", sub: "Mon-Sun from 11am", delay: 0.1 },
+        { icon: Phone, title: "Phone", content: "+91 94327 50140", sub: "Mon-Sun from 12pm", delay: 0.1 },
         { icon: Mail, title: "Email", content: "fulbarirestaurant25@gmail.com", sub: "Online support", delay: 0.2 },
         { icon: MapPin, title: "Location", content: "Serampore, Hooghly", sub: "West Bengal 712201", delay: 0.3 },
-        { icon: Clock, title: "Hours", content: "11:00 AM - 10:00 PM", sub: "Open Every Day", delay: 0.4 },
+        { icon: Clock, title: "Hours", content: "12:00 PM - 10:30 PM", sub: "Open Every Day", delay: 0.4 },
     ];
 
     return (
@@ -113,7 +113,7 @@ export default function ContactPage() {
                                         For larger parties, special events, or catering inquiries, feel free to call us directly for immediate assistance.
                                     </p>
                                     <div className="pt-2">
-                                        <a href="tel:+918420680650" className="inline-flex items-center gap-2 bg-white text-primary px-6 py-3 rounded-full font-black uppercase text-xs tracking-widest hover:scale-105 transition-transform shadow-lg">
+                                        <a href="tel:+919432750140" className="inline-flex items-center gap-2 bg-white text-primary px-6 py-3 rounded-full font-black uppercase text-xs tracking-widest hover:scale-105 transition-transform shadow-lg">
                                             Call Now <ArrowRight size={14} />
                                         </a>
                                     </div>
