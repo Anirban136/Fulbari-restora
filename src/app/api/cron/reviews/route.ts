@@ -2,7 +2,8 @@ import { NextResponse } from 'next/server';
 import { fetchGoogleReviews } from '@/lib/google-reviews';
 
 // This route can be hit by ISR or a Cron job
-export const revalidate = 86400; // Cache for 1 day
+export const dynamic = 'force-static';
+export const revalidate = false; // Static cache for manual host
 
 export async function GET() {
     try {

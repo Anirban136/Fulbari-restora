@@ -8,7 +8,7 @@ async function run() {
     const env = {};
     envContent.split('\n').forEach(line => {
         const [key, ...rest] = line.split('=');
-        if (key && rest.length > 0) env[key.trim()] = rest.join('=').trim().replace(/^"(.*)"$/, '$1');
+        if (key && rest.length > 0) env[key.trim()] = rest.join('=').trim().replace(/^['"](.*)['"]$/, '$1');
     });
 
     const supabase = createClient(env.NEXT_PUBLIC_SUPABASE_URL, env.NEXT_PUBLIC_SUPABASE_ANON_KEY);

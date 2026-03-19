@@ -1,9 +1,6 @@
 import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
-
 export async function GET() {
     try {
         const { data, error } = await supabase
@@ -59,12 +56,30 @@ export async function POST(request: Request) {
         }
 
         if (action === "DELETE") {
-            const { error } = await supabase
+            console.log("Attempting to delete item with ID:", item.id);
+            // First remove from daily_specials to avoid foreign key constraint issues
+            const { error: specialError } = await supabase
+                .from('daily_specials')
+                .delete()
+                .eq('menu_item_id', item.id);
+            
+            if (specialError) {
+                console.error("Error deleting from daily_specials:", specialError);
+            } else {
+                console.log("Successfully removed from daily_specials (or not found)");
+            }
+
+            const { error: menuError } = await supabase
                 .from('menu_items')
                 .delete()
                 .eq('id', item.id);
 
-            if (error) throw error;
+            if (menuError) {
+                console.error("Error deleting from menu_items:", menuError);
+                throw menuError;
+            }
+            
+            console.log("Successfully deleted item from menu_items");
             return NextResponse.json({ success: true });
         }
 

@@ -203,12 +203,10 @@ export function GoogleReviews() {
 
 
                                             <div className="flex items-center gap-2 pt-4 border-t border-border/20 group-hover:border-primary/20 transition-colors grayscale opacity-40 group-hover:grayscale-0 group-hover:opacity-80 transition-all duration-500">
-                                                <Image
-                                                    src="https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_92x30dp.png"
+                                                <img
+                                                    src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg"
                                                     alt="Google"
-                                                    width={60}
-                                                    height={20}
-                                                    className="h-3 w-auto"
+                                                    className="h-4 w-4 shrink-0"
                                                 />
                                                 <span className="text-[9px] font-bold tracking-wider">VERIFIED REVIEW</span>
                                             </div>

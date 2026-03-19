@@ -14,28 +14,28 @@ const categoryConfig = [
     {
         icon: Utensils,
         label: "Main Course",
-        image: "https://images.unsplash.com/photo-1585937421612-70a008356fbe?q=80&w=400&auto=format&fit=crop",
+        image: "/food/food1.jpeg",
         menuCategories: ["Indian Main Course"] as Category[],
         menuType: "RESTAURANT",
     },
     {
         icon: Coffee,
         label: "Breakfast",
-        image: "https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?q=80&w=400&auto=format&fit=crop",
+        image: "/food/food2.jpeg",
         menuCategories: ["Breakfast"] as Category[],
         menuType: "CAFE",
     },
     {
         icon: Wine,
         label: "Drinks",
-        image: "https://images.unsplash.com/photo-1551538827-9c037cb4f32a?q=80&w=400&auto=format&fit=crop",
+        image: "/food/food3.jpeg",
         menuCategories: ["Beverages"] as Category[],
         // Any menu type
     },
     {
         icon: Cake,
         label: "Desserts",
-        image: "https://images.unsplash.com/photo-1488477181946-6428a0291777?q=80&w=400&auto=format&fit=crop",
+        image: "/food/food4.jpeg",
         menuCategories: ["Desserts", "Ice Cream"] as Category[],
         menuType: "RESTAURANT",
     },

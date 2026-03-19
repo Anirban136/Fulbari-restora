@@ -38,15 +38,19 @@ export function Navbar() {
             <div className="max-w-7xl mx-auto px-4 md:px-8 w-full flex items-center justify-center md:justify-between relative">
                 {/* Logo - Centered on mobile, left on desktop */}
                 <Link href="/" className="flex items-center gap-2">
-                    <div className="relative h-16 w-40 md:h-16 md:w-48" style={{ transform: 'none', rotate: 'none' }}>
+                    <div className="relative h-16 w-40 md:h-16 md:w-48">
                         <Image
                             src="/logo.png"
                             alt="Fulbari Restaurant Logo"
                             fill
                             unoptimized
                             className="object-contain"
-                            style={{ objectPosition: 'center', rotate: '0deg' }}
+                            style={{ objectPosition: 'center' }}
                             priority
+                            onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.src = "/icon.jpeg"; // Use icon.jpeg as fallback
+                            }}
                         />
                     </div>
                 </Link>

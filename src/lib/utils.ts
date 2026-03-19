@@ -5,12 +5,14 @@ export function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
 }
 
+const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=800&auto=format&fit=crop";
+
 export function sanitizeImageUrl(url: string | undefined | null) {
-    if (!url) return "";
+    if (!url) return FALLBACK_IMAGE;
     let s = url.trim();
 
     // Don't process empty strings
-    if (s === "") return "";
+    if (s === "") return FALLBACK_IMAGE;
 
     // 1. Force HTTPS to prevent mixed content issues on Vercel
     if (s.startsWith("http://")) {

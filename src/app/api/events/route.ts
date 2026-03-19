@@ -1,9 +1,6 @@
 import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
-
 const CACHE_HEADERS = {
     "Cache-Control": "no-store, max-age=0, must-revalidate",
     "Pragma": "no-cache",

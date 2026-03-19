@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+export const dynamic = 'force-static';
+export const revalidate = false;
 
 export async function POST(request: Request) {
     const { username, password } = await request.json();

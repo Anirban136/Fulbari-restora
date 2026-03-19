@@ -418,17 +418,31 @@ export default function AdminDashboard() {
     };
 
     const handleDelete = async (id: string) => {
-        if (!confirm("Are you sure you want to delete this item?")) return;
+        if (!window.confirm("Are you sure you want to delete this item?")) return;
+        
         try {
             const res = await fetch("/api/menu", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ action: "DELETE", item: { id } }),
             });
-            if (res.ok) fetchMenu();
-        } catch (error) {
-            console.error("Delete failed");
+            
+            const data = await res.json();
+            
+            if (res.ok) {
+                alert("✅ Success: Item deleted from database!");
+                fetchMenu();
+                setShowToast({ show: true, message: "Item Deleted!", type: 'success' });
+            } else {
+                const errMsg = data.error || "Unknown server error";
+                alert(`❌ Error: ${errMsg}`);
+                throw new Error(errMsg);
+            }
+        } catch (error: any) {
+            console.error("Delete failed:", error);
+            setShowToast({ show: true, message: `Error: ${error.message}`, type: 'error' });
         }
+        setTimeout(() => setShowToast(p => ({ ...p, show: false })), 3000);
     };
 
     const handleEditItem = (item: MenuItem) => {

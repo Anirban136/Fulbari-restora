@@ -1,9 +1,6 @@
 import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
-
 const today = () => new Date().toISOString().split("T")[0];
 
 export async function GET() {
