@@ -1,3 +1,4 @@
+// Next.js Production Server for Fulbari Restaurant - Deployment Optimized: 2026-04-05
 const { createServer } = require('http');
 const { parse } = require('url');
 const next = require('next');
