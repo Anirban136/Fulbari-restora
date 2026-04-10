@@ -15,7 +15,7 @@ const categoryConfig = [
         icon: Utensils,
         label: "Main Course",
         image: "/food/food1.jpeg",
-        menuCategories: ["Indian Main Course"] as Category[],
+        menuCategories: ["Indian Main Course", "Indian main course Veg", "Indian Main course Chicken", "Chinese Main Course", "Mutton", "Fish & Prawns", "Biryani", "Indian", "Bengali"] as Category[],
         menuType: "RESTAURANT",
     },
     {

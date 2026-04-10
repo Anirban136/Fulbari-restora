@@ -1,4 +1,4 @@
-export type Category = "All" | "Bengali" | "Indian" | "Chinese" | "Starters" | "Drinks" | "Desserts" | "Indian Main Course" | "Chinese Main Course" | "breakfast" | "Breakfast" | "Beverages" | "Ice Cream" | "Appetizers" | "Biryani" | "Tandoori" | "Soups" | "Bread" | "Rice" | "Noodles" | "Tea & Coffee" | "Burgers & Sandwiches" | "Snacks" | "Maggi & Pasta" | "Momo" | "Momos";
+export type Category = "All" | "Bengali" | "Indian" | "Chinese" | "Starters" | "Drinks" | "Desserts" | "Indian Main Course" | "Indian main course Veg" | "Indian Main course Chicken" | "Chinese Main Course" | "breakfast" | "Breakfast" | "Beverages" | "Ice Cream" | "Appetizers" | "Biryani" | "Tandoori" | "Soups" | "Bread" | "Rice" | "Noodles" | "Tea & Coffee" | "Burgers & Sandwiches" | "Snacks" | "Maggi & Pasta" | "Momo" | "Momos" | "Mutton" | "Fish & Prawns" | "Salad" | "Raita" | "Egg";
 
 export interface MenuItem {
     id: string;
